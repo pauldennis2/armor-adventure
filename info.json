@@ -1,0 +1,14 @@
+{
+  "name": "armor-adventure",
+  "version": "0.0.1",
+  "title": "Armor Adventure",
+  "author": "erronius",
+  "contact": "",
+  "homepage": "",
+  "description": "Upgraded armor variants.",
+  "factorio_version": "2.0",
+  "dependencies": [
+    "base >= 2.0.0",
+    "space-age >= 2.0.0"
+  ]
+}
