@@ -22,3 +22,24 @@ mech_mk2.resistances = {
   { type = "laser",     decrease = 10, percent = 20 },
 }
 data:extend({ mech_mk2 })
+
+data:extend({
+  {
+    type = "item",
+    name = "regenerative-plating",
+    icon = "__base__/graphics/icons/energy-shield-equipment.png",
+    place_as_equipment_result = "regenerative-plating",
+    subgroup = "utility-equipment",
+    order = "f[regenerative-plating]",
+    stack_size = 5,
+  },
+  {
+    type = "item",
+    name = "personal-combat-roboport",
+    icon = "__base__/graphics/icons/personal-roboport-equipment.png",
+    place_as_equipment_result = "personal-combat-roboport",
+    subgroup = "utility-equipment",
+    order = "f[personal-combat-roboport]",
+    stack_size = 5,
+  },
+})

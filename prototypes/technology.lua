@@ -30,3 +30,41 @@ data:extend({
     },
   },
 })
+
+data:extend({
+  {
+    type = "technology",
+    name = "regenerative-armor",
+    icon = "__base__/graphics/technology/energy-shield-equipment.png",
+    icon_size = 256,
+    prerequisites = {"mech-armor-mk2"},
+    unit = {
+      count = 10,
+      ingredients = {{"metallurgic-science-pack", 1}},
+      time = 60,
+    },
+    effects = {
+      {type = "unlock-recipe", recipe = "regenerative-plating"},
+    },
+  },
+})
+
+if mods["castra-prime"] then
+  data:extend({
+    {
+      type = "technology",
+      name = "personal-combat-roboport",
+      icon = "__base__/graphics/technology/personal-roboport-equipment.png",
+      icon_size = 256,
+      prerequisites = {"mech-armor-mk2"},
+      unit = {
+        count = 10,
+        ingredients = {{"battlefield-science-pack", 1}},
+        time = 60,
+      },
+      effects = {
+        {type = "unlock-recipe", recipe = "personal-combat-roboport"},
+      },
+    },
+  })
+end

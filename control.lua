@@ -80,3 +80,84 @@ end)
 script.on_event(defines.events.on_player_respawned, function(event)
   sync_player_bonuses(game.players[event.player_index])
 end)
+
+-- Unique equipment enforcement --
+
+script.on_event(defines.events.on_equipment_inserted, function(event)
+  if event.equipment.name ~= "regenerative-plating" then return end
+
+  local grid = event.grid or event.equipment.grid
+  local count = 0
+  for _, eq in pairs(grid.equipment) do
+    if eq.name == "regenerative-plating" then count = count + 1 end
+  end
+  if count <= 1 then return end
+
+  local quality = event.equipment.quality
+  grid.take({equipment = event.equipment})
+
+  for _, player in pairs(game.players) do
+    local armor_inv = player.get_inventory(defines.inventory.character_armor)
+    if armor_inv then
+      local armor = armor_inv[1]
+      if armor and armor.valid_for_read and armor.grid == grid then
+        player.insert({name = "regenerative-plating", count = 1, quality = quality.name})
+        player.print("Only one Regenerative Plating can be equipped at a time.")
+        return
+      end
+    end
+  end
+end)
+
+-- Personal Combat Roboport --
+
+local COMBAT_ROBOPORT_ITEM = "personal-combat-roboport"
+local COMBAT_ROBOPORT_TECH = "personal-combat-roboport"
+local COMBAT_ROBOPORT_RANGE = 20
+local COMBAT_ROBOPORT_SPAWN_COUNT = 5
+
+local function has_combat_roboport_equipped(player)
+  local armor_inv = player.get_inventory(defines.inventory.character_armor)
+  if not armor_inv then return false end
+  local armor = armor_inv[1]
+  if not armor or not armor.valid_for_read then return false end
+  local grid = armor.grid
+  if not grid then return false end
+  for _, equipment in pairs(grid.equipment) do
+    if equipment.name == COMBAT_ROBOPORT_ITEM then return true end
+  end
+  return false
+end
+
+local function spawn_defenders(player)
+  local surface = player.surface
+  for i = 1, COMBAT_ROBOPORT_SPAWN_COUNT do
+    local pos = {
+      x = player.position.x + math.random(-2, 2),
+      y = player.position.y + math.random(-2, 2),
+    }
+    local robot = surface.create_entity({name = "defender", position = pos, force = player.force})
+    if robot and robot.valid then
+      robot.combat_robot_owner = player.character
+    end
+  end
+end
+
+script.on_nth_tick(300, function()
+  for _, player in pairs(game.players) do
+    if not player.character then goto continue end
+    if not has_tech(player, COMBAT_ROBOPORT_TECH) then goto continue end
+    if not has_combat_roboport_equipped(player) then goto continue end
+
+    local nearest_enemy = player.surface.find_nearest_enemy({
+      position = player.position,
+      max_distance = COMBAT_ROBOPORT_RANGE,
+      force = player.force,
+    })
+    if nearest_enemy then
+      spawn_defenders(player)
+    end
+
+    ::continue::
+  end
+end)
