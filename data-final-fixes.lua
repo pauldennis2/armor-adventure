@@ -47,3 +47,18 @@ if regen then
     usage_priority = "secondary-input",
   }
 end
+
+-- Pocket Dimension Generator: power = best other generator-equipment * 1.5.
+-- Scanned here so it automatically scales if other mods add stronger generators.
+local best_gen = 0
+for name, eq in pairs(data.raw["generator-equipment"] or {}) do
+  if name ~= "pocket-dimension-generator" then
+    best_gen = math.max(best_gen, parse_energy(eq.power or 0))
+  end
+end
+if best_gen == 0 then best_gen = 2500000 end  -- 2.5 MW fallback (vanilla fusion reactor)
+
+local pdg = data.raw["generator-equipment"]["pocket-dimension-generator"]
+if pdg then
+  pdg.power = math.floor(best_gen * 1.5 / 1000) .. "kW"
+end

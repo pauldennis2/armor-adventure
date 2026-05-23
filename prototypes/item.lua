@@ -82,4 +82,23 @@ data:extend({
     order = "f[personal-beacon-equipment]",
     stack_size = 1,
   },
+  {
+    type = "item",
+    name = "pocket-dimension-generator",
+    icon = "__base__/graphics/icons/personal-roboport-equipment.png",
+    place_as_equipment_result = "pocket-dimension-generator",
+    subgroup = "utility-equipment",
+    order = "f[pocket-dimension-generator]",
+    stack_size = 1,
+  },
+  {
+    type = "item",
+    name = "personal-tesla-turret",
+    icon = "__space-age__/graphics/icons/teslagun.png",
+    icon_size = 64,
+    place_as_equipment_result = "personal-tesla-turret",
+    subgroup = "utility-equipment",
+    order = "f[personal-tesla-turret]",
+    stack_size = 1,
+  },
 })

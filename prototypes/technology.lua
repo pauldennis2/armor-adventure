@@ -85,6 +85,42 @@ data:extend({
   },
 })
 
+data:extend({
+  {
+    type = "technology",
+    name = "pocket-dimension",
+    icon = "__base__/graphics/technology/personal-roboport-equipment.png",
+    icon_size = 256,
+    prerequisites = {"mech-armor-mk2"},
+    unit = {
+      count = 10,
+      ingredients = {{"automation-science-pack", 1}},
+      time = 60,
+    },
+    effects = {
+      {type = "unlock-recipe", recipe = "pocket-dimension-generator"},
+    },
+  },
+})
+
+data:extend({
+  {
+    type = "technology",
+    name = "personal-tesla-turret",
+    icon = "__base__/graphics/technology/personal-laser-defense-equipment.png",
+    icon_size = 256,
+    prerequisites = {"mech-armor-mk2", "tesla-weapons"},
+    unit = {
+      count = 20,
+      ingredients = {{"electromagnetic-science-pack", 1}},
+      time = 60,
+    },
+    effects = {
+      {type = "unlock-recipe", recipe = "personal-tesla-turret"},
+    },
+  },
+})
+
 if mods["castra-prime"] then
   data:extend({
     {

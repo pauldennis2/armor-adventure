@@ -79,4 +79,26 @@ data:extend({
     },
     results = {{type = "item", name = "personal-combat-roboport-destroyer", amount = 1}},
   },
+  {
+    type = "recipe",
+    name = "pocket-dimension-generator",
+    enabled = false,
+    energy_required = 10,
+    ingredients = {
+      {type = "item", name = "fusion-reactor-equipment", amount = 1},
+      {type = "item", name = "steel-plate",              amount = 5},
+    },
+    results = {{type = "item", name = "pocket-dimension-generator", amount = 1}},
+  },
+  {
+    type = "recipe",
+    name = "personal-tesla-turret",
+    enabled = false,
+    energy_required = 10,
+    ingredients = {
+      {type = "item", name = "personal-laser-defense-equipment", amount = 1},
+      {type = "item", name = "tesla-turret",                     amount = 1},
+    },
+    results = {{type = "item", name = "personal-tesla-turret", amount = 1}},
+  },
 })

@@ -47,10 +47,12 @@ local function init_storage()
   storage.mk2_penalties      = storage.mk2_penalties or {}
   storage.roboport_cooldowns = storage.roboport_cooldowns or {}
   storage.personal_beacons   = storage.personal_beacons or {}
+  storage.pocket_dim_return  = storage.pocket_dim_return or {}
   for _, player in pairs(game.players) do
     storage.mk2_penalties[player.index]      = storage.mk2_penalties[player.index] or {}
     storage.roboport_cooldowns[player.index] = storage.roboport_cooldowns[player.index] or {}
     storage.personal_beacons[player.index]   = storage.personal_beacons[player.index]
+    storage.pocket_dim_return[player.index]  = storage.pocket_dim_return[player.index]
   end
 end
 
@@ -58,10 +60,31 @@ script.on_init(function()
   storage.mk2_penalties      = {}
   storage.roboport_cooldowns = {}
   storage.personal_beacons   = {}
+  storage.pocket_dim_return  = {}
 end)
 
-script.on_configuration_changed(function()
+script.on_configuration_changed(function(data)
   init_storage()
+
+  -- When our mod itself changes, wipe existing pocket dimension surfaces so they
+  -- get rebuilt with the corrected map-gen settings on next entry.
+  if data and data.mod_changes and data.mod_changes["armor-adventure"] then
+    local safe_surface = game.surfaces["nauvis"] or game.surfaces[1]
+    for _, player in pairs(game.players) do
+      local name = "pocket-dimension-" .. player.index
+      local surface = game.surfaces[name]
+      if surface then
+        for _, p in pairs(game.players) do
+          if p.surface == surface then
+            p.teleport({0, 0}, safe_surface)
+          end
+        end
+        game.delete_surface(surface)
+        storage.pocket_dim_return[player.index] = nil
+      end
+    end
+  end
+
   for _, player in pairs(game.players) do
     sync_player_bonuses(player)
     sync_personal_beacon(player)
@@ -72,6 +95,7 @@ script.on_event(defines.events.on_player_created, function(event)
   storage.mk2_penalties[event.player_index]      = {}
   storage.roboport_cooldowns[event.player_index] = {}
   storage.personal_beacons[event.player_index]   = nil
+  storage.pocket_dim_return[event.player_index]  = nil
 end)
 
 script.on_event(defines.events.on_player_armor_inventory_changed, function(event)
@@ -110,13 +134,17 @@ local UNIQUE_EQUIPMENT = {
   ["personal-combat-roboport-distractor"] = "combat-roboport",
   ["personal-combat-roboport-destroyer"]  = "combat-roboport",
   [PERSONAL_BEACON_EQUIP]                 = PERSONAL_BEACON_EQUIP,
+  ["pocket-dimension-generator"]          = "pocket-dimension-generator",
+  ["personal-tesla-turret"]               = "personal-tesla-turret",
 }
 
 -- Display name used in the rejection message, keyed by group.
 local UNIQUE_GROUP_LABEL = {
-  ["regenerative-plating"] = {"item-name.regenerative-plating"},
-  ["combat-roboport"]      = {"armor-adventure.group-combat-roboport"},
-  [PERSONAL_BEACON_EQUIP]  = {"item-name." .. PERSONAL_BEACON_EQUIP},
+  ["regenerative-plating"]        = {"item-name.regenerative-plating"},
+  ["combat-roboport"]             = {"armor-adventure.group-combat-roboport"},
+  [PERSONAL_BEACON_EQUIP]         = {"item-name." .. PERSONAL_BEACON_EQUIP},
+  ["pocket-dimension-generator"]  = {"item-name.pocket-dimension-generator"},
+  ["personal-tesla-turret"]       = {"item-name.personal-tesla-turret"},
 }
 
 local function find_player_for_grid(grid)
@@ -305,17 +333,172 @@ sync_personal_beacon = function(player)
 end
 
 
+-- Pocket Dimension --
+
+local PD_HALF   = 32  -- interior half-width; playable area is 64×64 tiles
+local PDG_EQUIP = "pocket-dimension-generator"
+
+local function has_pocket_generator(player)
+  local armor_inv = player.get_inventory(defines.inventory.character_armor)
+  if not armor_inv then return false end
+  local armor = armor_inv[1]
+  if not armor or not armor.valid_for_read then return false end
+  local grid = armor.grid
+  if not grid then return false end
+  for _, eq in pairs(grid.equipment) do
+    if eq.name == PDG_EQUIP then return true end
+  end
+  return false
+end
+
+local function pocket_surface_name(player)
+  return "pocket-dimension-" .. player.index
+end
+
+local function is_in_pocket_dimension(player)
+  return player.surface.name == pocket_surface_name(player)
+end
+
+local function setup_pocket_surface(surface)
+  local H = PD_HALF
+
+  -- set_tiles only works on already-generated chunks. Force-generate the
+  -- 4×4 chunk area that covers our ±(H+2) tile boundary before writing tiles.
+  surface.request_to_generate_chunks({0, 0}, 3)
+  surface.force_generate_chunk_requests()
+
+  local tiles = {}
+
+  -- Main floor: lab-dark-2, 64×64 centered at origin
+  for x = -H, H - 1 do
+    for y = -H, H - 1 do
+      tiles[#tiles + 1] = {name = "lab-dark-2", position = {x, y}}
+    end
+  end
+
+  -- Exit approach markers: two bright tiles at the south-center gap,
+  -- last row of the interior, so the player can see where to walk out.
+  tiles[#tiles + 1] = {name = "tutorial-grid", position = {-1, H - 1}}
+  tiles[#tiles + 1] = {name = "tutorial-grid", position = { 0, H - 1}}
+
+  -- Out-of-map boundary (1 tile thick) blocks all four sides.
+  -- South row: gap at x = -1 and x = 0 so the player can step through.
+  for x = -(H + 2), H + 1 do
+    local t = (x == -1 or x == 0) and "lab-dark-2" or "out-of-map"
+    tiles[#tiles + 1] = {name = t, position = {x, H}}
+  end
+  -- North row
+  for x = -(H + 2), H + 1 do
+    tiles[#tiles + 1] = {name = "out-of-map", position = {x, -(H + 1)}}
+  end
+  -- West column
+  for y = -H, H - 1 do
+    tiles[#tiles + 1] = {name = "out-of-map", position = {-(H + 1), y}}
+  end
+  -- East column
+  for y = -H, H - 1 do
+    tiles[#tiles + 1] = {name = "out-of-map", position = {H, y}}
+  end
+
+  surface.set_tiles(tiles)
+end
+
+local function get_or_create_pocket_surface(player)
+  local name = pocket_surface_name(player)
+  local surface = game.surfaces[name]
+  if not surface then
+    surface = game.create_surface(name, {
+      peaceful_mode = true,
+      -- Suppress all resource, decorative, and tile autoplace so the surface
+      -- generates clean rather than inheriting planetary terrain.
+      autoplace_settings = {
+        entity    = {treat_missing_as_default = false, settings = {}},
+        decorative = {treat_missing_as_default = false, settings = {}},
+        tile      = {treat_missing_as_default = false, settings = {}},
+      },
+      cliff_settings = {cliff_elevation_0 = 1024, cliff_elevation_interval = 1024},
+    })
+    setup_pocket_surface(surface)
+  end
+  return surface
+end
+
+local function exit_pocket_dimension(player)
+  if not is_in_pocket_dimension(player) then return end
+  if not has_pocket_generator(player) then
+    player.print({"armor-adventure.pocket-dimension-no-generator"})
+    player.teleport({0, PD_HALF - 2}, player.surface)
+    return
+  end
+  local ret = storage.pocket_dim_return[player.index]
+  if not ret then return end
+  player.teleport(ret.position, ret.surface)
+  storage.pocket_dim_return[player.index] = nil
+  player.set_shortcut_toggled("pocket-dimension-toggle", false)
+end
+
+local function enter_pocket_dimension(player)
+  if not player.character then return end
+  if not has_tech(player, "pocket-dimension") then
+    player.print({"armor-adventure.pocket-dimension-locked"})
+    return
+  end
+  if not has_pocket_generator(player) then
+    player.print({"armor-adventure.pocket-dimension-no-generator"})
+    return
+  end
+  if is_in_pocket_dimension(player) then return end
+
+  storage.pocket_dim_return[player.index] = {
+    position = {x = player.position.x, y = player.position.y},
+    surface  = player.surface,
+  }
+  local surface = get_or_create_pocket_surface(player)
+  player.teleport({0, PD_HALF - 4}, surface)
+  player.set_shortcut_toggled("pocket-dimension-toggle", true)
+end
+
+local function handle_pocket_dimension_toggle(player)
+  if is_in_pocket_dimension(player) then
+    exit_pocket_dimension(player)
+  else
+    enter_pocket_dimension(player)
+  end
+end
+
+script.on_event("pocket-dimension-toggle", function(event)
+  handle_pocket_dimension_toggle(game.players[event.player_index])
+end)
+
+script.on_event(defines.events.on_lua_shortcut, function(event)
+  if event.prototype_name == "pocket-dimension-toggle" then
+    handle_pocket_dimension_toggle(game.players[event.player_index])
+  end
+end)
+
 -- Teleport beacon to follow player. Only teleports when player moves more than
 -- 1 tile from the beacon's target position to limit beacon recalculation frequency.
+-- Surface guard: don't chase the player into the pocket dimension.
 script.on_event(defines.events.on_player_changed_position, function(event)
   local player = game.players[event.player_index]
+
   local beacon = storage.personal_beacons[player.index]
-  if not beacon or not beacon.valid then return end
-  local pp = player.position
-  local tx = pp.x
-  local ty = pp.y - 1  -- hover 1 tile above player
-  local bp = beacon.position
-  if (tx - bp.x)^2 + (ty - bp.y)^2 > 1 then
-    beacon.teleport({x = tx, y = ty})
+  if beacon and beacon.valid and beacon.surface == player.surface then
+    local pp = player.position
+    local tx = pp.x
+    local ty = pp.y - 1
+    local bp = beacon.position
+    if (tx - bp.x)^2 + (ty - bp.y)^2 > 1 then
+      beacon.teleport({x = tx, y = ty})
+    end
+  end
+
+  -- Pocket dimension exit: walk south through the gap in the south wall.
+  if storage.pocket_dim_return[player.index] and
+     player.surface.name == "pocket-dimension-" .. player.index then
+    local pos = player.position
+    if pos.y >= PD_HALF and math.abs(pos.x) < 1.5 then
+      exit_pocket_dimension(player)
+    end
   end
 end)

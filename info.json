@@ -1,6 +1,6 @@
 {
   "name": "armor-adventure",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "title": "Armor Adventure",
   "author": "erronius",
   "contact": "",
@@ -10,6 +10,7 @@
   "dependencies": [
     "base >= 2.0.0",
     "space-age >= 2.0.0",
-    "? castra-prime"
+    "? castra-prime",
+    "? factorissimo-2-notnotmelon"
   ]
 }
