@@ -14,6 +14,9 @@ local create_personal_warp_pylon
 local destroy_personal_warp_pylon
 local sync_personal_warp_pylon
 
+local activate_time_stopper
+local deactivate_time_stopper
+
 -- Tech effects apply to the whole force. When the armor is NOT worn, we apply
 -- an equal and opposite penalty per-character so the net bonus is zero.
 -- When the armor IS worn, no penalty — the player gets the full tech bonus.
@@ -59,6 +62,8 @@ local function init_storage()
   storage.pocket_dim_return       = storage.pocket_dim_return or {}
   storage.personal_warp_pylons    = storage.personal_warp_pylons or {}
   storage.personal_warp_pylon_pos = storage.personal_warp_pylon_pos or {}
+  storage.time_stopper_active     = storage.time_stopper_active or {}
+  storage.time_stopper_cooldown   = storage.time_stopper_cooldown or {}
   for _, player in pairs(game.players) do
     storage.mk2_penalties[player.index]      = storage.mk2_penalties[player.index] or {}
     storage.roboport_cooldowns[player.index] = storage.roboport_cooldowns[player.index] or {}
@@ -73,6 +78,8 @@ script.on_init(function()
   storage.personal_beacons        = {}
   storage.pocket_dim_return       = {}
   storage.personal_warp_pylons    = {}
+  storage.time_stopper_active     = {}
+  storage.time_stopper_cooldown   = {}
   storage.personal_warp_pylon_pos = {}
 end)
 
@@ -110,6 +117,8 @@ script.on_event(defines.events.on_player_created, function(event)
   storage.personal_beacons[event.player_index]        = nil
   storage.pocket_dim_return[event.player_index]       = nil
   storage.personal_warp_pylons[event.player_index]    = nil
+  storage.time_stopper_active[event.player_index]     = nil
+  storage.time_stopper_cooldown[event.player_index]   = nil
   storage.personal_warp_pylon_pos[event.player_index] = nil
 end)
 
@@ -137,6 +146,9 @@ script.on_event(defines.events.on_player_respawned, function(event)
   sync_player_bonuses(player)
   sync_personal_beacon(player)
   if HAS_RABBASCA then sync_personal_warp_pylon(player) end
+  -- New character has clean modifiers; clear time stopper state without removal.
+  storage.time_stopper_active[player.index] = nil
+  player.set_shortcut_toggled("time-stopper-activate", false)
 end)
 
 -- Unique equipment enforcement --
@@ -153,6 +165,7 @@ local UNIQUE_EQUIPMENT = {
   [PERSONAL_BEACON_EQUIP]                 = PERSONAL_BEACON_EQUIP,
   ["pocket-dimension-generator"]          = "pocket-dimension-generator",
   ["personal-tesla-turret"]               = "personal-tesla-turret",
+  ["personal-time-stopper"]               = "personal-time-stopper",
 }
 if HAS_RABBASCA then
   UNIQUE_EQUIPMENT[PERSONAL_WARP_PYLON_EQUIP] = "personal-warp-pylon"
@@ -165,6 +178,7 @@ local UNIQUE_GROUP_LABEL = {
   [PERSONAL_BEACON_EQUIP]         = {"item-name." .. PERSONAL_BEACON_EQUIP},
   ["pocket-dimension-generator"]  = {"item-name.pocket-dimension-generator"},
   ["personal-tesla-turret"]       = {"item-name.personal-tesla-turret"},
+  ["personal-time-stopper"]       = {"item-name.personal-time-stopper"},
   ["personal-warp-pylon"]         = {"item-name." .. PERSONAL_WARP_PYLON_EQUIP},
 }
 
@@ -370,6 +384,7 @@ create_personal_beacon = function(player)
     position = {x = player.position.x, y = player.position.y - 1},
     force    = player.force,
   })
+  if beacon then beacon.destructible = false end
   storage.personal_beacons[player.index] = beacon
 end
 
@@ -532,6 +547,8 @@ end)
 script.on_event(defines.events.on_lua_shortcut, function(event)
   if event.prototype_name == "pocket-dimension-toggle" then
     handle_pocket_dimension_toggle(game.players[event.player_index])
+  elseif event.prototype_name == "time-stopper-activate" then
+    activate_time_stopper(game.players[event.player_index])
   end
 end)
 
@@ -624,3 +641,114 @@ sync_personal_warp_pylon = function(player)
 end
 
 end -- HAS_RABBASCA
+
+-- Personal Time Stopper --
+
+local PTS_EQUIP       = "personal-time-stopper"
+local PTS_SPEED_BONUS = 1.5   -- added to character_running_speed_modifier
+local PTS_CRAFT_BONUS = 2.0   -- added to character_crafting_speed_modifier
+local PTS_SLOW_RADIUS = 15    -- tile radius for enemy slow
+local PTS_COOLDOWN    = 60 * 60  -- 60s cooldown after effect ends
+
+local PTS_DURATION_BY_QUALITY = {
+  normal    = 10 * 60,
+  uncommon  = 12 * 60,
+  rare      = 15 * 60,
+  epic      = 20 * 60,
+  legendary = 30 * 60,
+}
+
+local function get_time_stopper_equip(player)
+  local armor_inv = player.get_inventory(defines.inventory.character_armor)
+  if not armor_inv then return nil end
+  local armor = armor_inv[1]
+  if not armor or not armor.valid_for_read then return nil end
+  local grid = armor.grid
+  if not grid then return nil end
+  for _, eq in pairs(grid.equipment) do
+    if eq.name == PTS_EQUIP then return eq end
+  end
+  return nil
+end
+
+local function apply_time_stopper_slow(player)
+  local enemies = player.surface.find_entities_filtered({
+    position = player.position,
+    radius   = PTS_SLOW_RADIUS,
+    force    = "enemy",
+    type     = "unit",
+  })
+  for _, enemy in pairs(enemies) do
+    if enemy.valid then
+      player.surface.create_entity({
+        name     = "time-stopper-slow",
+        position = enemy.position,
+        target   = enemy,
+      })
+    end
+  end
+end
+
+deactivate_time_stopper = function(player)
+  if not storage.time_stopper_active[player.index] then return end
+  storage.time_stopper_active[player.index] = nil
+  if player.character and player.character.valid then
+    player.character.character_running_speed_modifier =
+      player.character.character_running_speed_modifier - PTS_SPEED_BONUS
+    player.character.character_crafting_speed_modifier =
+      player.character.character_crafting_speed_modifier - PTS_CRAFT_BONUS
+  end
+  player.set_shortcut_toggled("time-stopper-activate", false)
+end
+
+activate_time_stopper = function(player)
+  if not player.character then return end
+  if not has_tech(player, "personal-time-stopper") then
+    player.print({"armor-adventure.time-stopper-locked"})
+    return
+  end
+  local eq = get_time_stopper_equip(player)
+  if not eq then
+    player.print({"armor-adventure.time-stopper-no-equipment"})
+    return
+  end
+  local tick = game.tick
+  local cooldown_until = storage.time_stopper_cooldown[player.index]
+  if cooldown_until and tick < cooldown_until then
+    local remaining = math.ceil((cooldown_until - tick) / 60)
+    player.print({"armor-adventure.time-stopper-on-cooldown", remaining})
+    return
+  end
+  if storage.time_stopper_active[player.index] then return end
+
+  local quality  = eq.quality.name
+  local duration = PTS_DURATION_BY_QUALITY[quality] or PTS_DURATION_BY_QUALITY.normal
+  storage.time_stopper_active[player.index]   = tick + duration
+  storage.time_stopper_cooldown[player.index] = tick + duration + PTS_COOLDOWN
+
+  player.character.character_running_speed_modifier =
+    player.character.character_running_speed_modifier + PTS_SPEED_BONUS
+  player.character.character_crafting_speed_modifier =
+    player.character.character_crafting_speed_modifier + PTS_CRAFT_BONUS
+
+  apply_time_stopper_slow(player)
+  player.set_shortcut_toggled("time-stopper-activate", true)
+end
+
+script.on_event("time-stopper-activate", function(event)
+  activate_time_stopper(game.players[event.player_index])
+end)
+
+-- Every second: deactivate expired effects and re-apply slow to newly entered enemies.
+script.on_nth_tick(60, function()
+  local tick = game.tick
+  for _, player in pairs(game.players) do
+    if not storage.time_stopper_active[player.index] then goto continue end
+    if tick >= storage.time_stopper_active[player.index] then
+      deactivate_time_stopper(player)
+    elseif player.character and player.character.valid then
+      apply_time_stopper_slow(player)
+    end
+    ::continue::
+  end
+end)

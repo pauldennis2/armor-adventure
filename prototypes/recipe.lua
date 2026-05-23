@@ -165,6 +165,17 @@ data:extend({
     },
     results = {{type = "item", name = "personal-tesla-turret", amount = 1}},
   },
+  {
+    type = "recipe",
+    name = "personal-time-stopper",
+    enabled = false,
+    energy_required = 10,
+    ingredients = {
+      {type = "item", name = "battery-mk2-equipment", amount = 1},
+      {type = "item", name = "steel-plate",           amount = 10},
+    },
+    results = {{type = "item", name = "personal-time-stopper", amount = 1}},
+  },
 })
 
 if mods["planet-rabbasca"] then

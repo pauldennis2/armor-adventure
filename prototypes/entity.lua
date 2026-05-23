@@ -114,6 +114,13 @@ forging_station.allowed_module_categories = {"speed", "efficiency"}
 forging_station.factoriopedia_simulation = nil
 data:extend({forging_station})
 
+local ts_slow = table.deepcopy(data.raw["sticker"]["tesla-turret-slow"])
+ts_slow.name                     = "time-stopper-slow"
+ts_slow.duration_in_ticks        = 180
+ts_slow.target_movement_modifier = 0.1
+ts_slow.vehicle_speed_modifier   = 0.1
+data:extend({ts_slow})
+
 local char_anims = data.raw.character.character.animations
 for _, entry in ipairs(char_anims) do
   if entry.armors then

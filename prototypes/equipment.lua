@@ -141,3 +141,11 @@ ptt.attack_parameters = {
   },
 }
 data:extend({ptt})
+
+local pts = table.deepcopy(data.raw["battery-equipment"]["battery-mk2-equipment"])
+pts.name                          = "personal-time-stopper"
+pts.take_result                   = "personal-time-stopper"
+pts.shape                         = {width = 2, height = 2, type = "full"}
+pts.categories                    = MK2_CATEGORY
+pts.energy_source.buffer_capacity = "1GJ"
+data:extend({pts})

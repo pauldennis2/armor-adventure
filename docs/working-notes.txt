@@ -1,14 +1,29 @@
 incorporate power transfer
 
-quality beacon = quality effect
 + increase radius? no, not necessarily good
 improve mining speed?
 unique roboport with high capacity?
 
 slowing effect on nearby enemies
 
-range scaling and others on personal tesla
-
-rabbasca integration - player can act as a warp pylon.
-
 idea: armor crafting station caps quality
+
+How do player centered effects work on space platform
+
+Add safety to our Rabbasca integration until/unless our PR is merged.
+
+Personal beacon UI/UX improvement
+
+icons needed: personal beacon
+Personal combat roboports***
+Pocket dimension generator**
+Regenerative plating
+Personal warp pylon***
+techs
+charged lightning gem (fulgora q)
+demolisher heart (vulcanus)
+gleba biomass*** (currently uses iron). 
+
+Personal beacon took damage
+
+Remove personal robot stash

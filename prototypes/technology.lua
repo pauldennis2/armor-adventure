@@ -124,6 +124,24 @@ data:extend({
 data:extend({
   {
     type = "technology",
+    name = "personal-time-stopper",
+    icon = "__base__/graphics/technology/battery-mk2-equipment.png",
+    icon_size = 256,
+    prerequisites = {"mech-armor-mk2"},
+    unit = {
+      count = 20,
+      ingredients = {{"electromagnetic-science-pack", 1}},
+      time = 60,
+    },
+    effects = {
+      {type = "unlock-recipe", recipe = "personal-time-stopper"},
+    },
+  },
+})
+
+data:extend({
+  {
+    type = "technology",
     name = "personal-fridge",
     icon = "__space-age__/graphics/technology/agriculture.png",
     icon_size = 256,

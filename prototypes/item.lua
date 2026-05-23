@@ -168,6 +168,7 @@ data:extend({
     order = "f[personal-combat-roboport-c]",
     stack_size = 5,
   },
+  -- TODO: delete personal-robot-stash entirely once confirmed unused
   {
     type = "item",
     name = "personal-robot-stash",
@@ -176,6 +177,7 @@ data:extend({
     subgroup = "armor-adventure-equipment",
     order = "f[personal-robot-stash]",
     stack_size = 1,
+    hidden = true,
   },
   {
     type = "item",
@@ -203,6 +205,15 @@ data:extend({
     place_as_equipment_result = "personal-tesla-turret",
     subgroup = "armor-adventure-equipment",
     order = "f[personal-tesla-turret]",
+    stack_size = 1,
+  },
+  {
+    type = "item",
+    name = "personal-time-stopper",
+    icon = "__base__/graphics/icons/battery-mk2-equipment.png",
+    place_as_equipment_result = "personal-time-stopper",
+    subgroup = "armor-adventure-equipment",
+    order = "f[personal-time-stopper]",
     stack_size = 1,
   },
 })
