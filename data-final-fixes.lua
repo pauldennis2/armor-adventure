@@ -69,6 +69,12 @@ if pdg then
   pdg.power = math.floor(best_gen * 1.5 / 1000) .. "kW"
 end
 
+-- personal-beacon variants are non-minable and must not have next_upgrade (other mods, e.g. Bob's, set it on all beacons).
+for _, suffix in ipairs({"", "-uncommon", "-rare", "-epic", "-legendary"}) do
+  local pb = data.raw["beacon"]["personal-beacon" .. suffix]
+  if pb then pb.next_upgrade = nil end
+end
+
 -- Personal Warp Pylon: invisible assembling-machine deepcopy of rabbasca-warp-pylon.
 -- Must be a crafting machine so Rabbasca's warp dispatch cycle (awake → trigger item → attempt_build_ghost) works.
 -- Graphics stripped via empty graphics_set so nothing is rendered.

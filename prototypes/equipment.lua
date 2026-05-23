@@ -34,25 +34,22 @@ robot_stash.robot_limit         = 5
 robot_stash.construction_radius = 20
 robot_stash.categories          = MK2_CATEGORY
 
-local personal_beacon_eq = table.deepcopy(data.raw["roboport-equipment"]["personal-roboport-equipment"])
-personal_beacon_eq.name                = "personal-beacon-equipment"
-personal_beacon_eq.take_result         = "personal-beacon-equipment"
-personal_beacon_eq.robot_limit         = 0
-personal_beacon_eq.construction_radius = 0
-personal_beacon_eq.charging_energy     = "0W"
-personal_beacon_eq.categories          = MK2_CATEGORY
+local personal_beacon_eq = table.deepcopy(data.raw["generator-equipment"]["fusion-reactor-equipment"])
+personal_beacon_eq.name       = "personal-beacon-equipment"
+personal_beacon_eq.take_result = "personal-beacon-equipment"
+personal_beacon_eq.shape      = {width = 2, height = 2, type = "full"}
+personal_beacon_eq.categories = MK2_CATEGORY
 
 data:extend({ combat_roboport, combat_roboport_distractor, combat_roboport_destroyer, robot_stash, personal_beacon_eq })
 
 if mods["planet-rabbasca"] then
-  local personal_warp_pylon_eq                = table.deepcopy(data.raw["roboport-equipment"]["personal-roboport-equipment"])
-  personal_warp_pylon_eq.name                 = "personal-warp-pylon-equipment"
-  personal_warp_pylon_eq.take_result          = "personal-warp-pylon-equipment"
-  personal_warp_pylon_eq.robot_limit          = 0
-  personal_warp_pylon_eq.construction_radius  = 0
-  personal_warp_pylon_eq.charging_energy      = "0W"
-  personal_warp_pylon_eq.shape                = {width = 2, height = 2, type = "full"}
-  personal_warp_pylon_eq.categories           = MK2_CATEGORY
+  local personal_warp_pylon_eq               = table.deepcopy(data.raw["movement-bonus-equipment"]["exoskeleton-equipment"])
+  personal_warp_pylon_eq.name                = "personal-warp-pylon-equipment"
+  personal_warp_pylon_eq.take_result         = "personal-warp-pylon-equipment"
+  personal_warp_pylon_eq.movement_bonus      = 0
+  personal_warp_pylon_eq.energy_consumption  = "1W"
+  personal_warp_pylon_eq.shape               = {width = 2, height = 2, type = "full"}
+  personal_warp_pylon_eq.categories          = MK2_CATEGORY
   data:extend({personal_warp_pylon_eq})
 end
 
@@ -64,15 +61,18 @@ pdg.categories  = MK2_CATEGORY
 data:extend({pdg})
 
 -- Start beam: fires at the primary target, applies damage + push-back + stickers.
+-- Damage is 0 here; quality-scaled damage is applied via on_script_trigger_effect in quests.lua.
 local ptb = table.deepcopy(data.raw["beam"]["chain-tesla-turret-beam-start"])
 ptb.name = "personal-tesla-turret-beam"
-ptb.action.action_delivery.target_effects[1].damage.amount = 50
+ptb.action.action_delivery.target_effects[1].damage.amount = 0
+table.insert(ptb.action.action_delivery.target_effects, {type = "script", effect_id = "personal-tesla-turret-hit"})
 data:extend({ptb})
 
 -- Bounce beam: same effects, used for each chain jump.
 local ptbb = table.deepcopy(data.raw["beam"]["chain-tesla-turret-beam-bounce"])
 ptbb.name = "personal-tesla-turret-beam-bounce"
-ptbb.action.action_delivery.target_effects[1].damage.amount = 2
+ptbb.action.action_delivery.target_effects[1].damage.amount = 0
+table.insert(ptbb.action.action_delivery.target_effects, {type = "script", effect_id = "personal-tesla-turret-chain-hit"})
 data:extend({ptbb})
 
 -- Chain trigger: 5 jumps, 12-tile range per jump, references our bounce beam.
@@ -100,8 +100,8 @@ ptt.energy_source = {
 }
 ptt.attack_parameters = {
   type            = "beam",
-  cooldown        = 120,
-  range           = 15,
+  cooldown        = 60,
+  range           = 25,
   range_mode      = "center-to-bounding-box",
   damage_modifier = 1,
   ammo_category   = "tesla",
@@ -127,7 +127,7 @@ ptt.attack_parameters = {
               action_delivery = {
                 type          = "beam",
                 beam          = "personal-tesla-turret-beam",
-                max_length    = 15,
+                max_length    = 25,
                 duration      = 30,
                 add_to_shooter = false,
                 destroy_with_source_or_target = false,

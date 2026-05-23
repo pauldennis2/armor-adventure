@@ -314,6 +314,25 @@ end)
 
 -- Personal Beacon --
 
+local BEACON_ENTITY_BY_QUALITY = {
+  normal    = "personal-beacon",
+  uncommon  = "personal-beacon-uncommon",
+  rare      = "personal-beacon-rare",
+  epic      = "personal-beacon-epic",
+  legendary = "personal-beacon-legendary",
+}
+
+local function get_beacon_equip_quality(player)
+  local armor_inv = player.get_inventory(defines.inventory.character_armor)
+  if not armor_inv then return "normal" end
+  local armor = armor_inv[1]
+  if not (armor and armor.valid_for_read and armor.grid) then return "normal" end
+  for _, eq in ipairs(armor.grid.equipment) do
+    if eq.name == PERSONAL_BEACON_EQUIP then return eq.quality.name end
+  end
+  return "normal"
+end
+
 local function has_personal_beacon_equip(player)
   local armor_inv = player.get_inventory(defines.inventory.character_armor)
   if not armor_inv then return false end
@@ -344,8 +363,10 @@ destroy_personal_beacon = function(player)
 end
 
 create_personal_beacon = function(player)
+  local quality     = get_beacon_equip_quality(player)
+  local entity_name = BEACON_ENTITY_BY_QUALITY[quality] or PERSONAL_BEACON_ENTITY
   local beacon = player.surface.create_entity({
-    name     = PERSONAL_BEACON_ENTITY,
+    name     = entity_name,
     position = {x = player.position.x, y = player.position.y - 1},
     force    = player.force,
   })
@@ -357,7 +378,13 @@ sync_personal_beacon = function(player)
   local has_eq     = player.character and has_personal_beacon_equip(player)
   local beacon     = storage.personal_beacons[player.index]
   local has_beacon = beacon and beacon.valid
-  if has_eq and not has_beacon then
+  if has_eq and has_beacon then
+    local expected = BEACON_ENTITY_BY_QUALITY[get_beacon_equip_quality(player)] or PERSONAL_BEACON_ENTITY
+    if beacon.name ~= expected then
+      destroy_personal_beacon(player)
+      create_personal_beacon(player)
+    end
+  elseif has_eq and not has_beacon then
     create_personal_beacon(player)
   elseif not has_eq and has_beacon then
     destroy_personal_beacon(player)

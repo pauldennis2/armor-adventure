@@ -41,26 +41,85 @@ end)
 -- Quest: Mind Control Rocket
 -- When the projectile hits an enemy entity, reassign its force to the player's.
 
-script.on_event(defines.events.on_script_trigger_effect, function(event)
-    if event.effect_id ~= "mind-control-hit" then return end
-    local target = event.target_entity
-    if not target or not target.valid then return end
-    if target.force.name ~= "enemy" then return end
-    target.force = "player"
-    if target.commandable then
-        target.commandable.set_command{type = defines.command.wander, distraction = defines.distraction.none}
+-- Personal Tesla Turret: quality-scaled damage.
+-- The beam prototypes deal 0 damage; script applies the real amount based on equipment quality.
+
+local TESLA_PRIMARY_DAMAGE = {
+    normal    = 25,
+    uncommon  = 75,
+    rare      = 150,
+    epic      = 225,
+    legendary = 400,
+}
+local TESLA_CHAIN_DAMAGE = {
+    normal    = 2,
+    uncommon  = 5,
+    rare      = 15,
+    epic      = 25,
+    legendary = 75,
+}
+
+-- Returns (player, quality_name) for whoever currently has the tesla turret equipped.
+-- Tries event.cause and event.source_entity first (one of these is the player character for
+-- the primary hit; chain hits may route differently so we fall back to a full player scan).
+local function get_tesla_player_and_quality(event)
+    local function check(player)
+        if not (player and player.character and player.character.valid) then return end
+        local inv = player.get_inventory(defines.inventory.character_armor)
+        if not inv then return end
+        local item = inv[1]
+        if not (item and item.valid_for_read and item.grid) then return end
+        for _, eq in ipairs(item.grid.equipment) do
+            if eq.name == "personal-tesla-turret" then return player, eq.quality.name end
+        end
     end
-    storage.mind_controlled = storage.mind_controlled or {}
-    storage.mind_controlled[target.unit_number] = target
-    rendering.draw_text{
-        text          = "★ Mind Controlled",
-        surface       = target.surface,
-        target        = target,
-        target_offset = {0, -2.5},
-        color         = {r = 0.7, g = 0.2, b = 1.0},
-        scale         = 1.2,
-        alignment     = "center",
-    }
+    local p, q
+    if event.cause and event.cause.valid and event.cause.type == "character" then
+        p, q = check(event.cause.player)
+        if p then return p, q end
+    end
+    if event.source_entity and event.source_entity.valid and event.source_entity.type == "character" then
+        p, q = check(event.source_entity.player)
+        if p then return p, q end
+    end
+    for _, player in pairs(game.connected_players) do
+        p, q = check(player)
+        if p then return p, q end
+    end
+end
+
+script.on_event(defines.events.on_script_trigger_effect, function(event)
+    local id = event.effect_id
+
+    if id == "mind-control-hit" then
+        local target = event.target_entity
+        if not target or not target.valid then return end
+        if target.force.name ~= "enemy" then return end
+        target.force = "player"
+        if target.commandable then
+            target.commandable.set_command{type = defines.command.wander, distraction = defines.distraction.none}
+        end
+        storage.mind_controlled = storage.mind_controlled or {}
+        storage.mind_controlled[target.unit_number] = target
+        rendering.draw_text{
+            text          = "★ Mind Controlled",
+            surface       = target.surface,
+            target        = target,
+            target_offset = {0, -2.5},
+            color         = {r = 0.7, g = 0.2, b = 1.0},
+            scale         = 1.2,
+            alignment     = "center",
+        }
+
+    elseif id == "personal-tesla-turret-hit" or id == "personal-tesla-turret-chain-hit" then
+        local target = event.target_entity
+        if not (target and target.valid) then return end
+        local player, quality = get_tesla_player_and_quality(event)
+        if not player then return end
+        quality = quality or "normal"
+        local dmg_table = (id == "personal-tesla-turret-hit") and TESLA_PRIMARY_DAMAGE or TESLA_CHAIN_DAMAGE
+        target.damage(dmg_table[quality] or dmg_table.normal, player.force, "electric", player.character)
+    end
 end)
 
 -- Harvester
