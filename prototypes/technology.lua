@@ -64,6 +64,8 @@ if mods["castra-prime"] then
       },
       effects = {
         {type = "unlock-recipe", recipe = "personal-combat-roboport"},
+        {type = "unlock-recipe", recipe = "personal-combat-roboport-distractor"},
+        {type = "unlock-recipe", recipe = "personal-combat-roboport-destroyer"},
       },
     },
   })
