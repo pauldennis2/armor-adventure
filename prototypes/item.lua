@@ -5,6 +5,61 @@ data:extend({
 data:extend({
   {
     type       = "item",
+    name         = "enemy-biomass",
+    icon         = "__base__/graphics/icons/iron-plate.png",
+    hidden       = true,
+    subgroup     = "intermediate-product",
+    order        = "z[enemy-biomass]",
+    stack_size   = 500,
+    spoil_ticks  = 7200,
+    spoil_result = "spoilage",
+  },
+  {
+    type         = "item",
+    name         = "gleba-parts",
+    icon         = "__base__/graphics/icons/behemoth-biter.png",
+    subgroup     = "intermediate-product",
+    order        = "z[gleba-parts]",
+    stack_size   = 50,
+    spoil_ticks  = 7200,
+    spoil_result = "spoilage",
+  },
+  {
+    type         = "item",
+    name         = "harvester",
+    icon         = "__base__/graphics/icons/assembling-machine-1.png",
+    place_result = "harvester",
+    subgroup     = "production-machine",
+    order        = "z[harvester]",
+    stack_size   = 10,
+  },
+})
+
+data:extend({
+  {
+    type          = "ammo",
+    name          = "mind-control-rocket",
+    icon          = "__base__/graphics/icons/rocket.png",
+    ammo_category = "rocket",
+    ammo_type = {
+      action = {
+        type = "direct",
+        action_delivery = {
+          type           = "projectile",
+          projectile     = "mind-control-rocket-projectile",
+          starting_speed = 0.1,
+        }
+      }
+    },
+    subgroup   = "ammo",
+    order      = "d[rocket-launcher]-b[mind-control]",
+    stack_size = 20,
+  },
+})
+
+data:extend({
+  {
+    type       = "item",
     name       = "charged-lightning-gem",
     icon       = "__space-age__/graphics/icons/lightning-collector.png",
     subgroup   = "intermediate-product",
@@ -23,6 +78,23 @@ data:extend({
 })
 
 data:extend({
+  {
+    type         = "item",
+    name         = "armor-forging-station",
+    icon         = "__base__/graphics/icons/assembling-machine-3.png",
+    place_result = "armor-forging-station",
+    subgroup     = "production-machine",
+    order        = "z[armor-forging-station]",
+    stack_size   = 5,
+  },
+  {
+    type       = "item",
+    name       = "bio-interface",
+    icon       = "__base__/graphics/icons/electronic-circuit.png",
+    subgroup   = "intermediate-product",
+    order      = "z[bio-interface]",
+    stack_size = 50,
+  },
   {
     type       = "item",
     name       = "demolisher-heart",

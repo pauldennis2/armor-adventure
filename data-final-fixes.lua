@@ -36,6 +36,12 @@ local our_regen = math.max(1, math.ceil(our_hp / REGEN_SECONDS))
 
 -- Minimum-cost energy source: 1J per HP, buffer just large enough to fill the shield,
 -- flow limit set to exactly what the target regen rate requires.
+-- Add mind-control-rocket recipe unlock to the rocketry technology.
+local rocketry = data.raw["technology"]["rocketry"]
+if rocketry and rocketry.effects then
+    table.insert(rocketry.effects, {type = "unlock-recipe", recipe = "mind-control-rocket"})
+end
+
 local regen = data.raw["energy-shield-equipment"]["regenerative-plating"]
 if regen then
   regen.max_shield_value = our_hp

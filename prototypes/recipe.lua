@@ -1,4 +1,9 @@
 data:extend({
+  {type = "recipe-category", name = "harvesting"},
+  {type = "recipe-category", name = "armor-forging"},
+})
+
+data:extend({
   {
     type = "recipe",
     name = "mech-armor-mk2",
@@ -89,6 +94,55 @@ data:extend({
       {type = "item", name = "steel-plate",              amount = 5},
     },
     results = {{type = "item", name = "pocket-dimension-generator", amount = 1}},
+  },
+  {
+    type            = "recipe",
+    name            = "armor-forging-station",
+    enabled         = true,
+    energy_required = 10,
+    ingredients = {
+      {type = "item", name = "assembling-machine-3", amount = 1},
+      {type = "item", name = "steel-plate",          amount = 10},
+    },
+    results = {{type = "item", name = "armor-forging-station", amount = 1}},
+  },
+  {
+    type            = "recipe",
+    name            = "bio-interface",
+    enabled         = true,
+    energy_required = 10,
+    category        = "armor-forging",
+    ingredients     = {{type = "item", name = "gleba-parts", amount = 10}},
+    results         = {{type = "item", name = "bio-interface", amount = 1}},
+  },
+  {
+    type            = "recipe",
+    name            = "gleba-parts-from-biomass",
+    enabled         = true,
+    energy_required = 1,
+    category        = "harvesting",
+    ingredients     = {{type = "item", name = "enemy-biomass", amount = 1}},
+    results         = {{type = "item", name = "gleba-parts",   amount = 1}},
+  },
+  {
+    type            = "recipe",
+    name            = "harvester",
+    enabled         = true,
+    energy_required = 10,
+    ingredients = {
+      {type = "item", name = "electronic-circuit", amount = 3},
+      {type = "item", name = "iron-gear-wheel",    amount = 5},
+      {type = "item", name = "iron-plate",         amount = 9},
+    },
+    results = {{type = "item", name = "harvester", amount = 1}},
+  },
+  {
+    type            = "recipe",
+    name            = "mind-control-rocket",
+    enabled         = false,
+    energy_required = 1,
+    ingredients     = {{type = "item", name = "iron-plate", amount = 1}},
+    results         = {{type = "item", name = "mind-control-rocket", amount = 1}},
   },
   {
     type             = "recipe",

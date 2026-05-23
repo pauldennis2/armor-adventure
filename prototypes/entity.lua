@@ -46,6 +46,31 @@ personal_beacon.graphics_set = {module_icons_suppressed = false}
 personal_beacon.radius_visualisation_picture = nil
 data:extend({personal_beacon})
 
+-- Harvester: assembling-machine deepcopy restricted to the "harvesting" crafting category.
+-- Script auto-sets the recipe and feeds enemy-biomass into the input inventory.
+local harvester = table.deepcopy(data.raw["assembling-machine"]["assembling-machine-1"])
+harvester.name                     = "harvester"
+harvester.minable                  = {mining_time = 0.5, result = "harvester"}
+harvester.crafting_categories      = {"harvesting"}
+harvester.crafting_speed           = 1.0
+harvester.factoriopedia_simulation = nil
+data:extend({harvester})
+
+-- Mind Control Rocket: deepcopy of vanilla rocket projectile, damage replaced with
+-- a script trigger that reassigns the hit entity's force to "player".
+local mc_proj = table.deepcopy(data.raw["projectile"]["rocket"])
+mc_proj.name   = "mind-control-rocket-projectile"
+mc_proj.action = {
+    type = "direct",
+    action_delivery = {
+        type = "instant",
+        target_effects = {
+            {type = "script", effect_id = "mind-control-hit"},
+        }
+    }
+}
+data:extend({mc_proj})
+
 -- Massive Lightning Collector: 10× attraction range, 4×4 footprint, no grid output.
 local massive_lc = table.deepcopy(data.raw["lightning-attractor"]["lightning-collector"])
 massive_lc.name                           = "massive-lightning-collector"
@@ -72,6 +97,17 @@ shift_layers(cg.picture,             0, -2)
 shift_layers(cg.charge_animation,    0, -2)
 shift_layers(cg.discharge_animation, 0, -2)
 data:extend({massive_lc})
+
+-- Armor Forging Station: assembling-machine-3 restricted to armor-forging category.
+-- Quality and productivity effects/modules are intentionally blocked.
+local forging_station = table.deepcopy(data.raw["assembling-machine"]["assembling-machine-3"])
+forging_station.name                     = "armor-forging-station"
+forging_station.minable                  = {mining_time = 0.5, result = "armor-forging-station"}
+forging_station.crafting_categories      = {"armor-forging"}
+forging_station.allowed_effects          = {"speed", "consumption", "pollution"}
+forging_station.allowed_module_categories = {"speed", "efficiency"}
+forging_station.factoriopedia_simulation = nil
+data:extend({forging_station})
 
 local char_anims = data.raw.character.character.animations
 for _, entry in ipairs(char_anims) do

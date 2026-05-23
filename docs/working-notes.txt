@@ -13,3 +13,9 @@ unique roboport with high capacity?
 slowing effect on nearby enemies
 
 range scaling and others on personal tesla
+
+rabbasca integration - player can act as a warp pylon.
+
+Inventory fridge feature?
+
+idea: armor crafting station caps quality
