@@ -34,6 +34,42 @@ data:extend({
 data:extend({
   {
     type = "technology",
+    name = "personal-robot-stash",
+    icon = "__base__/graphics/technology/personal-roboport-equipment.png",
+    icon_size = 256,
+    prerequisites = {"mech-armor-mk2"},
+    unit = {
+      count = 10,
+      ingredients = {{"automation-science-pack", 1}},
+      time = 60,
+    },
+    effects = {
+      {type = "unlock-recipe", recipe = "personal-robot-stash"},
+    },
+  },
+})
+
+data:extend({
+  {
+    type = "technology",
+    name = "personal-beacon",
+    icon = "__base__/graphics/technology/personal-roboport-equipment.png",
+    icon_size = 256,
+    prerequisites = {"mech-armor-mk2"},
+    unit = {
+      count = 20,
+      ingredients = {{"electromagnetic-science-pack", 1}},
+      time = 60,
+    },
+    effects = {
+      {type = "unlock-recipe", recipe = "personal-beacon-equipment"},
+    },
+  },
+})
+
+data:extend({
+  {
+    type = "technology",
     name = "regenerative-armor",
     icon = "__base__/graphics/technology/energy-shield-equipment.png",
     icon_size = 256,

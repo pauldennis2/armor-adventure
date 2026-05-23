@@ -47,6 +47,28 @@ data:extend({
   },
   {
     type = "recipe",
+    name = "personal-robot-stash",
+    enabled = false,
+    energy_required = 10,
+    ingredients = {
+      {type = "item", name = "construction-robot", amount = 5},
+      {type = "item", name = "steel-chest",        amount = 1},
+    },
+    results = {{type = "item", name = "personal-robot-stash", amount = 1}},
+  },
+  {
+    type = "recipe",
+    name = "personal-beacon-equipment",
+    enabled = false,
+    energy_required = 10,
+    ingredients = {
+      {type = "item", name = "beacon",      amount = 1},
+      {type = "item", name = "steel-plate", amount = 10},
+    },
+    results = {{type = "item", name = "personal-beacon-equipment", amount = 1}},
+  },
+  {
+    type = "recipe",
     name = "personal-combat-roboport-destroyer",
     enabled = false,
     energy_required = 10,

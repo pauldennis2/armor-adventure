@@ -1,10 +1,14 @@
 data:extend({
+  {type = "equipment-category", name = "armor-adventure-mk2"},
+})
+
+data:extend({
   {
     type = "equipment-grid",
     name = "armor-adventure-mech-mk2-grid",
     width = 12,
     height = 14,
-    equipment_categories = {"armor"},
+    equipment_categories = {"armor", "armor-adventure-mk2"},
   },
 })
 
@@ -59,5 +63,23 @@ data:extend({
     subgroup = "utility-equipment",
     order = "f[personal-combat-roboport-c]",
     stack_size = 5,
+  },
+  {
+    type = "item",
+    name = "personal-robot-stash",
+    icon = "__base__/graphics/icons/construction-robot.png",
+    place_as_equipment_result = "personal-robot-stash",
+    subgroup = "utility-equipment",
+    order = "f[personal-robot-stash]",
+    stack_size = 1,
+  },
+  {
+    type = "item",
+    name = "personal-beacon-equipment",
+    icon = "__base__/graphics/icons/beacon.png",
+    place_as_equipment_result = "personal-beacon-equipment",
+    subgroup = "utility-equipment",
+    order = "f[personal-beacon-equipment]",
+    stack_size = 1,
   },
 })
