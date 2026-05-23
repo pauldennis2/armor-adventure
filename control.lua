@@ -7,6 +7,13 @@ local create_personal_beacon
 local destroy_personal_beacon
 local sync_personal_beacon
 
+local HAS_RABBASCA = script.active_mods["planet-rabbasca"] ~= nil
+local PERSONAL_WARP_PYLON_EQUIP  = "personal-warp-pylon-equipment"
+local PERSONAL_WARP_PYLON_ENTITY = "armor-adventure-personal-warp-pylon"
+local create_personal_warp_pylon
+local destroy_personal_warp_pylon
+local sync_personal_warp_pylon
+
 -- Tech effects apply to the whole force. When the armor is NOT worn, we apply
 -- an equal and opposite penalty per-character so the net bonus is zero.
 -- When the armor IS worn, no penalty — the player gets the full tech bonus.
@@ -46,10 +53,12 @@ local function sync_player_bonuses(player)
 end
 
 local function init_storage()
-  storage.mk2_penalties      = storage.mk2_penalties or {}
-  storage.roboport_cooldowns = storage.roboport_cooldowns or {}
-  storage.personal_beacons   = storage.personal_beacons or {}
-  storage.pocket_dim_return  = storage.pocket_dim_return or {}
+  storage.mk2_penalties           = storage.mk2_penalties or {}
+  storage.roboport_cooldowns      = storage.roboport_cooldowns or {}
+  storage.personal_beacons        = storage.personal_beacons or {}
+  storage.pocket_dim_return       = storage.pocket_dim_return or {}
+  storage.personal_warp_pylons    = storage.personal_warp_pylons or {}
+  storage.personal_warp_pylon_pos = storage.personal_warp_pylon_pos or {}
   for _, player in pairs(game.players) do
     storage.mk2_penalties[player.index]      = storage.mk2_penalties[player.index] or {}
     storage.roboport_cooldowns[player.index] = storage.roboport_cooldowns[player.index] or {}
@@ -59,10 +68,12 @@ local function init_storage()
 end
 
 script.on_init(function()
-  storage.mk2_penalties      = {}
-  storage.roboport_cooldowns = {}
-  storage.personal_beacons   = {}
-  storage.pocket_dim_return  = {}
+  storage.mk2_penalties           = {}
+  storage.roboport_cooldowns      = {}
+  storage.personal_beacons        = {}
+  storage.pocket_dim_return       = {}
+  storage.personal_warp_pylons    = {}
+  storage.personal_warp_pylon_pos = {}
 end)
 
 script.on_configuration_changed(function(data)
@@ -96,8 +107,10 @@ end)
 script.on_event(defines.events.on_player_created, function(event)
   storage.mk2_penalties[event.player_index]      = {}
   storage.roboport_cooldowns[event.player_index] = {}
-  storage.personal_beacons[event.player_index]   = nil
-  storage.pocket_dim_return[event.player_index]  = nil
+  storage.personal_beacons[event.player_index]        = nil
+  storage.pocket_dim_return[event.player_index]       = nil
+  storage.personal_warp_pylons[event.player_index]    = nil
+  storage.personal_warp_pylon_pos[event.player_index] = nil
 end)
 
 script.on_event(defines.events.on_player_armor_inventory_changed, function(event)
@@ -105,6 +118,7 @@ script.on_event(defines.events.on_player_armor_inventory_changed, function(event
   storage.mk2_penalties[player.index] = storage.mk2_penalties[player.index] or {}
   sync_player_bonuses(player)
   sync_personal_beacon(player)
+  if HAS_RABBASCA then sync_personal_warp_pylon(player) end
 end)
 
 script.on_event(defines.events.on_research_finished, function(event)
@@ -122,6 +136,7 @@ script.on_event(defines.events.on_player_respawned, function(event)
   local player = game.players[event.player_index]
   sync_player_bonuses(player)
   sync_personal_beacon(player)
+  if HAS_RABBASCA then sync_personal_warp_pylon(player) end
 end)
 
 -- Unique equipment enforcement --
@@ -139,6 +154,9 @@ local UNIQUE_EQUIPMENT = {
   ["pocket-dimension-generator"]          = "pocket-dimension-generator",
   ["personal-tesla-turret"]               = "personal-tesla-turret",
 }
+if HAS_RABBASCA then
+  UNIQUE_EQUIPMENT[PERSONAL_WARP_PYLON_EQUIP] = "personal-warp-pylon"
+end
 
 -- Display name used in the rejection message, keyed by group.
 local UNIQUE_GROUP_LABEL = {
@@ -147,6 +165,7 @@ local UNIQUE_GROUP_LABEL = {
   [PERSONAL_BEACON_EQUIP]         = {"item-name." .. PERSONAL_BEACON_EQUIP},
   ["pocket-dimension-generator"]  = {"item-name.pocket-dimension-generator"},
   ["personal-tesla-turret"]       = {"item-name.personal-tesla-turret"},
+  ["personal-warp-pylon"]         = {"item-name." .. PERSONAL_WARP_PYLON_EQUIP},
 }
 
 local function find_player_for_grid(grid)
@@ -189,14 +208,25 @@ script.on_event(defines.events.on_equipment_inserted, function(event)
     local player = find_player_for_grid(grid)
     if player then create_personal_beacon(player) end
   end
+
+  -- Spawn personal warp pylon when its equipment is inserted
+  if HAS_RABBASCA and eq_name == PERSONAL_WARP_PYLON_EQUIP then
+    local player = find_player_for_grid(grid)
+    if player then create_personal_warp_pylon(player) end
+  end
 end)
 
 script.on_event(defines.events.on_equipment_removed, function(event)
   local eq = event.equipment
   local name = type(eq) == "string" and eq or eq.name
-  if name ~= PERSONAL_BEACON_EQUIP then return end
-  local player = find_player_for_grid(event.grid)
-  if player then sync_personal_beacon(player) end
+  if name == PERSONAL_BEACON_EQUIP then
+    local player = find_player_for_grid(event.grid)
+    if player then sync_personal_beacon(player) end
+  end
+  if HAS_RABBASCA and name == PERSONAL_WARP_PYLON_EQUIP then
+    local player = find_player_for_grid(event.grid)
+    if player then sync_personal_warp_pylon(player) end
+  end
 end)
 
 -- Personal Combat Roboport --
@@ -495,6 +525,17 @@ script.on_event(defines.events.on_player_changed_position, function(event)
     end
   end
 
+  if HAS_RABBASCA then
+    local warp_pylon = storage.personal_warp_pylons[player.index]
+    if warp_pylon and warp_pylon.valid and warp_pylon.surface == player.surface then
+      local pp = player.position
+      local wp = warp_pylon.position
+      if (pp.x - wp.x)^2 + (pp.y - wp.y)^2 > 1 then
+        warp_pylon.teleport({x = pp.x, y = pp.y})
+      end
+    end
+  end
+
   -- Pocket dimension exit: walk south through the gap in the south wall.
   if storage.pocket_dim_return[player.index] and
      player.surface.name == "pocket-dimension-" .. player.index then
@@ -504,3 +545,55 @@ script.on_event(defines.events.on_player_changed_position, function(event)
     end
   end
 end)
+
+-- Personal Warp Pylon (Rabbasca integration) --
+
+if HAS_RABBASCA then
+
+local function has_personal_warp_pylon_equip(player)
+  local armor_inv = player.get_inventory(defines.inventory.character_armor)
+  if not armor_inv then return false end
+  local armor = armor_inv[1]
+  if not armor or not armor.valid_for_read then return false end
+  local grid = armor.grid
+  if not grid then return false end
+  for _, eq in pairs(grid.equipment) do
+    if eq.name == PERSONAL_WARP_PYLON_EQUIP then return true end
+  end
+  return false
+end
+
+destroy_personal_warp_pylon = function(player)
+  local pylon = storage.personal_warp_pylons[player.index]
+  storage.personal_warp_pylons[player.index]    = nil
+  storage.personal_warp_pylon_pos[player.index] = nil
+  if not pylon or not pylon.valid then return end
+  remote.call("rabbasca_warp_pylons", "unregister_pylon", pylon.unit_number)
+  pylon.destroy()
+end
+
+create_personal_warp_pylon = function(player)
+  local pylon = player.surface.create_entity({
+    name     = PERSONAL_WARP_PYLON_ENTITY,
+    position = player.position,
+    force    = player.force,
+  })
+  if not pylon then return end
+  storage.personal_warp_pylons[player.index]    = pylon
+  storage.personal_warp_pylon_pos[player.index] = {x = player.position.x, y = player.position.y}
+  remote.call("rabbasca_warp_pylons", "register_pylon", pylon)
+end
+
+sync_personal_warp_pylon = function(player)
+  if not player or not player.valid then return end
+  local has_eq    = player.character and has_personal_warp_pylon_equip(player)
+  local pylon     = storage.personal_warp_pylons[player.index]
+  local has_pylon = pylon and pylon.valid
+  if has_eq and not has_pylon then
+    create_personal_warp_pylon(player)
+  elseif not has_eq and has_pylon then
+    destroy_personal_warp_pylon(player)
+  end
+end
+
+end -- HAS_RABBASCA

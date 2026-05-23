@@ -68,3 +68,25 @@ local pdg = data.raw["generator-equipment"]["pocket-dimension-generator"]
 if pdg then
   pdg.power = math.floor(best_gen * 1.5 / 1000) .. "kW"
 end
+
+-- Personal Warp Pylon: invisible assembling-machine deepcopy of rabbasca-warp-pylon.
+-- Must be a crafting machine so Rabbasca's warp dispatch cycle (awake → trigger item → attempt_build_ghost) works.
+-- Graphics stripped via empty graphics_set so nothing is rendered.
+if mods["planet-rabbasca"] then
+  local src = data.raw["assembling-machine"]["rabbasca-warp-pylon"]
+  if src then
+    local personal_pylon                    = table.deepcopy(src)
+    personal_pylon.name                     = "armor-adventure-personal-warp-pylon"
+    personal_pylon.minable                  = nil
+    personal_pylon.allow_copy_paste         = false
+    personal_pylon.collision_box            = {{-0.01, -0.01}, {0.01, 0.01}}
+    personal_pylon.collision_mask           = {layers = {}}
+    personal_pylon.selection_box            = {{-0.01, -0.01}, {0.01, 0.01}}
+    personal_pylon.factoriopedia_simulation = nil
+    personal_pylon.graphics_set             = {}
+    personal_pylon.flags = {
+      "not-on-map", "not-blueprintable", "not-deconstructable", "not-repairable",
+    }
+    data:extend({personal_pylon})
+  end
+end

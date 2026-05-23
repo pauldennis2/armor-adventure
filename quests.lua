@@ -11,7 +11,6 @@ script.on_nth_tick(1, function()
     if not entity or not entity.valid then return end
 
     if entity.energy >= MLC_THRESHOLD then
-        game.print("Charged up!")
         local pos = entity.position
         entity.surface.spill_item_stack{
             position     = {
@@ -159,6 +158,43 @@ script.on_nth_tick(60, function()
                     destination = nearest.position,
                     distraction = defines.distraction.by_enemy,
                 }
+            end
+        end
+    end
+
+    -- Personal Fridge: add 30 ticks every 60 ticks = 50% slower spoilage while
+    -- wearing mech-armor-mk2 and personal-fridge is researched.
+    for _, player in pairs(game.players) do
+        if not player.character then goto continue end
+        if not player.force.technologies["personal-fridge"].researched then goto continue end
+        local armor_inv = player.get_inventory(defines.inventory.character_armor)
+        if not armor_inv or not armor_inv[1].valid_for_read then goto continue end
+        if armor_inv[1].name ~= "mech-armor-mk2" then goto continue end
+        local inv = player.get_main_inventory()
+        if inv then
+            for i = 1, #inv do
+                local stack = inv[i]
+                if stack.valid_for_read and stack.spoil_tick > 0 then
+                    stack.spoil_tick = stack.spoil_tick + 30
+                end
+            end
+        end
+        ::continue::
+    end
+
+    -- Re-register personal warp pylons with Rabbasca when they've moved > 20 tiles
+    -- from their last registered position, so covered chunks stay current.
+    if remote.interfaces["rabbasca_warp_pylons"] and storage.personal_warp_pylons then
+        for _, player in pairs(game.players) do
+            local pylon = storage.personal_warp_pylons[player.index]
+            if pylon and pylon.valid then
+                local last = storage.personal_warp_pylon_pos and storage.personal_warp_pylon_pos[player.index]
+                local pp   = pylon.position
+                if not last or (pp.x - last.x)^2 + (pp.y - last.y)^2 > 400 then
+                    remote.call("rabbasca_warp_pylons", "unregister_pylon", pylon.unit_number)
+                    remote.call("rabbasca_warp_pylons", "register_pylon",   pylon)
+                    storage.personal_warp_pylon_pos[player.index] = {x = pp.x, y = pp.y}
+                end
             end
         end
     end

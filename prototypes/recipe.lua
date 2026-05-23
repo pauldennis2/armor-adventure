@@ -166,3 +166,14 @@ data:extend({
     results = {{type = "item", name = "personal-tesla-turret", amount = 1}},
   },
 })
+
+if mods["planet-rabbasca"] then
+  data:extend({{
+    type            = "recipe",
+    name            = "personal-warp-pylon-equipment",
+    enabled         = false,
+    energy_required = 10,
+    ingredients     = {{type = "item", name = "bio-interface", amount = 5}},
+    results         = {{type = "item", name = "personal-warp-pylon-equipment", amount = 1}},
+  }})
+end

@@ -205,3 +205,15 @@ data:extend({
     stack_size = 1,
   },
 })
+
+if mods["planet-rabbasca"] then
+  data:extend({{
+    type = "item",
+    name = "personal-warp-pylon-equipment",
+    icon = "__base__/graphics/icons/roboport.png",
+    place_as_equipment_result = "personal-warp-pylon-equipment",
+    subgroup = "utility-equipment",
+    order = "f[personal-warp-pylon-equipment]",
+    stack_size = 1,
+  }})
+end

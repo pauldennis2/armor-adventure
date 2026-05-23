@@ -121,6 +121,39 @@ data:extend({
   },
 })
 
+data:extend({
+  {
+    type = "technology",
+    name = "personal-fridge",
+    icon = "__space-age__/graphics/technology/agriculture.png",
+    icon_size = 256,
+    prerequisites = {"mech-armor-mk2"},
+    unit = {
+      count = 10,
+      ingredients = {{"agricultural-science-pack", 1}},
+      time = 60,
+    },
+  },
+})
+
+if mods["planet-rabbasca"] then
+  data:extend({{
+    type = "technology",
+    name = "personal-warp-pylon",
+    icon = "__base__/graphics/technology/personal-roboport-equipment.png",
+    icon_size = 256,
+    prerequisites = {"mech-armor-mk2", "interplanetary-construction-1"},
+    unit = {
+      count = 20,
+      ingredients = {{"athletic-science-pack", 1}},
+      time = 60,
+    },
+    effects = {
+      {type = "unlock-recipe", recipe = "personal-warp-pylon-equipment"},
+    },
+  }})
+end
+
 if mods["castra-prime"] then
   data:extend({
     {

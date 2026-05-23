@@ -44,6 +44,18 @@ personal_beacon_eq.categories          = MK2_CATEGORY
 
 data:extend({ combat_roboport, combat_roboport_distractor, combat_roboport_destroyer, robot_stash, personal_beacon_eq })
 
+if mods["planet-rabbasca"] then
+  local personal_warp_pylon_eq                = table.deepcopy(data.raw["roboport-equipment"]["personal-roboport-equipment"])
+  personal_warp_pylon_eq.name                 = "personal-warp-pylon-equipment"
+  personal_warp_pylon_eq.take_result          = "personal-warp-pylon-equipment"
+  personal_warp_pylon_eq.robot_limit          = 0
+  personal_warp_pylon_eq.construction_radius  = 0
+  personal_warp_pylon_eq.charging_energy      = "0W"
+  personal_warp_pylon_eq.shape                = {width = 2, height = 2, type = "full"}
+  personal_warp_pylon_eq.categories           = MK2_CATEGORY
+  data:extend({personal_warp_pylon_eq})
+end
+
 local pdg = table.deepcopy(data.raw["generator-equipment"]["fusion-reactor-equipment"])
 pdg.name        = "pocket-dimension-generator"
 pdg.take_result = "pocket-dimension-generator"
