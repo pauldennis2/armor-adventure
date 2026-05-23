@@ -4,6 +4,37 @@ data:extend({
 
 data:extend({
   {
+    type       = "item",
+    name       = "charged-lightning-gem",
+    icon       = "__space-age__/graphics/icons/lightning-collector.png",
+    subgroup   = "intermediate-product",
+    order      = "z[charged-lightning-gem]",
+    stack_size = 10,
+  },
+  {
+    type         = "item",
+    name         = "massive-lightning-collector",
+    icon         = "__space-age__/graphics/icons/lightning-collector.png",
+    place_result = "massive-lightning-collector",
+    subgroup     = "energy",
+    order        = "f[massive-lightning-collector]",
+    stack_size   = 5,
+  },
+})
+
+data:extend({
+  {
+    type       = "item",
+    name       = "demolisher-heart",
+    icon       = "__base__/graphics/icons/heavy-armor.png",
+    subgroup   = "intermediate-product",
+    order      = "z[demolisher-heart]",
+    stack_size = 1,
+  },
+})
+
+data:extend({
+  {
     type = "equipment-grid",
     name = "armor-adventure-mech-mk2-grid",
     width = 12,

@@ -91,6 +91,16 @@ data:extend({
     results = {{type = "item", name = "pocket-dimension-generator", amount = 1}},
   },
   {
+    type             = "recipe",
+    name             = "massive-lightning-collector",
+    enabled          = true,
+    energy_required  = 10,
+    ingredients = {
+      {type = "item", name = "lightning-collector", amount = 10},
+    },
+    results = {{type = "item", name = "massive-lightning-collector", amount = 1}},
+  },
+  {
     type = "recipe",
     name = "personal-tesla-turret",
     enabled = false,

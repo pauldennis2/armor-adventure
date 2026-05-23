@@ -1,3 +1,17 @@
+local function scale_graphics(t, factor)
+  if type(t) ~= "table" then return end
+  if t.scale ~= nil then t.scale = t.scale * factor end
+  for _, v in pairs(t) do scale_graphics(v, factor) end
+end
+
+local function shift_layers(anim, dx, dy)
+  if not anim or not anim.layers then return end
+  for _, layer in pairs(anim.layers) do
+    local s = layer.shift or {0, 0}
+    layer.shift = {s[1] + dx, s[2] + dy}
+  end
+end
+
 local function apply_fixed_tint(t, tint_color)
   if type(t) ~= "table" then return end
   if t.apply_runtime_tint then
@@ -31,6 +45,33 @@ personal_beacon.energy_source = {type = "void"}
 personal_beacon.graphics_set = {module_icons_suppressed = false}
 personal_beacon.radius_visualisation_picture = nil
 data:extend({personal_beacon})
+
+-- Massive Lightning Collector: 10× attraction range, 4×4 footprint, no grid output.
+local massive_lc = table.deepcopy(data.raw["lightning-attractor"]["lightning-collector"])
+massive_lc.name                           = "massive-lightning-collector"
+massive_lc.minable                        = {mining_time = 0.5, result = "massive-lightning-collector"}
+massive_lc.max_health                     = 2000
+massive_lc.range_elongation               = 250.0
+massive_lc.collision_box                  = {{-1.7, -1.7}, {1.7, 1.7}}
+massive_lc.selection_box                  = {{-2, -2}, {2, 2}}
+massive_lc.drawing_box_vertical_extension = 9.0
+massive_lc.lightning_strike_offset        = {0, -9.6}
+massive_lc.energy_source = {
+    type                   = "electric",
+    buffer_capacity        = "1000GJ",
+    usage_priority         = "primary-output",
+    output_flow_limit      = "0W",
+    drain                  = "0W",
+    render_no_power_icon   = false,
+    render_no_network_icon = false,
+}
+massive_lc.factoriopedia_simulation = nil
+scale_graphics(massive_lc.chargable_graphics, 2)
+local cg = massive_lc.chargable_graphics
+shift_layers(cg.picture,             0, -2)
+shift_layers(cg.charge_animation,    0, -2)
+shift_layers(cg.discharge_animation, 0, -2)
+data:extend({massive_lc})
 
 local char_anims = data.raw.character.character.animations
 for _, entry in ipairs(char_anims) do

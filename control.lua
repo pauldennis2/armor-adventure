@@ -1,3 +1,5 @@
+require("quests")
+
 local ARMOR_NAME = "mech-armor-mk2"
 
 -- Forward declarations for personal beacon functions defined later in this file.
