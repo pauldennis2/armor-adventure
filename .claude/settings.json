@@ -1,7 +1,0 @@
-{
-  "permissions": {
-    "allow": [
-      "Bash(Get-Content *factorio-current.log*)"
-    ]
-  }
-}
