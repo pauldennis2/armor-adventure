@@ -156,3 +156,18 @@ pts.shape                         = {width = 2, height = 2, type = "full"}
 pts.categories                    = MK2_CATEGORY
 pts.energy_source.buffer_capacity = "1GJ"
 data:extend({pts})
+
+local acs_eq = table.deepcopy(data.raw["movement-bonus-equipment"]["exoskeleton-equipment"])
+acs_eq.name              = "armor-forging-station-equipment"
+acs_eq.take_result       = "armor-forging-station"
+acs_eq.movement_bonus    = 0
+acs_eq.energy_source     = {type = "electric", usage_priority = "secondary-input", buffer_capacity = "1J", input_flow_limit = "1W"}
+acs_eq.shape             = {width = 2, height = 2, type = "full"}
+acs_eq.categories        = MK2_CATEGORY
+acs_eq.sprite            = {
+  filename = "__armor-adventure__/graphics/entity/armor-crafting-station/base/armor-crafting-station-icon.png",
+  width    = 640,
+  height   = 640,
+  scale    = 0.5,
+}
+data:extend({acs_eq})

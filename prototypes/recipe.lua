@@ -5,15 +5,58 @@ data:extend({
 
 data:extend({
   {
-    type = "recipe",
-    name = "mech-armor-mk2",
-    enabled = false,
+    type            = "recipe",
+    name            = "aquilo-prom-suit-component",
+    enabled         = false,
+    energy_required = 5,
+    ingredients = {
+      {type = "item", name = "steel-plate", amount = 2},
+    },
+    results = {{type = "item", name = "aquilo-prom-suit-component", amount = 1}},
+  },
+  {
+    type            = "recipe",
+    name            = "mech-armor-mk2",
+    enabled         = false,
     energy_required = 10,
     ingredients = {
-      {type = "item", name = "mech-armor",  amount = 1},
-      {type = "item", name = "steel-plate", amount = 5},
+      {type = "item", name = "mech-armor",                   amount = 1},
+      {type = "item", name = "steel-plate",                  amount = 5},
+      {type = "item", name = "bio-interface",                amount = 1},
+      {type = "item", name = "aquilo-prom-suit-component",   amount = 1},
+      {type = "item", name = "promethium-armor-chassis",     amount = 1},
+      {type = "item", name = "promethium-asteroid-chunk",    amount = 100},
+      {type = "item", name = "promethium-armor-electronics", amount = 1},
     },
     results = {{type = "item", name = "mech-armor-mk2", amount = 1}},
+  },
+  {
+    type            = "recipe",
+    name            = "promethium-armor-chassis",
+    enabled         = false,
+    energy_required = 30,
+    category        = "armor-forging",
+    ingredients = {
+      {type = "item", name = "demolisher-heart", amount = 1},
+      {type = "item", name = "tungsten-plate",   amount = 100},
+      {type = "item", name = "steel-plate",      amount = 100},
+    },
+    results = {{type = "item", name = "promethium-armor-chassis", amount = 1}},
+  },
+  {
+    type            = "recipe",
+    name            = "promethium-armor-electronics",
+    enabled         = false,
+    energy_required = 60,
+    category        = "armor-forging",
+    ingredients = {
+      {type = "item", name = "charged-lightning-gem",  amount = 10},
+      {type = "item", name = "speed-module-3",         amount = 5},
+      {type = "item", name = "efficiency-module-3",    amount = 5},
+      {type = "item", name = "productivity-module-3",  amount = 5},
+      {type = "item", name = "quality-module-3",       amount = 5},
+    },
+    results = {{type = "item", name = "promethium-armor-electronics", amount = 1}},
   },
   {
     type = "recipe",
@@ -32,9 +75,12 @@ data:extend({
     enabled = false,
     energy_required = 10,
     ingredients = {
-      {type = "item", name = "personal-roboport-equipment", amount = 1},
-      {type = "item", name = "steel-plate",                 amount = 10},
-      {type = "item", name = "defender-capsule",            amount = 100},
+      {type = "item", name = "defender-capsule",              amount = 200},
+      {type = "item", name = "combat-roboport",               amount = 1},
+      {type = "item", name = "personal-roboport-mk2-equipment", amount = 1},
+      {type = "item", name = "speed-module-3",                amount = 2},
+      {type = "item", name = "efficiency-module-3",           amount = 2},
+      {type = "item", name = "gun-turret",                    amount = 5},
     },
     results = {{type = "item", name = "personal-combat-roboport", amount = 1}},
   },
@@ -44,9 +90,12 @@ data:extend({
     enabled = false,
     energy_required = 10,
     ingredients = {
-      {type = "item", name = "personal-roboport-equipment", amount = 1},
-      {type = "item", name = "steel-plate",                 amount = 10},
-      {type = "item", name = "distractor-capsule",          amount = 100},
+      {type = "item", name = "distractor-capsule",            amount = 200},
+      {type = "item", name = "combat-roboport",               amount = 1},
+      {type = "item", name = "personal-roboport-mk2-equipment", amount = 1},
+      {type = "item", name = "speed-module-3",                amount = 2},
+      {type = "item", name = "efficiency-module-3",           amount = 2},
+      {type = "item", name = "laser-turret",                  amount = 5},
     },
     results = {{type = "item", name = "personal-combat-roboport-distractor", amount = 1}},
   },
@@ -79,9 +128,12 @@ data:extend({
     enabled = false,
     energy_required = 10,
     ingredients = {
-      {type = "item", name = "personal-roboport-equipment", amount = 1},
-      {type = "item", name = "steel-plate",                 amount = 10},
-      {type = "item", name = "destroyer-capsule",           amount = 100},
+      {type = "item", name = "destroyer-capsule",             amount = 200},
+      {type = "item", name = "combat-roboport",               amount = 1},
+      {type = "item", name = "personal-roboport-mk2-equipment", amount = 1},
+      {type = "item", name = "speed-module-3",                amount = 2},
+      {type = "item", name = "efficiency-module-3",           amount = 2},
+      {type = "item", name = "tesla-turret",                  amount = 2},
     },
     results = {{type = "item", name = "personal-combat-roboport-destroyer", amount = 1}},
   },
@@ -99,7 +151,7 @@ data:extend({
   {
     type            = "recipe",
     name            = "armor-forging-station",
-    enabled         = true,
+    enabled         = false,
     energy_required = 10,
     ingredients = {
       {type = "item", name = "assembling-machine-3", amount = 1},
@@ -149,7 +201,7 @@ data:extend({
   {
     type            = "recipe",
     name            = "harvester",
-    enabled         = true,
+    enabled         = false,
     energy_required = 10,
     ingredients = {
       {type = "item", name = "electronic-circuit", amount = 3},
@@ -169,7 +221,7 @@ data:extend({
   {
     type             = "recipe",
     name             = "massive-lightning-collector",
-    enabled          = true,
+    enabled          = false,
     energy_required  = 10,
     ingredients = {
       {type = "item", name = "lightning-collector", amount = 10},
@@ -206,7 +258,11 @@ if mods["planet-rabbasca"] then
     name            = "personal-warp-pylon-equipment",
     enabled         = false,
     energy_required = 10,
-    ingredients     = {{type = "item", name = "bio-interface", amount = 5}},
+    ingredients = {
+      {type = "item", name = "rabbasca-warp-pylon",  amount = 2},
+      {type = "item", name = "speed-module-3",       amount = 2},
+      {type = "item", name = "efficiency-module-3",  amount = 2},
+    },
     results         = {{type = "item", name = "personal-warp-pylon-equipment", amount = 1}},
   }})
 end

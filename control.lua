@@ -23,6 +23,10 @@ local enforce_quality_gates_all_players
 local QUANTUM_COIL_ITEM  = "quantum-coil"
 local QUANTUM_COIL_EQUIP = "quantum-coil-equipment"
 
+local ACS_EQUIP = "armor-forging-station-equipment"
+local ACS_CRAFTING_BONUS = 1.0
+local sync_acs_crafting_bonus
+
 -- Tech effects apply to the whole force. When the armor is NOT worn, we apply
 -- an equal and opposite penalty per-character so the net bonus is zero.
 -- When the armor IS worn, no penalty — the player gets the full tech bonus.
@@ -70,6 +74,7 @@ local function init_storage()
   storage.personal_warp_pylon_pos = storage.personal_warp_pylon_pos or {}
   storage.time_stopper_active     = storage.time_stopper_active or {}
   storage.time_stopper_cooldown   = storage.time_stopper_cooldown or {}
+  storage.acs_crafting_bonus      = storage.acs_crafting_bonus or {}
   for _, player in pairs(game.players) do
     storage.mk2_penalties[player.index]      = storage.mk2_penalties[player.index] or {}
     storage.roboport_cooldowns[player.index] = storage.roboport_cooldowns[player.index] or {}
@@ -86,6 +91,7 @@ script.on_init(function()
   storage.personal_warp_pylons    = {}
   storage.time_stopper_active     = {}
   storage.time_stopper_cooldown   = {}
+  storage.acs_crafting_bonus      = {}
   storage.personal_warp_pylon_pos = {}
 end)
 
@@ -114,6 +120,7 @@ script.on_configuration_changed(function(data)
   for _, player in pairs(game.players) do
     sync_player_bonuses(player)
     sync_personal_beacon(player)
+    sync_acs_crafting_bonus(player)
   end
   if QUALITY_GATE_ENABLED then enforce_quality_gates_all_players() end
 end)
@@ -135,6 +142,7 @@ script.on_event(defines.events.on_player_armor_inventory_changed, function(event
   sync_player_bonuses(player)
   sync_personal_beacon(player)
   if HAS_RABBASCA then sync_personal_warp_pylon(player) end
+  sync_acs_crafting_bonus(player)
 end)
 
 script.on_event(defines.events.on_research_finished, function(event)
@@ -156,6 +164,9 @@ script.on_event(defines.events.on_player_respawned, function(event)
   -- New character has clean modifiers; clear time stopper state without removal.
   storage.time_stopper_active[player.index] = nil
   player.set_shortcut_toggled("time-stopper-activate", false)
+  -- New character starts at modifier=0; treat storage as unset so sync reapplies from grid.
+  storage.acs_crafting_bonus[player.index] = nil
+  sync_acs_crafting_bonus(player)
 end)
 
 -- Unique equipment enforcement --
@@ -174,6 +185,7 @@ local UNIQUE_EQUIPMENT = {
   ["personal-tesla-turret"]               = "personal-tesla-turret",
   ["personal-time-stopper"]               = "personal-time-stopper",
   [QUANTUM_COIL_EQUIP]                    = "quantum-coil",
+  [ACS_EQUIP]                             = ACS_EQUIP,
 }
 if HAS_RABBASCA then
   UNIQUE_EQUIPMENT[PERSONAL_WARP_PYLON_EQUIP] = "personal-warp-pylon"
@@ -215,6 +227,7 @@ local UNIQUE_GROUP_LABEL = {
   ["personal-time-stopper"]       = {"item-name.personal-time-stopper"},
   ["personal-warp-pylon"]         = {"item-name." .. PERSONAL_WARP_PYLON_EQUIP},
   ["quantum-coil"]                = {"item-name.quantum-coil"},
+  [ACS_EQUIP]                     = {"item-name.armor-forging-station"},
 }
 
 local function find_player_for_grid(grid)
@@ -229,10 +242,44 @@ local function find_player_for_grid(grid)
   end
 end
 
+sync_acs_crafting_bonus = function(player)
+  if not (player and player.valid and player.character and player.character.valid) then return end
+  local prev = storage.acs_crafting_bonus[player.index] or 0
+  local current = 0
+  local inv = player.character.get_inventory(defines.inventory.character_armor)
+  local armor = inv and inv[1]
+  if armor and armor.valid_for_read and armor.grid then
+    for _, eq in pairs(armor.grid.equipment) do
+      if eq.name == ACS_EQUIP then current = current + ACS_CRAFTING_BONUS end
+    end
+  end
+  local delta = current - prev
+  if delta ~= 0 then
+    player.character.character_crafting_speed_modifier =
+      player.character.character_crafting_speed_modifier + delta
+    storage.acs_crafting_bonus[player.index] = current
+  end
+end
+
 script.on_event(defines.events.on_equipment_inserted, function(event)
   local eq_name = event.equipment.name
   local group   = UNIQUE_EQUIPMENT[eq_name]
   local grid    = event.grid or event.equipment.grid
+
+  -- Tech gate: ACS requires packable-forge research before it can be equipped
+  if eq_name == ACS_EQUIP then
+    local player = find_player_for_grid(grid)
+    local tech   = player and player.force.technologies["packable-forge"]
+    if not (tech and tech.researched) then
+      local quality = event.equipment.quality
+      local taken   = grid.take({equipment = event.equipment})
+      if player and taken then
+        player.insert({name = taken.name, count = 1, quality = quality.name})
+        player.print({"armor-adventure.acs-pack-locked"})
+      end
+      return
+    end
+  end
 
   -- Enforce uniqueness group
   if group then
@@ -279,6 +326,12 @@ script.on_event(defines.events.on_equipment_inserted, function(event)
     local player = find_player_for_grid(grid)
     if player then create_personal_warp_pylon(player) end
   end
+
+  -- Apply crafting speed bonus when ACS equipment is inserted
+  if eq_name == ACS_EQUIP then
+    local player = find_player_for_grid(grid)
+    if player then sync_acs_crafting_bonus(player) end
+  end
 end)
 
 script.on_event(defines.events.on_equipment_removed, function(event)
@@ -291,6 +344,10 @@ script.on_event(defines.events.on_equipment_removed, function(event)
   if HAS_RABBASCA and name == PERSONAL_WARP_PYLON_EQUIP then
     local player = find_player_for_grid(event.grid)
     if player then sync_personal_warp_pylon(player) end
+  end
+  if name == ACS_EQUIP then
+    local player = find_player_for_grid(event.grid)
+    if player then sync_acs_crafting_bonus(player) end
   end
 end)
 
