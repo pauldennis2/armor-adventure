@@ -35,6 +35,7 @@ data:extend({
   {
     type = "technology",
     name = "personal-robot-stash",
+    hidden = true,
     icon = "__base__/graphics/technology/personal-roboport-equipment.png",
     icon_size = 256,
     prerequisites = {"mech-armor-mk2"},

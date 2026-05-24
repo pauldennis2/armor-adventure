@@ -142,6 +142,13 @@ ptt.attack_parameters = {
 }
 data:extend({ptt})
 
+local quantum_coil_eq = table.deepcopy(data.raw["active-defense-equipment"]["personal-laser-defense-equipment"])
+quantum_coil_eq.name        = "quantum-coil-equipment"
+quantum_coil_eq.take_result = "quantum-coil"
+quantum_coil_eq.shape       = {width = 2, height = 2, type = "full"}
+quantum_coil_eq.categories  = MK2_CATEGORY
+data:extend({quantum_coil_eq})
+
 local pts = table.deepcopy(data.raw["battery-equipment"]["battery-mk2-equipment"])
 pts.name                          = "personal-time-stopper"
 pts.take_result                   = "personal-time-stopper"

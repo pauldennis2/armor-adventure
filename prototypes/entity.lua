@@ -59,6 +59,52 @@ harvester.minable                  = {mining_time = 0.5, result = "harvester"}
 harvester.crafting_categories      = {"harvesting"}
 harvester.crafting_speed           = 1.0
 harvester.factoriopedia_simulation = nil
+harvester.collision_box            = {{-2.4, -2.4}, {2.4, 2.4}}
+harvester.selection_box            = {{-2.5, -2.5}, {2.5, 2.5}}
+harvester.next_upgrade             = nil
+harvester.icon                     = "__armor-adventure__/graphics/entity/the-harvester/the-harvester-icon.png"
+harvester.icon_size                = 64
+-- frame_count=64 and scale=0.25 are estimated from the 4000×4000 sheet (8 cols × 8 rows × 500px).
+-- Adjust if the animation looks wrong in-game.
+-- color and frozen sprites exist but are not yet wired.
+harvester.graphics_set = {
+  animation = {
+    layers = {
+      {
+        filename        = "__armor-adventure__/graphics/entity/the-harvester/the-harvester-hr-animation-1.png",
+        priority        = "high",
+        width           = 500,
+        height          = 500,
+        frame_count     = 58,
+        line_length     = 8,
+        scale           = 0.32,
+        animation_speed = 0.3,
+      },
+      {
+        filename        = "__armor-adventure__/graphics/entity/the-harvester/the-harvester-hr-shadow.png",
+        priority        = "high",
+        width           = 900,
+        height          = 700,
+        repeat_count    = 58,
+        draw_as_shadow  = true,
+        animation_speed = 0.3,
+        scale           = 0.25,
+      },
+      {
+        filename        = "__armor-adventure__/graphics/entity/the-harvester/the-harvester-emission-1.png",
+        priority        = "high",
+        width           = 500,
+        height          = 500,
+        frame_count     = 58,
+        line_length     = 8,
+        scale           = 0.32,
+        animation_speed = 0.3,
+        draw_as_glow    = true,
+        blend_mode      = "additive",
+      },
+    }
+  }
+}
 data:extend({harvester})
 
 -- Mind Control Rocket: deepcopy of vanilla rocket projectile, damage replaced with
@@ -106,13 +152,91 @@ data:extend({massive_lc})
 -- Armor Forging Station: assembling-machine-3 restricted to armor-forging category.
 -- Quality and productivity effects/modules are intentionally blocked.
 local forging_station = table.deepcopy(data.raw["assembling-machine"]["assembling-machine-3"])
-forging_station.name                     = "armor-forging-station"
-forging_station.minable                  = {mining_time = 0.5, result = "armor-forging-station"}
-forging_station.crafting_categories      = {"armor-forging"}
-forging_station.allowed_effects          = {"speed", "consumption", "pollution"}
+forging_station.name                      = "armor-forging-station"
+forging_station.minable                   = {mining_time = 0.5, result = "armor-forging-station"}
+forging_station.crafting_categories       = {"armor-forging"}
+forging_station.allowed_effects           = {"speed", "consumption", "pollution"}
 forging_station.allowed_module_categories = {"speed", "efficiency"}
-forging_station.factoriopedia_simulation = nil
+forging_station.factoriopedia_simulation  = nil
+forging_station.collision_box             = {{-2.9, -2.9}, {2.9, 2.9}}
+forging_station.selection_box             = {{-3.0, -3.0}, {3.0, 3.0}}
+forging_station.fluid_boxes               = nil
+forging_station.fluid_boxes_off_when_no_fluid_recipe = nil
+forging_station.icon                      = "__armor-adventure__/graphics/entity/armor-crafting-station/base/armor-crafting-station-icon.png"
+forging_station.icon_size                 = 640
+-- frame_count=64 estimated from the 4000×3840 sheet (8 cols × 500px, 8 rows × 480px).
+-- color1 tint mask and frozen sprites exist but are not yet wired.
+forging_station.graphics_set = {
+  animation = {
+    layers = {
+      {
+        filename        = "__armor-adventure__/graphics/entity/armor-crafting-station/base/armor-crafting-station-shadow.png",
+        priority        = "high",
+        width           = 900,
+        height          = 500,
+        frame_count     = 1,
+        line_length     = 1,
+        repeat_count    = 64,
+        draw_as_shadow  = true,
+        animation_speed = 0.3,
+        scale           = 0.5,
+        shift           = {0, -1},
+      },
+      {
+        filename        = "__armor-adventure__/graphics/entity/armor-crafting-station/base/armor-crafting-station-animation.png",
+        priority        = "high",
+        width           = 400,
+        height          = 480,
+        frame_count     = 64,
+        line_length     = 10,
+        animation_speed = 0.3,
+        scale           = 0.5,
+        shift           = {0, -1},
+      },
+      {
+        filename        = "__armor-adventure__/graphics/entity/armor-crafting-station/base/armor-crafting-station-emission1.png",
+        priority        = "high",
+        width           = 400,
+        height          = 480,
+        frame_count     = 64,
+        line_length     = 10,
+        animation_speed = 0.3,
+        scale           = 0.5,
+        shift           = {0, -1},
+        draw_as_glow    = true,
+        blend_mode      = "additive",
+      },
+      {
+        filename        = "__armor-adventure__/graphics/entity/armor-crafting-station/base/armor-crafting-station-emission2.png",
+        priority        = "high",
+        width           = 400,
+        height          = 480,
+        frame_count     = 64,
+        line_length     = 10,
+        animation_speed = 0.3,
+        scale           = 0.5,
+        shift           = {0, -1},
+        draw_as_glow    = true,
+        blend_mode      = "additive",
+      },
+    }
+  },
+  reset_animation_when_frozen = true,
+}
 data:extend({forging_station})
+
+-- Quantum Coil: hybrid item — laser turret when placed, laser defense when equipped
+local quantum_coil_turret = table.deepcopy(data.raw["electric-turret"]["laser-turret"])
+quantum_coil_turret.name    = "quantum-coil-turret"
+quantum_coil_turret.minable = {mining_time = 0.5, result = "quantum-coil"}
+data:extend({quantum_coil_turret})
+
+-- Legochest: concept-test for quality-gated recipe ingredients
+local legochest = table.deepcopy(data.raw["container"]["steel-chest"])
+legochest.name           = "legochest"
+legochest.minable        = {mining_time = 0.5, result = "legochest"}
+legochest.inventory_size = 100
+data:extend({legochest})
 
 local ts_slow = table.deepcopy(data.raw["sticker"]["tesla-turret-slow"])
 ts_slow.name                     = "time-stopper-slow"

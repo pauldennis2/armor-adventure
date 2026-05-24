@@ -17,6 +17,12 @@ local sync_personal_warp_pylon
 local activate_time_stopper
 local deactivate_time_stopper
 
+local QUALITY_GATE_ENABLED = settings.startup["armor-adventure-quality-gate"].value
+local enforce_quality_gates_all_players
+
+local QUANTUM_COIL_ITEM  = "quantum-coil"
+local QUANTUM_COIL_EQUIP = "quantum-coil-equipment"
+
 -- Tech effects apply to the whole force. When the armor is NOT worn, we apply
 -- an equal and opposite penalty per-character so the net bonus is zero.
 -- When the armor IS worn, no penalty — the player gets the full tech bonus.
@@ -109,6 +115,7 @@ script.on_configuration_changed(function(data)
     sync_player_bonuses(player)
     sync_personal_beacon(player)
   end
+  if QUALITY_GATE_ENABLED then enforce_quality_gates_all_players() end
 end)
 
 script.on_event(defines.events.on_player_created, function(event)
@@ -166,9 +173,36 @@ local UNIQUE_EQUIPMENT = {
   ["pocket-dimension-generator"]          = "pocket-dimension-generator",
   ["personal-tesla-turret"]               = "personal-tesla-turret",
   ["personal-time-stopper"]               = "personal-time-stopper",
+  [QUANTUM_COIL_EQUIP]                    = "quantum-coil",
 }
 if HAS_RABBASCA then
   UNIQUE_EQUIPMENT[PERSONAL_WARP_PYLON_EQUIP] = "personal-warp-pylon"
+end
+
+enforce_quality_gates_all_players = function()
+  for _, player in pairs(game.players) do
+    if not (player.character and player.character.valid) then goto continue end
+    local armor_inv = player.character.get_inventory(defines.inventory.character_armor)
+    if not armor_inv then goto continue end
+    local armor_stack = armor_inv[1]
+    if not (armor_stack and armor_stack.valid_for_read) then goto continue end
+    local armor_level = armor_stack.quality.level
+    local grid = armor_stack.grid
+    if not grid then goto continue end
+    local to_remove = {}
+    for _, eq in pairs(grid.equipment) do
+      if UNIQUE_EQUIPMENT[eq.name] and eq.quality.level > armor_level then
+        to_remove[#to_remove + 1] = {name = eq.name, quality = eq.quality.name, eq = eq}
+      end
+    end
+    for _, entry in ipairs(to_remove) do
+      if entry.eq.valid then
+        grid.take({equipment = entry.eq})
+        player.insert({name = entry.name, count = 1, quality = entry.quality})
+      end
+    end
+    ::continue::
+  end
 end
 
 -- Display name used in the rejection message, keyed by group.
@@ -180,6 +214,7 @@ local UNIQUE_GROUP_LABEL = {
   ["personal-tesla-turret"]       = {"item-name.personal-tesla-turret"},
   ["personal-time-stopper"]       = {"item-name.personal-time-stopper"},
   ["personal-warp-pylon"]         = {"item-name." .. PERSONAL_WARP_PYLON_EQUIP},
+  ["quantum-coil"]                = {"item-name.quantum-coil"},
 }
 
 local function find_player_for_grid(grid)
@@ -207,13 +242,29 @@ script.on_event(defines.events.on_equipment_inserted, function(event)
     end
     if count > 1 then
       local quality = event.equipment.quality
-      grid.take({equipment = event.equipment})
-      local player = find_player_for_grid(grid)
-      if player then
-        player.insert({name = eq_name, count = 1, quality = quality.name})
+      local taken   = grid.take({equipment = event.equipment})
+      local player  = find_player_for_grid(grid)
+      if player and taken then
+        player.insert({name = taken.name, count = 1, quality = quality.name})
         player.print({"armor-adventure.unique-equipment-limit", UNIQUE_GROUP_LABEL[group]})
       end
       return
+    end
+  end
+
+  -- Quality gate: custom equipment quality cannot exceed armor quality
+  if QUALITY_GATE_ENABLED and UNIQUE_EQUIPMENT[eq_name] then
+    local player = find_player_for_grid(grid)
+    if player and player.character then
+      local armor_inv = player.character.get_inventory(defines.inventory.character_armor)
+      local armor_stack = armor_inv and armor_inv[1]
+      if armor_stack and armor_stack.valid_for_read and event.equipment.quality.level > armor_stack.quality.level then
+        local quality = event.equipment.quality
+        local taken   = grid.take({equipment = event.equipment})
+        if taken then player.insert({name = taken.name, count = 1, quality = quality.name}) end
+        player.print({"armor-adventure.quality-gate-rejection", {"equipment-name." .. eq_name}})
+        return
+      end
     end
   end
 

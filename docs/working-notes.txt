@@ -4,8 +4,6 @@ incorporate power transfer
 improve mining speed?
 unique roboport with high capacity?
 
-slowing effect on nearby enemies
-
 idea: armor crafting station caps quality
 
 How do player centered effects work on space platform
@@ -22,8 +20,38 @@ Personal warp pylon***
 techs
 charged lightning gem (fulgora q)
 demolisher heart (vulcanus)
-gleba biomass*** (currently uses iron). 
+gleba biomass*** (currently uses iron)
+mind control rocket**
+Bio interface*
+Personal time stopper*
+Harvester
+armor crafting station
+charged lightning gem
+demo heart
 
-Personal beacon took damage
+add localization for gleba parts, better name
 
-Remove personal robot stash
+entity needed/preferred:
+Demo heart
+Armor crafting station - possibly smaller atom forge with different glow color
+Harvester - possibly pathogen lab, maybe with red tint
+charged lightning gem
+
+Better visual on MC for gleba quest
+
+Balancing
+
+Remove personal robot stash - still visible
+
+Briefing
+
+Create a spoiler version and no-spoilers version for each quest
+
+Any possible ideas for easily doable graphics? 
+ Some kind of explosion when the armor takes more than 20%.
+ A visual for the time stopper
+
+quests:
+    Nauvis quest - create a high pollution item, survive waves of attacks for duration
+    Aquilo - gem suggested something with heat and cold management, circuit wise. I thought about building an elevator to the core
+    Castra - kill a certain number of data collectors in a window and it spawns a big robot, kill the robot

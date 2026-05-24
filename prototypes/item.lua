@@ -27,7 +27,7 @@ data:extend({
   {
     type         = "item",
     name         = "harvester",
-    icon         = "__base__/graphics/icons/assembling-machine-1.png",
+    icon         = "__armor-adventure__/graphics/entity/the-harvester/the-harvester-icon.png",
     place_result = "harvester",
     subgroup     = "armor-adventure-machines",
     order        = "z[harvester]",
@@ -81,7 +81,8 @@ data:extend({
   {
     type         = "item",
     name         = "armor-forging-station",
-    icon         = "__base__/graphics/icons/assembling-machine-3.png",
+    icon         = "__armor-adventure__/graphics/entity/armor-crafting-station/base/armor-crafting-station-icon.png",
+    icon_size    = 640,
     place_result = "armor-forging-station",
     subgroup     = "armor-adventure-machines",
     order        = "z[armor-forging-station]",
@@ -102,6 +103,25 @@ data:extend({
     subgroup   = "armor-adventure-materials",
     order      = "z[demolisher-heart]",
     stack_size = 1,
+  },
+  {
+    type                    = "item",
+    name                    = "quantum-coil",
+    icon                    = "__base__/graphics/icons/personal-laser-defense-equipment.png",
+    place_result            = "quantum-coil-turret",
+    place_as_equipment_result = "quantum-coil-equipment",
+    subgroup                = "armor-adventure-equipment",
+    order                   = "z[quantum-coil]",
+    stack_size              = 5,
+  },
+  {
+    type         = "item",
+    name         = "legochest",
+    icon         = "__base__/graphics/icons/steel-chest.png",
+    place_result = "legochest",
+    subgroup     = "armor-adventure-machines",
+    order        = "z[legochest]",
+    stack_size   = 10,
   },
 })
 

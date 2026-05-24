@@ -53,6 +53,7 @@ data:extend({
   {
     type = "recipe",
     name = "personal-robot-stash",
+    hidden = true,
     enabled = false,
     energy_required = 10,
     ingredients = {
@@ -123,6 +124,27 @@ data:extend({
     category        = "harvesting",
     ingredients     = {{type = "item", name = "enemy-biomass", amount = 1}},
     results         = {{type = "item", name = "gleba-parts",   amount = 1}},
+  },
+  {
+    type            = "recipe",
+    name            = "quantum-coil",
+    enabled         = true,
+    energy_required = 5,
+    ingredients = {
+      {type = "item", name = "iron-plate", amount = 1},
+    },
+    results = {{type = "item", name = "quantum-coil", amount = 1}},
+  },
+  {
+    type            = "recipe",
+    name            = "legochest",
+    enabled         = true,
+    energy_required = 5,
+    ingredients = {
+      {type = "item", name = "steel-plate", amount = 10, quality = "legendary"},
+      {type = "item", name = "iron-plate",  amount = 5},
+    },
+    results = {{type = "item", name = "legochest", amount = 1}},
   },
   {
     type            = "recipe",
