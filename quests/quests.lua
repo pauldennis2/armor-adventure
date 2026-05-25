@@ -1,8 +1,10 @@
 -- Quest system dispatcher.
--- Manages all quest event registrations. on_nth_tick(59) is registered
--- dynamically based on the active player's current surface and tech state,
--- using Factorio's overwrite behavior as an intentional design: only one
--- planet quest runs at a time (multiplayer: last surface-change wins).
+-- on_nth_tick(59) is registered dynamically via M.refresh(), called whenever
+-- the relevant game state changes (surface change, research, mod load).
+--
+-- Split-party rule: if any two players are simultaneously on different quest
+-- surfaces, all quest handlers are disabled. Quests are cooperative — one
+-- planet at a time.
 
 local HAS_CASTRA = script.active_mods["castra-prime"] ~= nil
 
@@ -12,7 +14,8 @@ local castra  = HAS_CASTRA and require("quests.castra") or nil
 
 local M = {}
 
--- Returns the 59-tick handler for the given surface, or nil to deregister.
+-- Returns the 59-tick handler for a surface name, or nil if not a quest surface
+-- or the required tech has not been researched.
 local function make_handler(surface_name)
     if surface_name == "gleba" then
         local tech = game.forces["player"].technologies["armor-adventure-gleba"]
@@ -25,48 +28,40 @@ local function make_handler(surface_name)
     return nil
 end
 
--- Register or deregister the 59-tick quest handler based on this player's surface.
--- In multiplayer, the most recently surface-changed player's planet wins.
-function M.on_player_surface_changed(player)
-    if not (player and player.character and player.character.valid) then return end
-    script.on_nth_tick(59, make_handler(player.surface.name))
-end
-
--- Called from control.lua's on_research_finished.
--- Re-evaluates the 59-tick handler if the new tech unlocks a quest planet.
-local QUEST_TECH_SURFACES = {
-    ["armor-adventure-gleba"] = "gleba",
-}
-
-function M.on_research_finished(tech_name)
-    local planet = QUEST_TECH_SURFACES[tech_name]
-    if not planet then return end
+-- Scans all players and registers the correct 59-tick handler:
+--   * No players on a quest surface  → deregister (nil)
+--   * All quest-surface players on the same planet → register that planet's handler
+--   * Players on different quest surfaces → deregister (split-party rule)
+local function refresh()
+    local active_surface = nil
+    local active_handler = nil
     for _, player in pairs(game.players) do
-        if player.character and player.character.valid
-           and player.surface.name == planet then
-            script.on_nth_tick(59, make_handler(planet))
-            return
-        end
-    end
-end
-
--- Called from control.lua's on_configuration_changed.
--- Restores the correct 59-tick handler after a mod update.
-function M.init()
-    for _, player in pairs(game.players) do
-        if player.character and player.character.valid then
-            local h = make_handler(player.surface.name)
-            if h then
-                script.on_nth_tick(59, h)
+        if not (player.character and player.character.valid) then goto continue end
+        local name = player.surface.name
+        local h    = make_handler(name)
+        if h then
+            if active_surface and active_surface ~= name then
+                script.on_nth_tick(59, nil)
                 return
             end
+            active_surface = name
+            active_handler = h
         end
+        ::continue::
     end
+    script.on_nth_tick(59, active_handler)
 end
 
--- Surface change drives the 59-tick registration.
-script.on_event(defines.events.on_player_changed_surface, function(event)
-    M.on_player_surface_changed(game.players[event.player_index])
+-- Called from control.lua whenever state that affects quest activation changes:
+-- on_configuration_changed, on_research_finished, and on_player_changed_surface.
+function M.refresh()
+    refresh()
+end
+
+-- Surface change is the primary trigger; registered here since control.lua
+-- has no on_player_changed_surface handler to conflict with.
+script.on_event(defines.events.on_player_changed_surface, function(_)
+    refresh()
 end)
 
 -- MLC: drain every tick, rescan every 5s.

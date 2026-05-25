@@ -126,7 +126,7 @@ script.on_configuration_changed(function(data)
     sync_acs_crafting_bonus(player)
   end
   if QUALITY_GATE_ENABLED then enforce_quality_gates_all_players() end
-  quests.init()
+  quests.refresh()
 end)
 
 script.on_event(defines.events.on_player_created, function(event)
@@ -158,7 +158,7 @@ script.on_event(defines.events.on_research_finished, function(event)
       return
     end
   end
-  quests.on_research_finished(event.research.name)
+  quests.refresh()
 end)
 
 script.on_event(defines.events.on_player_respawned, function(event)
