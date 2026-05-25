@@ -274,3 +274,24 @@ if mods["planet-rabbasca"] then
     stack_size = 1,
   }})
 end
+
+if mods["castra-prime"] then
+  data:extend({
+    {
+      type       = "item",
+      name       = "unrefined-simulac-core",
+      icon       = "__base__/graphics/icons/tank.png",
+      subgroup   = "armor-adventure-materials",
+      order      = "z[simulac-core-a]",
+      stack_size = 1,
+    },
+    {
+      type       = "item",
+      name       = "simulac-core",
+      icon       = "__base__/graphics/icons/uranium-235.png",
+      subgroup   = "armor-adventure-materials",
+      order      = "z[simulac-core-b]",
+      stack_size = 1,
+    },
+  })
+end

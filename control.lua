@@ -8,6 +8,7 @@ local destroy_personal_beacon
 local sync_personal_beacon
 
 local HAS_RABBASCA = script.active_mods["planet-rabbasca"] ~= nil
+local HAS_CASTRA   = script.active_mods["castra-prime"]    ~= nil
 local PERSONAL_WARP_PYLON_EQUIP  = "personal-warp-pylon-equipment"
 local PERSONAL_WARP_PYLON_ENTITY = "armor-adventure-personal-warp-pylon"
 local create_personal_warp_pylon
@@ -75,6 +76,7 @@ local function init_storage()
   storage.time_stopper_active     = storage.time_stopper_active or {}
   storage.time_stopper_cooldown   = storage.time_stopper_cooldown or {}
   storage.acs_crafting_bonus      = storage.acs_crafting_bonus or {}
+  storage.simulac_awaken_meter    = storage.simulac_awaken_meter or 0
   for _, player in pairs(game.players) do
     storage.mk2_penalties[player.index]      = storage.mk2_penalties[player.index] or {}
     storage.roboport_cooldowns[player.index] = storage.roboport_cooldowns[player.index] or {}
@@ -93,6 +95,7 @@ script.on_init(function()
   storage.time_stopper_cooldown   = {}
   storage.acs_crafting_bonus      = {}
   storage.personal_warp_pylon_pos = {}
+  storage.simulac_awaken_meter    = 0
 end)
 
 script.on_configuration_changed(function(data)

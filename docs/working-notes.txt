@@ -39,6 +39,8 @@ charged lightning gem
 
 Better visual on MC for gleba quest
 
+Better looting UX - chest or container?
+
 Balancing
 
 Remove personal robot stash - still visible

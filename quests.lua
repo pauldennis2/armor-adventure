@@ -94,6 +94,8 @@ script.on_event(defines.events.on_script_trigger_effect, function(event)
     if id == "mind-control-hit" then
         local target = event.target_entity
         if not target or not target.valid then return end
+        if target.surface.name ~= "gleba" then return end  -- belt: Gleba surface only
+        if target.type ~= "unit" then return end            -- suspenders: mobile units only, not spawners/structures
         if target.force.name ~= "enemy" then return end
         target.force = "player"
         if target.commandable then
@@ -152,7 +154,6 @@ script.on_event(defines.events.on_built_entity,         on_harvester_built,   HA
 script.on_event(defines.events.on_robot_built_entity,   on_harvester_built,   HARVESTER_FILTER)
 script.on_event(defines.events.script_raised_built,     on_harvester_built,   HARVESTER_FILTER)
 
-script.on_event(defines.events.on_entity_died,          on_harvester_removed, HARVESTER_FILTER)
 script.on_event(defines.events.on_player_mined_entity,  on_harvester_removed, HARVESTER_FILTER)
 script.on_event(defines.events.on_robot_mined_entity,   on_harvester_removed, HARVESTER_FILTER)
 script.on_event(defines.events.script_raised_destroy,   on_harvester_removed, HARVESTER_FILTER)
@@ -197,7 +198,7 @@ script.on_nth_tick(60, function()
     end
 
     -- Follow pass
-    if not mc then return end
+    if mc then
     for uid, entity in pairs(mc) do
         if not entity.valid then
             mc[uid] = nil
@@ -220,6 +221,7 @@ script.on_nth_tick(60, function()
             end
         end
     end
+    end -- if mc
 
     -- Personal Fridge: add 30 ticks every 60 ticks = 50% slower spoilage while
     -- wearing mech-armor-mk2 and personal-fridge is researched.
@@ -257,7 +259,109 @@ script.on_nth_tick(60, function()
             end
         end
     end
+
+    -- SIMULAC Commander: close-range laser pulse + pursuit command refresh.
+    if HAS_CASTRA_QUEST then
+        local cmd = storage.simulac_commander
+        if cmd and cmd.valid then
+            -- Undodgeable laser pulse, 15-tile radius, 200 laser/s.
+            local nearby = cmd.surface.find_entities_filtered({
+                type     = "character",
+                position = cmd.position,
+                radius   = 15,
+            })
+            for _, char in ipairs(nearby) do
+                if char.valid and char.force.name ~= "enemy" then
+                    char.damage(200, "enemy", "laser", cmd)
+                    rendering.draw_line{
+                        color        = {r = 0.2, g = 0.9, b = 1.0, a = 0.85},
+                        width        = 4,
+                        from         = cmd.position,
+                        to           = char.position,
+                        surface      = cmd.surface,
+                        time_to_live = 20,
+                    }
+                end
+            end
+
+            -- Re-issue pursuit toward nearest player every second so it tracks movement.
+            if cmd.commandable then
+                local nearest, dist2 = nil, math.huge
+                for _, player in pairs(game.players) do
+                    if player.character and player.character.valid
+                       and player.surface == cmd.surface then
+                        local dx = player.position.x - cmd.position.x
+                        local dy = player.position.y - cmd.position.y
+                        local d  = dx*dx + dy*dy
+                        if d < dist2 then dist2 = d; nearest = player end
+                    end
+                end
+                if nearest then
+                    cmd.commandable.set_command{
+                        type        = defines.command.go_to_location,
+                        destination = nearest.position,
+                        distraction = defines.distraction.by_anything,
+                    }
+                end
+            end
+        end
+    end
 end)
+
+-- Quest: SIMULAC Commander (Castra)
+-- Killing enemy data-collector bases earns quality-scaled points (1–5).
+-- Warning fires when meter crosses SIMULAC_WARN_THRESHOLD. Spawns commander at SIMULAC_KILL_THRESHOLD.
+-- Meter drains SIMULAC_DRAIN_PER_MIN points per minute.
+
+local HAS_CASTRA_QUEST       = script.active_mods["castra-prime"] ~= nil
+local SIMULAC_KILL_THRESHOLD = 50
+local SIMULAC_WARN_THRESHOLD = 30
+local SIMULAC_DRAIN_PER_MIN  = 2
+local SIMULAC_QUALITY_POINTS = {normal=1, uncommon=2, rare=3, epic=4, legendary=5}
+local SIMULAC_COMMANDER_NAME = "simulac-commander"
+local SIMULAC_SPAWN_DIST     = 90  -- tiles; off-screen at normal zoom
+
+local function find_player_on_castra(near_position)
+    local best, best_d2 = nil, math.huge
+    for _, player in pairs(game.players) do
+        if player.character and player.character.valid
+           and player.surface.name == "castra" then
+            local dx = player.position.x - near_position.x
+            local dy = player.position.y - near_position.y
+            local d2 = dx * dx + dy * dy
+            if d2 < best_d2 then best_d2 = d2; best = player end
+        end
+    end
+    return best
+end
+
+local function spawn_simulac_commander(near_player)
+    local surface = near_player.surface
+    local angle   = math.random() * 2 * math.pi
+    local base    = {
+        x = near_player.position.x + math.cos(angle) * SIMULAC_SPAWN_DIST,
+        y = near_player.position.y + math.sin(angle) * SIMULAC_SPAWN_DIST,
+    }
+    local pos = surface.find_non_colliding_position(SIMULAC_COMMANDER_NAME, base, 20, 1)
+    if not pos then pos = base end
+
+    local commander = surface.create_entity({
+        name     = SIMULAC_COMMANDER_NAME,
+        position = pos,
+        force    = "enemy",
+    })
+    if commander and commander.valid then
+        storage.simulac_commander = commander
+        if commander.commandable then
+            commander.commandable.set_command({
+                type        = defines.command.go_to_location,
+                destination = near_player.position,
+                distraction = defines.distraction.by_anything,
+            })
+        end
+    end
+    game.forces["player"].print({"armor-adventure.simulac-commander-spawned"})
+end
 
 -- Quest: Demolisher Hunt
 -- Drops a Demolisher Heart at the kill site when a big-demolisher dies
@@ -265,20 +369,103 @@ end)
 
 local HEART_DROP_RANGE = 50
 
+-- Consolidated on_entity_died handler.
+-- Factorio allows only one on_entity_died registration per mod; all cases dispatch here.
+local entity_died_filter = {
+    {filter = "name", name = "harvester"},
+    {filter = "name", name = "big-demolisher"},
+}
+if HAS_CASTRA_QUEST then
+    table.insert(entity_died_filter, {filter = "name", name = "data-collector"})
+    table.insert(entity_died_filter, {filter = "name", name = SIMULAC_COMMANDER_NAME})
+end
+
 script.on_event(defines.events.on_entity_died, function(event)
-    local surface  = event.entity.surface
-    local position = event.entity.position
+    local ent  = event.entity
+    local name = ent.name
 
-    local nearby = surface.find_entities_filtered({
-        type     = "character",
-        position = position,
-        radius   = HEART_DROP_RANGE,
-    })
-    if #nearby == 0 then return end
+    if name == "harvester" then
+        on_harvester_removed(event)
 
-    surface.spill_item_stack{
-        position     = position,
-        stack        = {name = "demolisher-heart", count = 1},
-        enable_looted = true,
-    }
-end, {{filter = "name", name = "big-demolisher"}})
+    elseif HAS_CASTRA_QUEST and name == "data-collector" then
+        if ent.surface.name ~= "castra" then return end
+        if ent.force.name  ~= "enemy"   then return end
+        -- Only credit kills made by a player character physically on Castra.
+        local cause = event.cause
+        if not (cause and cause.valid and cause.type == "character") then return end
+        if cause.surface.name ~= "castra" then return end
+        local quality   = ent.quality and ent.quality.name or "normal"
+        local pts       = SIMULAC_QUALITY_POINTS[quality] or 1
+        local old_meter = storage.simulac_awaken_meter or 0
+        local new_meter = old_meter + pts
+        storage.simulac_awaken_meter = new_meter
+        game.forces["player"].print(
+            "Killed a " .. quality .. " base, +" .. pts .. " castra points, you now have " .. new_meter)
+        if old_meter < SIMULAC_WARN_THRESHOLD and new_meter >= SIMULAC_WARN_THRESHOLD then
+            game.forces["player"].print({"armor-adventure.simulac-warning"})
+        end
+        if new_meter >= SIMULAC_KILL_THRESHOLD then
+            storage.simulac_awaken_meter = 0
+            game.forces["player"].print("Castra meter reset to 0 (commander spawned).")
+            local trigger_player = nil
+            if event.cause and event.cause.valid and event.cause.type == "character" then
+                trigger_player = event.cause.player
+            end
+            if not trigger_player then
+                trigger_player = find_player_on_castra(ent.position)
+            end
+            if trigger_player then
+                spawn_simulac_commander(trigger_player)
+            end
+        end
+
+    elseif HAS_CASTRA_QUEST and name == SIMULAC_COMMANDER_NAME then
+        storage.simulac_commander = nil
+        local surf      = ent.surface
+        local pos       = ent.position
+        local place_pos = surf.find_non_colliding_position("steel-chest", pos, 5, 0.5) or pos
+        local chest     = surf.create_entity({name = "steel-chest", position = place_pos, force = "neutral"})
+        if chest and chest.valid then
+            chest.get_inventory(defines.inventory.chest).insert({name = "unrefined-simulac-core", count = 1})
+            rendering.draw_text{
+                text          = "★ SIMULAC Core",
+                surface       = surf,
+                target        = place_pos,
+                target_offset = {0, -2.5},
+                color         = {r = 1, g = 0.8, b = 0, a = 1},
+                scale         = 1.5,
+                alignment     = "center",
+                time_to_live  = 600,
+            }
+        else
+            surf.spill_item_stack{position = pos, stack = {name = "unrefined-simulac-core", count = 1}, enable_looted = true}
+        end
+
+    elseif name == "big-demolisher" then
+        local surface  = ent.surface
+        local position = ent.position
+        local nearby   = surface.find_entities_filtered({
+            type     = "character",
+            position = position,
+            radius   = HEART_DROP_RANGE,
+        })
+        if #nearby == 0 then return end
+        surface.spill_item_stack{
+            position      = position,
+            stack         = {name = "demolisher-heart", count = 1},
+            enable_looted = true,
+        }
+    end
+end, entity_died_filter)
+
+-- Drain the Castra meter by SIMULAC_DRAIN_PER_MIN every minute.
+if HAS_CASTRA_QUEST then
+    script.on_nth_tick(3600, function()
+        local meter = storage.simulac_awaken_meter or 0
+        if meter <= 0 then return end
+        local drained = math.min(meter, SIMULAC_DRAIN_PER_MIN)
+        storage.simulac_awaken_meter = meter - drained
+        game.forces["player"].print(
+            "Castra meter drain: -" .. drained .. " points, now at " .. storage.simulac_awaken_meter)
+    end)
+end

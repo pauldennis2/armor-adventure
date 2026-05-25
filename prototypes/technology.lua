@@ -374,6 +374,7 @@ if mods["castra-prime"] then
         {type = "unlock-recipe", recipe = "personal-combat-roboport"},
         {type = "unlock-recipe", recipe = "personal-combat-roboport-distractor"},
         {type = "unlock-recipe", recipe = "personal-combat-roboport-destroyer"},
+        {type = "unlock-recipe", recipe = "simulac-core"},
       },
     },
   })

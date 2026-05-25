@@ -252,6 +252,34 @@ data:extend({
   },
 })
 
+if mods["castra-prime"] then
+  for _, recipe_name in ipairs({
+    "personal-combat-roboport",
+    "personal-combat-roboport-distractor",
+    "personal-combat-roboport-destroyer",
+  }) do
+    local r = data.raw["recipe"][recipe_name]
+    if r then
+      table.insert(r.ingredients, {type = "item", name = "simulac-core", amount = 1})
+    end
+  end
+
+  data:extend({{
+    type            = "recipe",
+    name            = "simulac-core",
+    enabled         = false,
+    energy_required = 30,
+    category        = "armor-forging",
+    ingredients = {
+      {type = "item", name = "unrefined-simulac-core", amount = 1},
+      {type = "item", name = "nickel-plate",           amount = 100},
+      {type = "item", name = "gunpowder",              amount = 50},
+      {type = "item", name = "uranium-235",            amount = 10},
+    },
+    results = {{type = "item", name = "simulac-core", amount = 1}},
+  }})
+end
+
 if mods["planet-rabbasca"] then
   data:extend({{
     type            = "recipe",

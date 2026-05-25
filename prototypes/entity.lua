@@ -245,6 +245,97 @@ ts_slow.target_movement_modifier = 0.1
 ts_slow.vehicle_speed_modifier   = 0.1
 data:extend({ts_slow})
 
+-- SIMULAC Commander: a gold-tinted heavyweight version of the Castra enemy tank.
+-- Only defined when castra-prime is loaded (provides castra-enemy-tank prototype).
+if mods["castra-prime"] then
+  local SIMULAC_SCALE = 3.0
+
+  local function scale_box(box, f)
+    if box[1] then
+      return {{box[1][1] * f, box[1][2] * f}, {box[2][1] * f, box[2][2] * f}}
+    end
+    return {
+      left_top     = {x = box.left_top.x * f,     y = box.left_top.y * f},
+      right_bottom = {x = box.right_bottom.x * f, y = box.right_bottom.y * f},
+    }
+  end
+
+  -- Ballistic cannon shell (direction_only = true, no homing).
+  -- Deepcopy of vanilla cannon-projectile which is already non-tracking.
+  local simulac_shell = table.deepcopy(data.raw["projectile"]["cannon-projectile"])
+  simulac_shell.name           = "simulac-commander-shell"
+  simulac_shell.starting_speed = 0.35
+  simulac_shell.animation.scale = 4.0   -- visually larger shell
+  simulac_shell.action = {
+    type = "direct",
+    action_delivery = {
+      type = "instant",
+      target_effects = {
+        {type = "create-entity", entity_name = "big-explosion"},
+        {type = "damage", damage = {amount = 2000, type = "explosion"}},
+      },
+    },
+  }
+  data:extend({simulac_shell})
+
+  local commander = table.deepcopy(data.raw["unit"]["castra-enemy-tank"])
+  commander.name            = "simulac-commander"
+  commander.max_health      = 200000
+  -- ~25 km/h; character run speed is 0.15, so this is slightly below sprint pace for a huge tank
+  commander.movement_speed  = 0.12
+  commander.healing_per_tick = 400 / 60
+
+  commander.resistances = {
+    {type = "electric",  decrease = 20,  percent = 75},
+    {type = "explosion", decrease = 50,  percent = 50},
+    {type = "laser",     decrease = 100, percent = 85},
+    {type = "physical",  decrease = 25,  percent = 60},
+    {type = "poison",                    percent = 99},
+    {type = "fire",      decrease = 25,  percent = 85},
+  }
+
+  -- Scale the vertical drawing budget so the engine doesn't cull the top of the 3× sprite.
+  if commander.drawing_box_vertical_extension then
+    commander.drawing_box_vertical_extension = commander.drawing_box_vertical_extension * SIMULAC_SCALE
+  end
+
+  local gold = {r = 1, g = 0.8, b = 0, a = 1}
+  if commander.run_animation then
+    commander.run_animation.tint = gold
+    scale_graphics(commander.run_animation, SIMULAC_SCALE)
+  end
+
+  -- Main cannon: traveling projectile (dodgeable), range 52, 2 rounds/s.
+  -- The shell physically flies through the air; a moving player can outrun it.
+  commander.attack_parameters = {
+    type               = "projectile",
+    range              = 52,
+    cooldown           = 30,
+    cooldown_deviation = 0.0,
+    ammo_category      = "cannon-shell",
+    ammo_type = {
+      target_type = "entity",
+      action = {
+        type = "direct",
+        action_delivery = {
+          type           = "projectile",
+          projectile     = "simulac-commander-shell",
+          starting_speed = 0.35,
+        },
+      },
+    },
+    animation  = commander.run_animation,
+    range_mode = "bounding-box-to-bounding-box",
+  }
+
+  commander.collision_box = scale_box(commander.collision_box, SIMULAC_SCALE)
+  -- Selection box is hardcoded: the vanilla tank's box (~0.9×1.3) scaled 3× is still tiny
+  -- relative to the enlarged sprite, so we set it explicitly to match the visual footprint.
+  commander.selection_box = {{-4, -4}, {4, 4}}
+
+  data:extend({commander})
+end
+
 local char_anims = data.raw.character.character.animations
 for _, entry in ipairs(char_anims) do
   if entry.armors then
