@@ -99,7 +99,7 @@ function gleba.unregister_harvester(entity)
     if storage.harvester_hp then storage.harvester_hp[uid] = nil end
 end
 
-function gleba.on_tick_60()
+function gleba.on_tick_59()
     local mc = storage.mind_controlled
 
     -- Harvest pass: consume nearby mind-controlled units.

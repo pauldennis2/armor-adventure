@@ -54,7 +54,7 @@ local function spawn_commander(near_player)
     game.forces["player"].print({"armor-adventure.simulac-commander-spawned"})
 end
 
-function castra.on_tick_60()
+function castra.on_tick_59()
     local cmd = storage.simulac_commander
     if not cmd or not cmd.valid then return end
 

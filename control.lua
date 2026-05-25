@@ -126,6 +126,7 @@ script.on_configuration_changed(function(data)
     sync_acs_crafting_bonus(player)
   end
   if QUALITY_GATE_ENABLED then enforce_quality_gates_all_players() end
+  quests.init()
 end)
 
 script.on_event(defines.events.on_player_created, function(event)
@@ -157,6 +158,7 @@ script.on_event(defines.events.on_research_finished, function(event)
       return
     end
   end
+  quests.on_research_finished(event.research.name)
 end)
 
 script.on_event(defines.events.on_player_respawned, function(event)
@@ -850,10 +852,9 @@ script.on_event("time-stopper-activate", function(event)
   activate_time_stopper(game.players[event.player_index])
 end)
 
--- Every second: run all quest 60-tick logic, then handle time stopper.
+-- Every second: time stopper, personal fridge, warp pylon re-registration.
+-- Planet quest work runs on tick 59 (registered dynamically by quests.lua).
 script.on_nth_tick(60, function()
-  quests.on_tick_60()
-
   local tick = game.tick
   for _, player in pairs(game.players) do
     if not storage.time_stopper_active[player.index] then goto continue end
@@ -863,5 +864,42 @@ script.on_nth_tick(60, function()
       apply_time_stopper_slow(player)
     end
     ::continue::
+  end
+
+  -- Personal Fridge: extend spoil_tick by 30 every 60 ticks = 50% slower spoilage.
+  for _, player in pairs(game.players) do
+    if player.character
+       and player.force.technologies["personal-fridge"].researched
+    then
+      local armor_inv = player.get_inventory(defines.inventory.character_armor)
+      local armor = armor_inv and armor_inv[1]
+      if armor and armor.valid_for_read and armor.name == ARMOR_NAME then
+        local inv = player.get_main_inventory()
+        if inv then
+          for i = 1, #inv do
+            local stack = inv[i]
+            if stack.valid_for_read and stack.spoil_tick > 0 then
+              stack.spoil_tick = stack.spoil_tick + 30
+            end
+          end
+        end
+      end
+    end
+  end
+
+  -- Warp pylon: re-register with Rabbasca when the pylon has moved > 20 tiles.
+  if remote.interfaces["rabbasca_warp_pylons"] and storage.personal_warp_pylons then
+    for _, player in pairs(game.players) do
+      local pylon = storage.personal_warp_pylons[player.index]
+      if pylon and pylon.valid then
+        local last = storage.personal_warp_pylon_pos and storage.personal_warp_pylon_pos[player.index]
+        local pp = pylon.position
+        if not last or (pp.x - last.x)^2 + (pp.y - last.y)^2 > 400 then
+          remote.call("rabbasca_warp_pylons", "unregister_pylon", pylon.unit_number)
+          remote.call("rabbasca_warp_pylons", "register_pylon",   pylon)
+          storage.personal_warp_pylon_pos[player.index] = {x = pp.x, y = pp.y}
+        end
+      end
+    end
   end
 end)
