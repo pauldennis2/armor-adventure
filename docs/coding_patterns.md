@@ -59,6 +59,7 @@ Current ownership:
 | Handler | Owner |
 |---|---|
 | `on_nth_tick(1)` | `quests.lua` (MLC drain) |
+| `on_nth_tick(20)` | `quests.lua` (Castra laser attack) |
 | `on_nth_tick(30)` | `control.lua` (combat roboport) |
 | `on_nth_tick(59)` | `quests.lua` (dynamic — planet quest) |
 | `on_nth_tick(60)` | `control.lua` (time stopper, fridge, warp pylon) |

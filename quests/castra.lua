@@ -54,29 +54,34 @@ local function spawn_commander(near_player)
     game.forces["player"].print({"armor-adventure.simulac-commander-spawned"})
 end
 
-function castra.on_tick_59()
+-- Laser attack: called every 20 ticks (~3x/sec) for responsive acquisition.
+function castra.on_tick_laser()
     local cmd = storage.simulac_commander
     if not cmd or not cmd.valid then return end
 
-    -- Undodgeable laser pulse: damages any non-enemy character within 15 tiles.
     local nearby = cmd.surface.find_entities_filtered({
         type     = "character",
         position = cmd.position,
-        radius   = 15,
+        radius   = 22,
     })
     for _, char in ipairs(nearby) do
         if char.valid and char.force.name ~= "enemy" then
             char.damage(200, "enemy", "laser", cmd)
-            rendering.draw_line{
-                color        = {r = 0.2, g = 0.9, b = 1.0, a = 0.85},
-                width        = 4,
-                from         = cmd.position,
-                to           = char.position,
-                surface      = cmd.surface,
-                time_to_live = 20,
-            }
+            cmd.surface.create_entity({
+                name     = "laser-beam",
+                position = cmd.position,
+                source   = cmd,
+                target   = char,
+                duration = 25,
+                force    = "enemy",
+            })
         end
     end
+end
+
+function castra.on_tick_59()
+    local cmd = storage.simulac_commander
+    if not cmd or not cmd.valid then return end
 
     -- Refresh pursuit toward nearest player on same surface.
     if cmd.commandable then

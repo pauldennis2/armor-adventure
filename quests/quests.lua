@@ -28,6 +28,17 @@ local function make_handler(surface_name)
     return nil
 end
 
+-- Re-registers tick 59 from storage alone (no game access) — safe for on_load.
+local function make_handler_from_storage()
+    local surface = storage.active_quest_surface
+    if surface == "gleba" then
+        return function() gleba.on_tick_59() end
+    elseif surface == "castra" and castra then
+        return function() castra.on_tick_59() end
+    end
+    return nil
+end
+
 -- Scans all players and registers the correct 59-tick handler:
 --   * No players on a quest surface  → deregister (nil)
 --   * All quest-surface players on the same planet → register that planet's handler
@@ -41,6 +52,7 @@ local function refresh()
         local h    = make_handler(name)
         if h then
             if active_surface and active_surface ~= name then
+                storage.active_quest_surface = nil
                 script.on_nth_tick(59, nil)
                 return
             end
@@ -49,6 +61,7 @@ local function refresh()
         end
         ::continue::
     end
+    storage.active_quest_surface = active_surface
     script.on_nth_tick(59, active_handler)
 end
 
@@ -57,6 +70,11 @@ end
 function M.refresh()
     refresh()
 end
+
+-- Re-register tick 59 on every game load (game is nil here; use storage only).
+script.on_load(function()
+    script.on_nth_tick(59, make_handler_from_storage())
+end)
 
 -- Surface change is the primary trigger; registered here since control.lua
 -- has no on_player_changed_surface handler to conflict with.
@@ -68,8 +86,9 @@ end)
 script.on_nth_tick(1,   function() fulgora.on_tick_1() end)
 script.on_nth_tick(300, function() fulgora.on_tick_300() end)
 
--- Castra meter drain: once per minute.
+-- Castra: laser attack (fast) + meter drain (once per minute).
 if castra then
+    script.on_nth_tick(20,   function() castra.on_tick_laser() end)
     script.on_nth_tick(3600, function() castra.on_tick_3600() end)
 end
 
