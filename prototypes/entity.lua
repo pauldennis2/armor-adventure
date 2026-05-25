@@ -434,6 +434,21 @@ pd_chest.flags          = {"not-blueprintable", "not-deconstructable"}
 pd_chest.inventory_size = 40
 data:extend({pd_chest})
 
+data:extend({
+  {
+    type          = "surface-property",
+    name          = "pocket-magnitude",
+    default_value = 0,
+  },
+  {
+    -- Default 1 so normal surfaces satisfy roboport surface_conditions without explicit override.
+    -- Pocket dim surfaces are set to 0 until the pocket-dimension-roboport tech is researched.
+    type          = "surface-property",
+    name          = "pocket-construction-access",
+    default_value = 1,
+  },
+})
+
 local char_anims = data.raw.character.character.animations
 for _, entry in ipairs(char_anims) do
   if entry.armors then

@@ -189,6 +189,12 @@ script.on_event(defines.events.on_research_finished, function(event)
   if HAS_CASTRA and event.research.name == "core-hunt" then
     sync_pcr_visibility(event.research.force)
   end
+  if event.research.name == "pocket-dimension-roboport" then
+    for _, p in pairs(event.research.force.players) do
+      local surf = game.surfaces["pocket-dimension-" .. p.index]
+      if surf then surf.set_property("pocket-construction-access", 1) end
+    end
+  end
   for _, bonus in pairs(ARMOR_BONUSES) do
     if event.research.name == bonus.tech then
       for _, player in pairs(event.research.force.players) do
@@ -720,7 +726,7 @@ local function setup_pocket_surface(surface)
   surface.set_tiles(tiles)
 
   -- Four quality-tiered storage chests in a square, ±10 tiles from centre.
-  -- No other containers are permitted (enforced in on_built_entity).
+  -- No other containers are permitted (enforced via surface_conditions on pocket-magnitude).
   for _, tier in ipairs(PD_CHEST_TIERS) do
     surface.create_entity({name = PD_CHEST, position = tier.pos, quality = tier.quality, force = "player"})
   end
@@ -772,6 +778,9 @@ local function get_or_create_pocket_surface(player)
       end
     end
   end
+  surface.set_property("pocket-magnitude", 1)
+  local pd_roboport_tech = player.force.technologies["pocket-dimension-roboport"]
+  surface.set_property("pocket-construction-access", (pd_roboport_tech and pd_roboport_tech.researched) and 1 or 0)
   return surface
 end
 
@@ -834,28 +843,6 @@ script.on_event(defines.events.on_lua_shortcut, function(event)
     activate_time_stopper(game.players[event.player_index])
   end
 end)
-
--- Block players and robots from placing any container in the pocket dimension
--- other than the 4 fixed chests already spawned by setup_pocket_surface.
-local CONTAINER_FILTER = {
-  {filter = "type", type = "container"},
-  {filter = "type", type = "logistic-container"},
-}
-script.on_event(defines.events.on_built_entity, function(event)
-  local entity = event.entity
-  if entity.name == PD_CHEST or not is_pocket_dim_surface(entity.surface) then return end
-  local player = game.players[event.player_index]
-  if player then player.insert({name = entity.name, count = 1, quality = entity.quality.name}) end
-  entity.destroy()
-  if player then player.print({"armor-adventure.pocket-dimension-no-containers"}) end
-end, CONTAINER_FILTER)
-
-script.on_event(defines.events.on_robot_built_entity, function(event)
-  local entity = event.entity
-  if entity.name == PD_CHEST or not is_pocket_dim_surface(entity.surface) then return end
-  entity.surface.spill_item_stack(entity.position, {name = entity.name, count = 1, quality = entity.quality.name}, true)
-  entity.destroy()
-end, CONTAINER_FILTER)
 
 -- Block access to tiered pocket chests whose quality exceeds the player's PDG quality.
 script.on_event(defines.events.on_gui_opened, function(event)

@@ -133,6 +133,21 @@ data:extend({
 data:extend({
   {
     type = "technology",
+    name = "pocket-dimension-roboport",
+    icon = "__base__/graphics/technology/construction-robotics.png",
+    icon_size = 256,
+    prerequisites = {"pocket-dimension"},
+    unit = {
+      count = 10,
+      ingredients = {{"logistic-science-pack", 1}},
+      time = 60,
+    },
+  },
+})
+
+data:extend({
+  {
+    type = "technology",
     name = "personal-tesla-turret",
     icon = "__base__/graphics/technology/personal-laser-defense-equipment.png",
     icon_size = 256,

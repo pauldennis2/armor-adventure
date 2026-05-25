@@ -69,6 +69,22 @@ for _, suffix in ipairs({"", "-uncommon", "-rare", "-epic", "-legendary"}) do
   if pb then pb.next_upgrade = nil end
 end
 
+-- Pocket dimension: disallow containers and solar panels on any surface with pocket-magnitude > 0.
+-- Uses the native surface_conditions system so placement is blocked before it happens.
+local pocket_condition = {property = "pocket-magnitude", max = 0}
+for _, type_name in ipairs({"container", "logistic-container", "solar-panel"}) do
+  for _, proto in pairs(data.raw[type_name] or {}) do
+    proto.surface_conditions = proto.surface_conditions or {}
+    proto.surface_conditions[#proto.surface_conditions + 1] = pocket_condition
+  end
+end
+
+local roboport_condition = {property = "pocket-construction-access", min = 1}
+for _, proto in pairs(data.raw["roboport"] or {}) do
+  proto.surface_conditions = proto.surface_conditions or {}
+  proto.surface_conditions[#proto.surface_conditions + 1] = roboport_condition
+end
+
 -- Personal Warp Pylon: invisible assembling-machine deepcopy of rabbasca-warp-pylon.
 -- Must be a crafting machine so Rabbasca's warp dispatch cycle (awake → trigger item → attempt_build_ghost) works.
 -- Graphics stripped via empty graphics_set so nothing is rendered.
