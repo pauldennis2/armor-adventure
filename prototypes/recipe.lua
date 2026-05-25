@@ -1,19 +1,11 @@
 data:extend({
   {type = "recipe-category", name = "harvesting"},
   {type = "recipe-category", name = "armor-forging"},
+  {type = "recipe-category", name = "aquilo-elevator-construction"},
+  {type = "recipe-category", name = "aquilo-elevator-dummy"},
 })
 
 data:extend({
-  {
-    type            = "recipe",
-    name            = "aquilo-prom-suit-component",
-    enabled         = false,
-    energy_required = 5,
-    ingredients = {
-      {type = "item", name = "steel-plate", amount = 2},
-    },
-    results = {{type = "item", name = "aquilo-prom-suit-component", amount = 1}},
-  },
   {
     type            = "recipe",
     name            = "mech-armor-mk2",
@@ -306,4 +298,41 @@ data:extend({{
     {type = "item", name = "grenade",            amount = 5},
   },
   results = {{type = "item", name = "pheromone-emitter", amount = 1}},
+}})
+
+-- Aquilo elevator shaft construction machine (item recipe, unlocked by aquilo-scanning-complete).
+data:extend({{
+  type            = "recipe",
+  name            = "aquilo-elevator-shaft",
+  enabled         = false,
+  energy_required = 10,
+  ingredients = {
+    {type = "item", name = "assembling-machine-3", amount = 1},
+    {type = "item", name = "concrete",             amount = 50},
+    {type = "item", name = "steel-plate",          amount = 50},
+    {type = "item", name = "tungsten-plate",       amount = 20},
+  },
+  results = {{type = "item", name = "aquilo-elevator-shaft", amount = 1}},
+}})
+
+-- One excavation cycle for the elevator shaft machine.
+-- ignored_by_productivity on both outputs: productivity modules speed up cycle
+-- count but never produce extra stone or iron ore per cycle.
+data:extend({{
+  type            = "recipe",
+  name            = "aquilo-elevator-dig",
+  icon            = "__base__/graphics/icons/concrete.png",
+  icon_size       = 64,
+  category        = "aquilo-elevator-construction",
+  enabled         = true,
+  energy_required = 30,
+  ingredients = {
+    {type = "item", name = "concrete",    amount = 50},
+    {type = "item", name = "steel-plate", amount = 25},
+  },
+  results = {
+    {type = "item", name = "stone",    amount = 100, ignored_by_productivity = 100},
+    {type = "item", name = "iron-ore", amount = 5,   ignored_by_productivity = 5},
+  },
+  allow_productivity = true,
 }})

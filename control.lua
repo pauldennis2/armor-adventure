@@ -1,4 +1,5 @@
-local quests = require("quests.quests")
+local quests       = require("quests.quests")
+local aquilo_quest = require("quests.aquilo")
 
 local ARMOR_NAME = "mech-armor-mk2"
 
@@ -73,6 +74,8 @@ local function init_storage()
   storage.roboport_cooldowns      = storage.roboport_cooldowns or {}
   storage.personal_beacons        = storage.personal_beacons or {}
   storage.pocket_dim_return       = storage.pocket_dim_return or {}
+  storage.aquilo_depot_return     = storage.aquilo_depot_return or {}
+  storage.aquilo_depot            = storage.aquilo_depot or {solved = {false, false, false, false}}
   storage.personal_warp_pylons    = storage.personal_warp_pylons or {}
   storage.personal_warp_pylon_pos = storage.personal_warp_pylon_pos or {}
   storage.time_stopper_active     = storage.time_stopper_active or {}
@@ -94,6 +97,8 @@ script.on_init(function()
   storage.roboport_cooldowns      = {}
   storage.personal_beacons        = {}
   storage.pocket_dim_return       = {}
+  storage.aquilo_depot_return     = {}
+  storage.aquilo_depot            = {solved = {false, false, false, false}}
   storage.personal_warp_pylons    = {}
   storage.time_stopper_active     = {}
   storage.time_stopper_cooldown   = {}
@@ -163,6 +168,10 @@ script.on_configuration_changed(function(data)
     if storage.time_stopper_active[player.index] then
       storage.time_stopper_render[player.index] = draw_time_stopper_aura(player)
     end
+  end
+  -- Migrate puzzle state and initial signals for existing depot surfaces.
+  if game.surfaces["aquilo-fulgoran-depot"] then
+    aquilo_quest.migrate_depot_puzzles()
   end
   quests.refresh()
 end)
@@ -957,15 +966,104 @@ script.on_event(defines.events.on_lua_shortcut, function(event)
   end
 end)
 
+-- ─── Elevator / depot GUI helpers ────────────────────────────────────────────
+
+local function open_elevator_gui(player)
+  if player.gui.screen["aquilo-elevator-gui"] then return end
+  local frame = player.gui.screen.add{
+    type      = "frame",
+    name      = "aquilo-elevator-gui",
+    caption   = {"armor-adventure.elevator-gui-title"},
+    direction = "vertical",
+  }
+  frame.auto_center = true
+  frame.add{
+    type    = "button",
+    name    = "aquilo-elevator-descend",
+    caption = {"armor-adventure.elevator-descend"},
+    style   = "confirm_button",
+  }
+  player.opened = frame
+end
+
+local function close_elevator_gui(player)
+  local frame = player.gui.screen["aquilo-elevator-gui"]
+  if frame and frame.valid then frame.destroy() end
+end
+
+local function open_depot_gui(player)
+  if player.gui.screen["aquilo-depot-gui"] then return end
+  local frame = player.gui.screen.add{
+    type      = "frame",
+    name      = "aquilo-depot-gui",
+    caption   = {"armor-adventure.depot-gui-title"},
+    direction = "vertical",
+  }
+  frame.auto_center = true
+  frame.add{
+    type    = "button",
+    name    = "aquilo-depot-ascend",
+    caption = {"armor-adventure.depot-ascend"},
+    style   = "confirm_button",
+  }
+  player.opened = frame
+end
+
+local function close_depot_gui(player)
+  local frame = player.gui.screen["aquilo-depot-gui"]
+  if frame and frame.valid then frame.destroy() end
+end
+
+-- ─────────────────────────────────────────────────────────────────────────────
+
 -- Block access to tiered pocket chests whose quality exceeds the player's PDG quality.
+-- Also intercepts the elevator and depot ascent entities to show custom GUIs.
 script.on_event(defines.events.on_gui_opened, function(event)
   if event.gui_type ~= defines.gui_type.entity then return end
   local entity = event.entity
-  if not entity or entity.name ~= PD_CHEST then return end
+  if not entity then return end
   local player = game.players[event.player_index]
-  if get_pdg_quality_level(player) < entity.quality.level then
+
+  if entity.name == PD_CHEST then
+    if get_pdg_quality_level(player) < entity.quality.level then
+      player.opened = nil
+      player.print({"armor-adventure.pocket-dimension-chest-locked"})
+    end
+  elseif entity.name == "aquilo-elevator-complete" then
     player.opened = nil
-    player.print({"armor-adventure.pocket-dimension-chest-locked"})
+    open_elevator_gui(player)
+  elseif entity.name == "aquilo-depot-ascent" then
+    player.opened = nil
+    open_depot_gui(player)
+  end
+end)
+
+script.on_event(defines.events.on_gui_click, function(event)
+  local player = game.players[event.player_index]
+  local name   = event.element.name
+  if name == "aquilo-elevator-descend" then
+    close_elevator_gui(player)
+    aquilo_quest.descend_to_depot(player)
+  elseif name == "aquilo-depot-ascend" then
+    close_depot_gui(player)
+    aquilo_quest.ascend_from_depot(player)
+  end
+end)
+
+script.on_event(defines.events.on_gui_closed, function(event)
+  if event.element then
+    local n = event.element.name
+    if n == "aquilo-elevator-gui" or n == "aquilo-depot-gui" then
+      if event.element.valid then event.element.destroy() end
+    end
+    return
+  end
+  if event.gui_type == defines.gui_type.entity and event.entity then
+    local ent = event.entity
+    if ent.valid and ent.name == "constant-combinator"
+       and ent.surface.name == "aquilo-fulgoran-depot" then
+      aquilo_quest.check_combinator_puzzle(ent)
+    end
   end
 end)
 
@@ -1010,6 +1108,9 @@ end)
 script.on_event(defines.events.on_player_changed_surface, function(event)
   local player = game.players[event.player_index]
   storage.spark_last_pos[player.index] = nil
+  if player.surface.name == "aquilo-fulgoran-depot" then
+    aquilo_quest.rebuild_depot_renders()
+  end
   if not (storage.time_stopper_active and storage.time_stopper_active[player.index]) then return end
   local render = storage.time_stopper_render and storage.time_stopper_render[player.index]
   if render and render.valid then render.destroy() end

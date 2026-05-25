@@ -33,6 +33,16 @@ data:extend({
     order        = "z[harvester]",
     stack_size   = 10,
   },
+  {
+    type         = "item",
+    name         = "aquilo-elevator-shaft",
+    icon         = "__base__/graphics/icons/assembling-machine-3.png",
+    icon_size    = 64,
+    place_result = "aquilo-elevator-shaft",
+    subgroup     = "armor-adventure-machines",
+    order        = "z[aquilo-elevator-shaft]",
+    stack_size   = 1,
+  },
 })
 
 data:extend({

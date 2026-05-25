@@ -8,6 +8,7 @@
 
 local HAS_CASTRA = script.active_mods["castra-prime"] ~= nil
 
+local aquilo  = require("quests.aquilo")
 local fulgora = require("quests.fulgora")
 local gleba   = require("quests.gleba")
 local nauvis  = require("quests.nauvis")
@@ -18,7 +19,20 @@ local M = {}
 -- Returns the 59-tick handler for a surface name, or nil if not a quest surface
 -- or the required tech has not been researched.
 local function make_handler(surface_name)
-    if surface_name == "nauvis" then
+    if surface_name == "aquilo" then
+        local tech = game.forces["player"].technologies["armor-adventure-aquilo"]
+        if not (tech and tech.researched) then return nil end
+        local scan_done = game.forces["player"].technologies["aquilo-scanning-complete"]
+        -- Active during scanning phase and during elevator construction phase.
+        if not (scan_done and scan_done.researched) then
+            return function() aquilo.on_tick_59() end
+        end
+        local elev = storage.aquilo_elevator
+        if elev and not elev.complete then
+            return function() aquilo.on_tick_59() end
+        end
+        return nil
+    elseif surface_name == "nauvis" then
         local tech = game.forces["player"].technologies["armor-adventure-nauvis"]
         if tech and tech.researched then
             return function() nauvis.on_tick_59() end
@@ -37,7 +51,9 @@ end
 -- Re-registers tick 59 from storage alone (no game access) — safe for on_load.
 local function make_handler_from_storage()
     local surface = storage.active_quest_surface
-    if surface == "nauvis" then
+    if surface == "aquilo" then
+        return function() aquilo.on_tick_59() end
+    elseif surface == "nauvis" then
         return function() nauvis.on_tick_59() end
     elseif surface == "gleba" then
         return function() gleba.on_tick_59() end
@@ -139,12 +155,30 @@ script.on_event(defines.events.script_raised_built,    on_emitter_built,  EMITTE
 script.on_event(defines.events.on_player_mined_entity, on_emitter_mined,  EMITTER_FILTER)
 script.on_event(defines.events.on_robot_mined_entity,  on_emitter_mined,  EMITTER_FILTER)
 
+-- Elevator shaft built/removed.
+local ELEVATOR_FILTER = {{filter = "name", name = "aquilo-elevator-shaft"}}
+local function on_elevator_built(event)
+    aquilo.register_elevator(event.entity)
+    refresh()
+end
+local function on_elevator_removed(event)
+    aquilo.unregister_elevator(event.entity)
+    refresh()
+end
+
+script.on_event(defines.events.on_built_entity,        on_elevator_built,   ELEVATOR_FILTER)
+script.on_event(defines.events.on_robot_built_entity,  on_elevator_built,   ELEVATOR_FILTER)
+script.on_event(defines.events.script_raised_built,    on_elevator_built,   ELEVATOR_FILTER)
+script.on_event(defines.events.on_player_mined_entity, on_elevator_removed, ELEVATOR_FILTER)
+script.on_event(defines.events.on_robot_mined_entity,  on_elevator_removed, ELEVATOR_FILTER)
+
 -- Entity died: dispatch to the module that owns each entity name.
 local entity_died_filter = {
     {filter = "name", name = "harvester"},
     {filter = "name", name = "big-demolisher"},
     {filter = "name", name = "pheromone-emitter"},
     {filter = "name", name = "gigantoid-spitter"},
+    {filter = "name", name = "aquilo-elevator-shaft"},
 }
 if HAS_CASTRA then
     table.insert(entity_died_filter, {filter = "name", name = "data-collector"})
@@ -158,6 +192,9 @@ script.on_event(defines.events.on_entity_died, function(event)
         gleba.on_entity_died(event)
     elseif name == "pheromone-emitter" then
         nauvis.on_emitter_destroyed(event.entity)
+    elseif name == "aquilo-elevator-shaft" then
+        aquilo.unregister_elevator(event.entity)
+        refresh()
     elseif name == "gigantoid-spitter" then
         nauvis.on_gigantoid_died(event.entity)
     elseif castra and (name == "data-collector" or name == "simulac-commander" or name == "simulac-mobile-fortress") then

@@ -424,6 +424,61 @@ if mods["castra-prime"] then
   }})
 end
 
+-- Aquilo elevator shaft: assembling-machine-3 deepcopy restricted to the
+-- aquilo-elevator-construction category so it only accepts the dig recipe.
+local elevator_shaft = table.deepcopy(data.raw["assembling-machine"]["assembling-machine-3"])
+elevator_shaft.name                = "aquilo-elevator-shaft"
+elevator_shaft.minable             = {mining_time = 0.5, result = "aquilo-elevator-shaft"}
+elevator_shaft.crafting_categories = {"aquilo-elevator-construction"}
+data:extend({elevator_shaft})
+
+-- Placeholder completed elevator (surface side) — chemical plant with no valid recipes.
+-- Intentionally terrible so it gets replaced with real art.
+local elevator_complete = table.deepcopy(data.raw["assembling-machine"]["chemical-plant"])
+elevator_complete.name                = "aquilo-elevator-complete"
+elevator_complete.minable             = nil
+elevator_complete.flags               = {"placeable-neutral", "not-blueprintable", "not-deconstructable"}
+elevator_complete.crafting_categories = {"aquilo-elevator-dummy"}
+elevator_complete.destructible        = false
+elevator_complete.energy_source       = {type = "void"}
+data:extend({elevator_complete})
+
+-- Placeholder ascent elevator (depot side) — same chemical plant hack.
+local depot_ascent = table.deepcopy(data.raw["assembling-machine"]["chemical-plant"])
+depot_ascent.name                = "aquilo-depot-ascent"
+depot_ascent.minable             = nil
+depot_ascent.flags               = {"placeable-neutral", "not-blueprintable", "not-deconstructable"}
+depot_ascent.crafting_categories = {"aquilo-elevator-dummy"}
+depot_ascent.destructible        = false
+depot_ascent.energy_source       = {type = "void"}
+data:extend({depot_ascent})
+
+-- Signal source entity spawned by script when Aquilo scanning completes.
+-- Mining it triggers the "aquilo-scanning-complete" research.
+-- collision_mask empty so it can be placed on any tile (ice, void edge, etc.).
+data:extend({{
+  type           = "simple-entity",
+  name           = "aquilo-signal-source",
+  icon           = "__base__/graphics/icons/radar.png",
+  icon_size      = 64,
+  flags          = {"placeable-neutral", "not-blueprintable", "not-deconstructable"},
+  render_layer   = "object",
+  destructible   = false,
+  collision_mask = {layers = {}},
+  minable = {
+    mining_time = 3,
+    results     = {{type = "item", name = "iron-plate", amount = 1}},
+  },
+  picture = {
+    filename = "__base__/graphics/icons/radar.png",
+    width    = 64,
+    height   = 64,
+    scale    = 3,
+  },
+  collision_box = {{-0.9, -0.9}, {0.9, 0.9}},
+  selection_box = {{-1.2, -1.2}, {1.2, 1.2}},
+}})
+
 -- Pocket dimension chest: unminable, indestructible container spawned by script
 -- into each player's pocket surface. Never craftable or placeable by the player.
 local pd_chest = table.deepcopy(data.raw["container"]["steel-chest"])

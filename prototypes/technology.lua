@@ -295,8 +295,17 @@ data:extend({
       },
       time = 60,
     },
-    effects = {
-      {type = "unlock-recipe", recipe = "aquilo-prom-suit-component"},
+    effects = {},
+  },
+  {
+    type             = "technology",
+    name             = "aquilo-scanning-complete",
+    icon             = "__base__/graphics/technology/radar.png",
+    icon_size        = 256,
+    prerequisites    = {"armor-adventure-aquilo"},
+    research_trigger = {type = "mine-entity", entity = "aquilo-signal-source"},
+    effects          = {
+      {type = "unlock-recipe", recipe = "aquilo-elevator-shaft"},
     },
   },
   {
