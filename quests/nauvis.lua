@@ -125,8 +125,14 @@ local function complete_emitter(uid, entry)
         if e.valid then e.die() end
     end
 
-    surface.spill_item_stack{position = pos, stack = {name = "nauvis-armor-piece", count = 1}, enable_looted = true}
-    game.print("[color=yellow]Pheromone Emitter fully charged! The pulse has cleared the area — collect the Nauvis Armor Piece.[/color]")
+    local spawn_pos = surface.find_non_colliding_position("gigantoid-spitter", pos, 20, 1) or pos
+    local boss = surface.create_entity({name = "gigantoid-spitter", position = spawn_pos, force = "enemy", quality = entry.quality})
+    if boss and boss.valid then
+        game.print("[color=red]The pheromone pulse has summoned a Gigantoid Spitter! Destroy it to claim the Nauvis Armor Piece.[/color]")
+    else
+        surface.spill_item_stack{position = pos, stack = {name = "nauvis-armor-piece", count = 1}, enable_looted = true}
+        game.print("[color=yellow]Pheromone Emitter fully charged — collect the Nauvis Armor Piece.[/color]")
+    end
 
     cleanup_nests(entry)
     entity.destroy()
@@ -152,6 +158,7 @@ function nauvis.register_emitter(entity, player_index)
         entity        = entity,
         ticks_charged = 0,
         nests         = nests,
+        quality       = entity.quality.name,
     }
     storage.pheromone_emitters[entity.unit_number] = entry
 
@@ -192,6 +199,30 @@ end
 -- Called every 59 ticks by quests.lua when a player is on Nauvis and
 -- armor-adventure-nauvis is researched. Zero UPS cost otherwise.
 -- Trickle spawns every 5 calls (~295 ticks ≈ 5s) via per-entry spawn_counter.
+function nauvis.on_gigantoid_died(entity)
+    local pos     = entity.position
+    local surface = entity.surface
+    local quality = entity.quality.name
+    local chest_pos = surface.find_non_colliding_position("iron-chest", pos, 5, 0.5) or pos
+    local chest = surface.create_entity({name = "iron-chest", position = chest_pos, force = "neutral"})
+    if chest and chest.valid then
+        chest.insert({name = "nauvis-armor-piece", count = 1, quality = quality})
+    else
+        surface.spill_item_stack{position = chest_pos, stack = {name = "nauvis-armor-piece", count = 1, quality = quality}, enable_looted = true}
+    end
+    rendering.draw_text{
+        text          = "★ Collect the Nauvis Armor Piece",
+        surface       = surface,
+        target        = chest_pos,
+        target_offset = {0, -2.5},
+        color         = {r = 1, g = 0.8, b = 0, a = 1},
+        scale         = 1.5,
+        alignment     = "center",
+        time_to_live  = 3600,
+    }
+    game.print("[color=yellow]The Gigantoid Spitter has fallen! Collect the Nauvis Armor Piece from the chest.[/color]")
+end
+
 function nauvis.on_tick_59()
     if not storage.pheromone_emitters or not next(storage.pheromone_emitters) then return end
     for uid, entry in pairs(storage.pheromone_emitters) do

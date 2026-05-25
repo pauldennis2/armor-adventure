@@ -543,3 +543,40 @@ do
   nest.flags = {"not-blueprintable", "not-deconstructable", "not-repairable", "not-rotatable"}
   data:extend({nest})
 end
+
+-- Gigantoid Spitter: boss summoned when the Pheromone Emitter fully charges.
+-- 5× visual scale of behemoth-spitter, 10× health and damage.
+-- Script-spawned only; no pollution attraction, no spawner list entry.
+do
+  local VISUAL_SCALE = 8
+  local STAT_SCALE   = 10
+
+  local function scale_sprites(t, factor)
+    if type(t) ~= "table" then return end
+    if type(t.scale)          == "number" then t.scale          = t.scale          * factor end
+    if type(t.multiply_shift) == "number" then t.multiply_shift = t.multiply_shift * factor end
+    for _, v in pairs(t) do
+      if type(v) == "table" then scale_sprites(v, factor) end
+    end
+  end
+
+  local function scale_box(box, f)
+    return {{box[1][1]*f, box[1][2]*f}, {box[2][1]*f, box[2][2]*f}}
+  end
+
+  local gs = table.deepcopy(data.raw["unit"]["behemoth-spitter"])
+  gs.name        = "gigantoid-spitter"
+  gs.hidden      = true
+  gs.max_health  = 150000
+  gs.collision_box = scale_box(gs.collision_box, VISUAL_SCALE)
+  gs.selection_box = scale_box(gs.selection_box, VISUAL_SCALE)
+  if gs.sticker_box then gs.sticker_box = scale_box(gs.sticker_box, VISUAL_SCALE) end
+  gs.attack_parameters.damage_modifier = gs.attack_parameters.damage_modifier * STAT_SCALE
+  scale_sprites(gs.run_animation,      VISUAL_SCALE)
+  scale_sprites(gs.attack_parameters,  VISUAL_SCALE)
+  if gs.water_reflection then scale_sprites(gs.water_reflection, VISUAL_SCALE) end
+  gs.factoriopedia_simulation   = nil
+  gs.spawning_time_modifier     = nil
+  gs.absorptions_to_join_attack = nil
+  data:extend({gs})
+end

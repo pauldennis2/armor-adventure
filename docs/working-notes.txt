@@ -76,3 +76,9 @@ quests:
     Nauvis quest - create a high pollution item, survive waves of attacks for duration
     Aquilo - gem suggested something with heat and cold management, circuit wise. I thought about building an elevator to the core
     Castra - kill a certain number of data collectors in a window and it spawns a big robot, kill the robot
+
+nauvis quest
+    change to create a humungoid spitter that eats the small guys
+    change to qual
+
+personal beacon still taking damage!

@@ -144,6 +144,7 @@ local entity_died_filter = {
     {filter = "name", name = "harvester"},
     {filter = "name", name = "big-demolisher"},
     {filter = "name", name = "pheromone-emitter"},
+    {filter = "name", name = "gigantoid-spitter"},
 }
 if HAS_CASTRA then
     table.insert(entity_died_filter, {filter = "name", name = "data-collector"})
@@ -157,6 +158,8 @@ script.on_event(defines.events.on_entity_died, function(event)
         gleba.on_entity_died(event)
     elseif name == "pheromone-emitter" then
         nauvis.on_emitter_destroyed(event.entity)
+    elseif name == "gigantoid-spitter" then
+        nauvis.on_gigantoid_died(event.entity)
     elseif castra and (name == "data-collector" or name == "simulac-commander" or name == "simulac-mobile-fortress") then
         castra.on_entity_died(event)
     end
