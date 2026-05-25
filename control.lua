@@ -1,4 +1,4 @@
-require("quests")
+local quests = require("quests.quests")
 
 local ARMOR_NAME = "mech-armor-mk2"
 
@@ -850,8 +850,10 @@ script.on_event("time-stopper-activate", function(event)
   activate_time_stopper(game.players[event.player_index])
 end)
 
--- Every second: deactivate expired effects and re-apply slow to newly entered enemies.
+-- Every second: run all quest 60-tick logic, then handle time stopper.
 script.on_nth_tick(60, function()
+  quests.on_tick_60()
+
   local tick = game.tick
   for _, player in pairs(game.players) do
     if not storage.time_stopper_active[player.index] then goto continue end
