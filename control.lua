@@ -9,6 +9,7 @@ local sync_personal_beacon
 
 local HAS_RABBASCA = script.active_mods["planet-rabbasca"] ~= nil
 local HAS_CASTRA   = script.active_mods["castra-prime"]    ~= nil
+local sync_pcr_visibility
 local PERSONAL_WARP_PYLON_EQUIP  = "personal-warp-pylon-equipment"
 local PERSONAL_WARP_PYLON_ENTITY = "armor-adventure-personal-warp-pylon"
 local create_personal_warp_pylon
@@ -96,6 +97,9 @@ script.on_init(function()
   storage.acs_crafting_bonus      = {}
   storage.personal_warp_pylon_pos = {}
   storage.simulac_awaken_meter    = 0
+  if HAS_CASTRA then
+    for _, force in pairs(game.forces) do sync_pcr_visibility(force) end
+  end
 end)
 
 script.on_configuration_changed(function(data)
@@ -126,6 +130,9 @@ script.on_configuration_changed(function(data)
     sync_acs_crafting_bonus(player)
   end
   if QUALITY_GATE_ENABLED then enforce_quality_gates_all_players() end
+  if HAS_CASTRA then
+    for _, force in pairs(game.forces) do sync_pcr_visibility(force) end
+  end
   quests.refresh()
 end)
 
@@ -149,7 +156,20 @@ script.on_event(defines.events.on_player_armor_inventory_changed, function(event
   sync_acs_crafting_bonus(player)
 end)
 
+sync_pcr_visibility = function(force)
+  local core_hunt = force.technologies["core-hunt"]
+  local pcr       = force.technologies["personal-combat-roboport"]
+  local shadow    = force.technologies["simulac-pcr-unknown"]
+  if not (core_hunt and pcr and shadow) then return end
+  local revealed = core_hunt.researched
+  pcr.enabled    = revealed
+  shadow.enabled = not revealed
+end
+
 script.on_event(defines.events.on_research_finished, function(event)
+  if HAS_CASTRA and event.research.name == "core-hunt" then
+    sync_pcr_visibility(event.research.force)
+  end
   for _, bonus in pairs(ARMOR_BONUSES) do
     if event.research.name == bonus.tech then
       for _, player in pairs(event.research.force.players) do

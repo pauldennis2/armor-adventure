@@ -250,27 +250,18 @@ function castra.on_entity_died(event)
         storage.simulac_commander = nil
         local surf      = ent.surface
         local pos       = ent.position
-        local place_pos = surf.find_non_colliding_position("steel-chest", pos, 5, 0.5) or pos
-        local chest     = surf.create_entity({name = "steel-chest", position = place_pos, force = "neutral"})
-        if chest and chest.valid then
-            chest.get_inventory(defines.inventory.chest).insert({name = "unrefined-simulac-core", count = 1})
-            rendering.draw_text{
-                text          = "★ SIMULAC Core",
-                surface       = surf,
-                target        = place_pos,
-                target_offset = {0, -2.5},
-                color         = {r = 1, g = 0.8, b = 0, a = 1},
-                scale         = 1.5,
-                alignment     = "center",
-                time_to_live  = 600,
-            }
-        else
-            surf.spill_item_stack{
-                position      = pos,
-                stack         = {name = "unrefined-simulac-core", count = 1},
-                enable_looted = true,
-            }
-        end
+        local place_pos = surf.find_non_colliding_position("simulac-core-remains", pos, 10, 0.5) or pos
+        surf.create_entity({name = "simulac-core-remains", position = place_pos, force = "neutral"})
+        rendering.draw_text{
+            text          = "★ Mine the SIMULAC Remains",
+            surface       = surf,
+            target        = place_pos,
+            target_offset = {0, -2.5},
+            color         = {r = 1, g = 0.8, b = 0, a = 1},
+            scale         = 1.5,
+            alignment     = "center",
+            time_to_live  = 600,
+        }
     end
 end
 

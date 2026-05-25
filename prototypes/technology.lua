@@ -350,11 +350,43 @@ end
 if mods["castra-prime"] then
   data:extend({
     {
+      -- Shadow tech: visible "???" placeholder in the tree occupying the same slot as PCR.
+      -- Script (sync_pcr_visibility) manages which is enabled: shadow shown before core-hunt,
+      -- real PCR shown after. The unit cost is astronomically high so it can never be
+      -- researched normally.
+      type          = "technology",
+      name          = "simulac-pcr-unknown",
+      icon          = "__base__/graphics/technology/military.png",
+      icon_size     = 256,
+      localised_name        = {"", "???"},
+      localised_description = {"", "Something awaits on Castra..."},
+      prerequisites = {"forge-promethium-armor", "core-hunt"},
+      unit = {
+        count       = 100000000,
+        ingredients = {{"promethium-science-pack", 1}},
+        time        = 60,
+      },
+      effects = {},
+    },
+    {
+      type             = "technology",
+      name             = "core-hunt",
+      icon             = "__base__/graphics/technology/uranium-ammo.png",
+      icon_size        = 256,
+      prerequisites    = {"forge-promethium-armor"},
+      research_trigger = {type = "mine-entity", entity = "simulac-core-remains"},
+      effects = {
+        {type = "unlock-recipe", recipe = "simulac-core"},
+      },
+    },
+    {
       type = "technology",
       name = "personal-combat-roboport",
       icon = "__base__/graphics/technology/personal-roboport-equipment.png",
       icon_size = 256,
-      prerequisites = {"forge-promethium-armor"},
+      enabled               = false,
+      visible_when_disabled = false,
+      prerequisites = {"forge-promethium-armor", "core-hunt"},
       unit = {
         count = 10000,
         ingredients = {
@@ -374,7 +406,6 @@ if mods["castra-prime"] then
         {type = "unlock-recipe", recipe = "personal-combat-roboport"},
         {type = "unlock-recipe", recipe = "personal-combat-roboport-distractor"},
         {type = "unlock-recipe", recipe = "personal-combat-roboport-destroyer"},
-        {type = "unlock-recipe", recipe = "simulac-core"},
       },
     },
   })

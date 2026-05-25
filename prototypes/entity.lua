@@ -398,6 +398,30 @@ if mods["castra-prime"] then
   commander.selection_box = {{-4, -4}, {4, 4}}
 
   data:extend({commander})
+
+  -- Mineable remains left by a dead SIMULAC Commander.
+  -- The mine-entity research trigger on "core-hunt" fires when a player mines this.
+  data:extend({{
+    type          = "simple-entity",
+    name          = "simulac-core-remains",
+    icon          = "__base__/graphics/icons/uranium-235.png",
+    icon_size     = 64,
+    flags         = {"placeable-neutral", "not-blueprintable", "not-deconstructable"},
+    render_layer  = "object",
+    destructible  = false,
+    minable = {
+      mining_time = 2,
+      results     = {{type = "item", name = "unrefined-simulac-core", amount = 1}},
+    },
+    picture = {
+      filename = "__base__/graphics/icons/uranium-235.png",
+      width    = 64,
+      height   = 64,
+      scale    = 3,
+    },
+    collision_box = {{-0.9, -0.9}, {0.9, 0.9}},
+    selection_box = {{-1.2, -1.2}, {1.2, 1.2}},
+  }})
 end
 
 local char_anims = data.raw.character.character.animations
