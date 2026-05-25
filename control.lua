@@ -118,6 +118,25 @@ script.on_configuration_changed(function(data)
             p.teleport({0, 0}, safe_surface)
           end
         end
+        -- Salvage items from pocket chests before wiping the surface.
+        for _, chest in pairs(surface.find_entities_filtered({name = PD_CHEST})) do
+          local inv = chest.get_inventory(defines.inventory.chest)
+          if inv then
+            for i = 1, #inv do
+              local stack = inv[i]
+              if stack.valid_for_read then
+                local inserted = player.insert({name = stack.name, count = stack.count, quality = stack.quality.name})
+                if inserted < stack.count then
+                  safe_surface.spill_item_stack(
+                    player.position,
+                    {name = stack.name, count = stack.count - inserted, quality = stack.quality.name},
+                    true
+                  )
+                end
+              end
+            end
+          end
+        end
         game.delete_surface(surface)
         storage.pocket_dim_return[player.index] = nil
       end
@@ -544,6 +563,83 @@ end
 
 local PD_HALF   = 32  -- interior half-width; playable area is 64×64 tiles
 local PDG_EQUIP = "pocket-dimension-generator"
+local PD_CHEST  = "pocket-dimension-chest"
+-- Ordered uncommon→legendary. Positions form a 20×20 square around the centre.
+local PD_CHEST_TIERS = {
+  {pos = {-10, -10}, quality = "uncommon"},
+  {pos = { 10, -10}, quality = "rare"},
+  {pos = {-10,  10}, quality = "epic"},
+  {pos = { 10,  10}, quality = "legendary"},
+}
+
+-- Maps PDG quality level to interior half-width in tiles.
+-- quality.level is 0-indexed: normal=0, uncommon=1, rare=2, epic=3, legendary=4.
+-- Normal→22×22, Uncommon→32×32, Rare→40×40, Epic→50×50, Legendary→64×64.
+local QUALITY_HALVES = {[0]=11, 16, 20, 25, 32}
+local function quality_to_half(q_level)
+  return QUALITY_HALVES[q_level] or 32
+end
+-- The four non-legendary boundary half-widths; used by apply_pocket_area to
+-- clear stale rings left by earlier entries at different quality levels.
+local ALL_BOUNDARY_HALVES = {11, 16, 20, 25}
+
+-- Update the pocket dimension's walkable area for the current PDG quality.
+-- Uses a 1-tile-thick boundary ring rather than filling the outer zone with
+-- out-of-map, so entities the player built at a higher quality level are
+-- preserved on lab-dark-2 tiles and become reachable again when quality rises.
+local function apply_pocket_area(surface, q_level)
+  local H  = PD_HALF
+  local HQ = quality_to_half(q_level)
+
+  -- Pass 1: clear all possible interior quality boundary rings back to lab-dark-2.
+  -- This removes the ring left by any previous entry at a different quality level.
+  local clear = {}
+  for _, bh in ipairs(ALL_BOUNDARY_HALVES) do
+    for x = -(bh + 1), bh do
+      clear[#clear + 1] = {name = "lab-dark-2", position = {x,       bh}}
+      clear[#clear + 1] = {name = "lab-dark-2", position = {x, -bh - 1}}
+    end
+    for y = -bh, bh - 1 do
+      clear[#clear + 1] = {name = "lab-dark-2", position = { bh,     y}}
+      clear[#clear + 1] = {name = "lab-dark-2", position = {-bh - 1, y}}
+    end
+    -- Clear tutorial-grid markers for this boundary level
+    clear[#clear + 1] = {name = "lab-dark-2", position = {-1, bh - 1}}
+    clear[#clear + 1] = {name = "lab-dark-2", position = { 0, bh - 1}}
+  end
+  -- Also clear the legendary tutorial marker (y = H-1, not in ALL_BOUNDARY_HALVES)
+  clear[#clear + 1] = {name = "lab-dark-2", position = {-1, H - 1}}
+  clear[#clear + 1] = {name = "lab-dark-2", position = { 0, H - 1}}
+  surface.set_tiles(clear)
+
+  -- Pass 2: place the current quality boundary ring and exit markers.
+  -- For legendary (HQ = H) the permanent outer walls already serve as the boundary.
+  local ring = {}
+  if HQ < H then
+    -- South row with exit gap
+    for x = -(HQ + 1), HQ do
+      ring[#ring + 1] = {name = (x == -1 or x == 0) and "lab-dark-2" or "out-of-map", position = {x, HQ}}
+    end
+    -- North row
+    for x = -(HQ + 1), HQ do
+      ring[#ring + 1] = {name = "out-of-map", position = {x, -HQ - 1}}
+    end
+    -- East column (between north/south rows)
+    for y = -HQ, HQ - 1 do
+      ring[#ring + 1] = {name = "out-of-map", position = {HQ,     y}}
+    end
+    -- West column
+    for y = -HQ, HQ - 1 do
+      ring[#ring + 1] = {name = "out-of-map", position = {-HQ - 1, y}}
+    end
+  end
+  -- Exit approach markers just inside the current boundary
+  ring[#ring + 1] = {name = "tutorial-grid", position = {-1, HQ - 1}}
+  ring[#ring + 1] = {name = "tutorial-grid", position = { 0, HQ - 1}}
+  surface.set_tiles(ring)
+
+  return HQ
+end
 
 local function has_pocket_generator(player)
   local armor_inv = player.get_inventory(defines.inventory.character_armor)
@@ -558,12 +654,29 @@ local function has_pocket_generator(player)
   return false
 end
 
+local function get_pdg_quality_level(player)
+  local armor_inv = player.get_inventory(defines.inventory.character_armor)
+  if not armor_inv then return 0 end
+  local armor = armor_inv[1]
+  if not armor or not armor.valid_for_read then return 0 end
+  local grid = armor.grid
+  if not grid then return 0 end
+  for _, eq in pairs(grid.equipment) do
+    if eq.name == PDG_EQUIP then return eq.quality.level end
+  end
+  return 0
+end
+
 local function pocket_surface_name(player)
   return "pocket-dimension-" .. player.index
 end
 
 local function is_in_pocket_dimension(player)
   return player.surface.name == pocket_surface_name(player)
+end
+
+local function is_pocket_dim_surface(surface)
+  return surface.name:match("^pocket%-dimension%-%d+$") ~= nil
 end
 
 local function setup_pocket_surface(surface)
@@ -576,20 +689,17 @@ local function setup_pocket_surface(surface)
 
   local tiles = {}
 
-  -- Main floor: lab-dark-2, 64×64 centered at origin
+  -- Full interior: lab-dark-2 for all 64×64 tiles (one-time init on new surfaces).
+  -- apply_pocket_area then places a thin ring wall at the quality boundary on each
+  -- entry, leaving tiles in the outer zone untouched so entities there survive.
   for x = -H, H - 1 do
     for y = -H, H - 1 do
       tiles[#tiles + 1] = {name = "lab-dark-2", position = {x, y}}
     end
   end
 
-  -- Exit approach markers: two bright tiles at the south-center gap,
-  -- last row of the interior, so the player can see where to walk out.
-  tiles[#tiles + 1] = {name = "tutorial-grid", position = {-1, H - 1}}
-  tiles[#tiles + 1] = {name = "tutorial-grid", position = { 0, H - 1}}
-
-  -- Out-of-map boundary (1 tile thick) blocks all four sides.
-  -- South row: gap at x = -1 and x = 0 so the player can step through.
+  -- Permanent outer walls on all four sides.
+  -- South row: permanent exit gap at x = -1 and x = 0
   for x = -(H + 2), H + 1 do
     local t = (x == -1 or x == 0) and "lab-dark-2" or "out-of-map"
     tiles[#tiles + 1] = {name = t, position = {x, H}}
@@ -608,6 +718,12 @@ local function setup_pocket_surface(surface)
   end
 
   surface.set_tiles(tiles)
+
+  -- Four quality-tiered storage chests in a square, ±10 tiles from centre.
+  -- No other containers are permitted (enforced in on_built_entity).
+  for _, tier in ipairs(PD_CHEST_TIERS) do
+    surface.create_entity({name = PD_CHEST, position = tier.pos, quality = tier.quality, force = "player"})
+  end
 end
 
 local function get_or_create_pocket_surface(player)
@@ -626,6 +742,35 @@ local function get_or_create_pocket_surface(player)
       cliff_settings = {cliff_elevation_0 = 1024, cliff_elevation_interval = 1024},
     })
     setup_pocket_surface(surface)
+  else
+    -- Migrate if chests are missing or are the old normal-quality configuration.
+    local chests = surface.find_entities_filtered({name = PD_CHEST})
+    local needs_migration = #chests ~= 4
+    if not needs_migration then
+      for _, chest in pairs(chests) do
+        if chest.quality.name == "normal" then needs_migration = true break end
+      end
+    end
+    if needs_migration then
+      for _, chest in pairs(chests) do
+        local inv = chest.get_inventory(defines.inventory.chest)
+        if inv then
+          for i = 1, #inv do
+            local stack = inv[i]
+            if stack.valid_for_read then
+              local inserted = player.insert({name = stack.name, count = stack.count, quality = stack.quality.name})
+              if inserted < stack.count then
+                surface.spill_item_stack(chest.position, {name = stack.name, count = stack.count - inserted, quality = stack.quality.name}, true)
+              end
+            end
+          end
+        end
+        chest.destroy()
+      end
+      for _, tier in ipairs(PD_CHEST_TIERS) do
+        surface.create_entity({name = PD_CHEST, position = tier.pos, quality = tier.quality, force = "player"})
+      end
+    end
   end
   return surface
 end
@@ -634,7 +779,8 @@ local function exit_pocket_dimension(player)
   if not is_in_pocket_dimension(player) then return end
   if not has_pocket_generator(player) then
     player.print({"armor-adventure.pocket-dimension-no-generator"})
-    player.teleport({0, PD_HALF - 2}, player.surface)
+    local ret = storage.pocket_dim_return[player.index]
+    player.teleport({0, (ret and ret.hq or PD_HALF) - 2}, player.surface)
     return
   end
   local ret = storage.pocket_dim_return[player.index]
@@ -656,12 +802,16 @@ local function enter_pocket_dimension(player)
   end
   if is_in_pocket_dimension(player) then return end
 
+  local q_level = get_pdg_quality_level(player)
+  local hq      = quality_to_half(q_level)
   storage.pocket_dim_return[player.index] = {
     position = {x = player.position.x, y = player.position.y},
     surface  = player.surface,
+    hq       = hq,
   }
   local surface = get_or_create_pocket_surface(player)
-  player.teleport({0, PD_HALF - 4}, surface)
+  apply_pocket_area(surface, q_level)
+  player.teleport({0, hq - 4}, surface)
   player.set_shortcut_toggled("pocket-dimension-toggle", true)
 end
 
@@ -682,6 +832,40 @@ script.on_event(defines.events.on_lua_shortcut, function(event)
     handle_pocket_dimension_toggle(game.players[event.player_index])
   elseif event.prototype_name == "time-stopper-activate" then
     activate_time_stopper(game.players[event.player_index])
+  end
+end)
+
+-- Block players and robots from placing any container in the pocket dimension
+-- other than the 4 fixed chests already spawned by setup_pocket_surface.
+local CONTAINER_FILTER = {
+  {filter = "type", type = "container"},
+  {filter = "type", type = "logistic-container"},
+}
+script.on_event(defines.events.on_built_entity, function(event)
+  local entity = event.entity
+  if entity.name == PD_CHEST or not is_pocket_dim_surface(entity.surface) then return end
+  local player = game.players[event.player_index]
+  if player then player.insert({name = entity.name, count = 1, quality = entity.quality.name}) end
+  entity.destroy()
+  if player then player.print({"armor-adventure.pocket-dimension-no-containers"}) end
+end, CONTAINER_FILTER)
+
+script.on_event(defines.events.on_robot_built_entity, function(event)
+  local entity = event.entity
+  if entity.name == PD_CHEST or not is_pocket_dim_surface(entity.surface) then return end
+  entity.surface.spill_item_stack(entity.position, {name = entity.name, count = 1, quality = entity.quality.name}, true)
+  entity.destroy()
+end, CONTAINER_FILTER)
+
+-- Block access to tiered pocket chests whose quality exceeds the player's PDG quality.
+script.on_event(defines.events.on_gui_opened, function(event)
+  if event.gui_type ~= defines.gui_type.entity then return end
+  local entity = event.entity
+  if not entity or entity.name ~= PD_CHEST then return end
+  local player = game.players[event.player_index]
+  if get_pdg_quality_level(player) < entity.quality.level then
+    player.opened = nil
+    player.print({"armor-adventure.pocket-dimension-chest-locked"})
   end
 end)
 
@@ -714,10 +898,10 @@ script.on_event(defines.events.on_player_changed_position, function(event)
   end
 
   -- Pocket dimension exit: walk south through the gap in the south wall.
-  if storage.pocket_dim_return[player.index] and
-     player.surface.name == "pocket-dimension-" .. player.index then
+  local pd_ret = storage.pocket_dim_return[player.index]
+  if pd_ret and player.surface.name == "pocket-dimension-" .. player.index then
     local pos = player.position
-    if pos.y >= PD_HALF and math.abs(pos.x) < 1.5 then
+    if pos.y >= (pd_ret.hq or PD_HALF) and math.abs(pos.x) < 1.5 then
       exit_pocket_dimension(player)
     end
   end

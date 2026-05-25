@@ -424,6 +424,16 @@ if mods["castra-prime"] then
   }})
 end
 
+-- Pocket dimension chest: unminable, indestructible container spawned by script
+-- into each player's pocket surface. Never craftable or placeable by the player.
+local pd_chest = table.deepcopy(data.raw["container"]["steel-chest"])
+pd_chest.name           = "pocket-dimension-chest"
+pd_chest.minable        = nil
+pd_chest.destructible   = false
+pd_chest.flags          = {"not-blueprintable", "not-deconstructable"}
+pd_chest.inventory_size = 40
+data:extend({pd_chest})
+
 local char_anims = data.raw.character.character.animations
 for _, entry in ipairs(char_anims) do
   if entry.armors then
