@@ -10,6 +10,9 @@ local WARN_THRESHOLD  = 30
 local DRAIN_PER_MIN   = 2
 local QUALITY_POINTS  = {normal=1, uncommon=2, rare=3, epic=4, legendary=5}
 local COMMANDER_NAME  = "simulac-commander"
+local SMF_NAME        = "simulac-mobile-fortress"
+local SMF_MIN_RANGE   = 20   -- tiles; SMF stops closing when this close to the player
+local SMF_SPEED       = 0.104 -- tiles per tick (~tank speed with rocket fuel, +30%)
 local SPAWN_DIST      = 90  -- tiles; off-screen at normal zoom
 
 local function find_player_on_castra(near_position)
@@ -54,54 +57,145 @@ local function spawn_commander(near_player)
     game.forces["player"].print({"armor-adventure.simulac-commander-spawned"})
 end
 
+local function spawn_smf(near_player)
+    local surface = near_player.surface
+    local angle   = math.random() * 2 * math.pi
+    local base    = {
+        x = near_player.position.x + math.cos(angle) * SPAWN_DIST,
+        y = near_player.position.y + math.sin(angle) * SPAWN_DIST,
+    }
+    local pos = surface.find_non_colliding_position(SMF_NAME, base, 30, 1)
+    if not pos then pos = base end
+
+    local smf = surface.create_entity({
+        name     = SMF_NAME,
+        position = pos,
+        force    = "enemy",
+    })
+    if smf and smf.valid then
+        storage.simulac_mobile_fortress = smf
+        local fuel_inv = smf.get_fuel_inventory()
+        if fuel_inv then fuel_inv.insert({name = "rocket-fuel", count = 20}) end
+        smf.color = {r = 0.05, g = 0.55, b = 1.0, a = 1}
+        if smf.grid then
+            smf.grid.put({name = "fusion-reactor-equipment",    position = {0, 0}})
+            smf.grid.put({name = "energy-shield-mk2-equipment", position = {4, 0}})
+            smf.grid.put({name = "personal-combat-roboport",    position = {4, 2}})
+        end
+        game.forces["player"].print("[SMF] Simulac Mobile Fortress has deployed at " .. pos.x .. ", " .. pos.y)
+    else
+        game.forces["player"].print("[SMF] ERROR: create_entity returned nil — spawn failed.")
+    end
+end
+
 -- Laser attack: called every 20 ticks (~3x/sec) for responsive acquisition.
 function castra.on_tick_laser()
     local cmd = storage.simulac_commander
-    if not cmd or not cmd.valid then return end
+    if cmd and cmd.valid then
+        local nearby = cmd.surface.find_entities_filtered({
+            type     = "character",
+            position = cmd.position,
+            radius   = 22,
+        })
+        for _, char in ipairs(nearby) do
+            if char.valid and char.force.name ~= "enemy" then
+                char.damage(200, "enemy", "laser", cmd)
+                cmd.surface.create_entity({
+                    name     = "laser-beam",
+                    position = cmd.position,
+                    source   = cmd,
+                    target   = char,
+                    duration = 25,
+                    force    = "enemy",
+                })
+            end
+        end
+    end
 
-    local nearby = cmd.surface.find_entities_filtered({
-        type     = "character",
-        position = cmd.position,
-        radius   = 22,
-    })
-    for _, char in ipairs(nearby) do
-        if char.valid and char.force.name ~= "enemy" then
-            char.damage(200, "enemy", "laser", cmd)
-            cmd.surface.create_entity({
-                name     = "laser-beam",
-                position = cmd.position,
-                source   = cmd,
-                target   = char,
-                duration = 25,
+end
+
+function castra.on_tick_59()
+    local cmd = storage.simulac_commander
+    if cmd and cmd.valid then
+        -- Refresh pursuit toward nearest player on same surface.
+        if cmd.commandable then
+            local nearest, dist2 = nil, math.huge
+            for _, player in pairs(game.players) do
+                if player.character and player.character.valid
+                   and player.surface == cmd.surface then
+                    local dx = player.position.x - cmd.position.x
+                    local dy = player.position.y - cmd.position.y
+                    local d  = dx*dx + dy*dy
+                    if d < dist2 then dist2 = d; nearest = player end
+                end
+            end
+            if nearest then
+                cmd.commandable.set_command{
+                    type        = defines.command.go_to_location,
+                    destination = nearest.position,
+                    distraction = defines.distraction.by_anything,
+                }
+            end
+        end
+    end
+
+    -- SMF: fire cannon at nearest player within 50 tiles (~once per second).
+    local smf = storage.simulac_mobile_fortress
+    if smf and smf.valid then
+        local nearest, dist2 = nil, math.huge
+        for _, player in pairs(game.players) do
+            if player.character and player.character.valid
+               and player.surface == smf.surface then
+                local dx = player.position.x - smf.position.x
+                local dy = player.position.y - smf.position.y
+                local d  = dx*dx + dy*dy
+                if d < dist2 then dist2 = d; nearest = player end
+            end
+        end
+        if nearest and dist2 < 50*50 then
+            local dist = math.sqrt(dist2)
+            local dx   = nearest.position.x - smf.position.x
+            local dy   = nearest.position.y - smf.position.y
+            local shell_pos = {
+                x = smf.position.x + dx / dist * 5,
+                y = smf.position.y + dy / dist * 5,
+            }
+            smf.surface.create_entity({
+                name     = "simulac-mobile-fortress-shell",
+                position = shell_pos,
+                target   = nearest.character,
+                speed    = 0.25,
                 force    = "enemy",
             })
         end
     end
 end
 
-function castra.on_tick_59()
-    local cmd = storage.simulac_commander
-    if not cmd or not cmd.valid then return end
+-- Movement: called every tick for smooth teleportation. Negligible UPS — single
+-- entity lookup with immediate return when no SMF is active.
+function castra.on_tick_smf()
+    local smf = storage.simulac_mobile_fortress
+    if not smf or not smf.valid then return end
 
-    -- Refresh pursuit toward nearest player on same surface.
-    if cmd.commandable then
-        local nearest, dist2 = nil, math.huge
-        for _, player in pairs(game.players) do
-            if player.character and player.character.valid
-               and player.surface == cmd.surface then
-                local dx = player.position.x - cmd.position.x
-                local dy = player.position.y - cmd.position.y
-                local d  = dx*dx + dy*dy
-                if d < dist2 then dist2 = d; nearest = player end
-            end
+    local nearest, dist2 = nil, math.huge
+    for _, player in pairs(game.players) do
+        if player.character and player.character.valid
+           and player.surface == smf.surface then
+            local dx = player.position.x - smf.position.x
+            local dy = player.position.y - smf.position.y
+            local d  = dx*dx + dy*dy
+            if d < dist2 then dist2 = d; nearest = player end
         end
-        if nearest then
-            cmd.commandable.set_command{
-                type        = defines.command.go_to_location,
-                destination = nearest.position,
-                distraction = defines.distraction.by_anything,
-            }
-        end
+    end
+    if not nearest then return end
+
+    local dx = nearest.position.x - smf.position.x
+    local dy = nearest.position.y - smf.position.y
+    smf.orientation = (math.atan2(dx, -dy) / (2 * math.pi)) % 1
+    if dist2 > SMF_MIN_RANGE * SMF_MIN_RANGE then
+        local dist  = math.sqrt(dist2)
+        local ratio = math.min(SMF_SPEED / dist, 1)
+        smf.teleport({smf.position.x + dx * ratio, smf.position.y + dy * ratio})
     end
 end
 
@@ -139,11 +233,18 @@ function castra.on_entity_died(event)
 
         if new_meter >= KILL_THRESHOLD then
             storage.simulac_awaken_meter = 0
-            game.forces["player"].print("Castra meter reset to 0 (commander spawned).")
+            game.forces["player"].print("Castra meter reset to 0 (commander + SMF spawned).")
             local trigger_player = (cause.valid and cause.type == "character") and cause.player
                                 or find_player_on_castra(ent.position)
-            if trigger_player then spawn_commander(trigger_player) end
+            if trigger_player then
+                spawn_commander(trigger_player)
+                -- spawn_smf(trigger_player)  -- SMF design in progress, not yet functional
+            end
         end
+
+    elseif name == SMF_NAME then
+        storage.simulac_mobile_fortress = nil
+        game.forces["player"].print("[SMF] Simulac Mobile Fortress destroyed.")
 
     elseif name == COMMANDER_NAME then
         storage.simulac_commander = nil

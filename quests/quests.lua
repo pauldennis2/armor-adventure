@@ -87,7 +87,9 @@ script.on_nth_tick(1,   function() fulgora.on_tick_1() end)
 script.on_nth_tick(300, function() fulgora.on_tick_300() end)
 
 -- Castra: laser attack (fast) + meter drain (once per minute).
+-- SMF movement runs every tick for smooth teleportation; early-exits when no SMF is active.
 if castra then
+    script.on_nth_tick(1,    function() castra.on_tick_smf() end)
     script.on_nth_tick(20,   function() castra.on_tick_laser() end)
     script.on_nth_tick(3600, function() castra.on_tick_3600() end)
 end
@@ -117,13 +119,14 @@ local entity_died_filter = {
 if HAS_CASTRA then
     table.insert(entity_died_filter, {filter = "name", name = "data-collector"})
     table.insert(entity_died_filter, {filter = "name", name = "simulac-commander"})
+    table.insert(entity_died_filter, {filter = "name", name = "simulac-mobile-fortress"})
 end
 
 script.on_event(defines.events.on_entity_died, function(event)
     local name = event.entity.name
     if name == "harvester" or name == "big-demolisher" then
         gleba.on_entity_died(event)
-    elseif castra and (name == "data-collector" or name == "simulac-commander") then
+    elseif castra and (name == "data-collector" or name == "simulac-commander" or name == "simulac-mobile-fortress") then
         castra.on_entity_died(event)
     end
 end, entity_died_filter)

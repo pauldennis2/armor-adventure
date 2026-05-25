@@ -4,6 +4,17 @@ local function scale_graphics(t, factor)
   for _, v in pairs(t) do scale_graphics(v, factor) end
 end
 
+-- Like scale_graphics but also handles sprite layers with no explicit scale.
+-- Sprite layers are identified by having a filename field; Factorio HR sprites
+-- default to scale=0.5 when unset, so we use that as the starting value.
+local function force_scale_graphics(t, factor)
+  if type(t) ~= "table" then return end
+  if t.filename ~= nil then
+    t.scale = (t.scale or 0.5) * factor
+  end
+  for _, v in pairs(t) do force_scale_graphics(v, factor) end
+end
+
 local function shift_layers(anim, dx, dy)
   if not anim or not anim.layers then return end
   for _, layer in pairs(anim.layers) do
@@ -21,6 +32,16 @@ local function apply_fixed_tint(t, tint_color)
   for _, v in pairs(t) do
     apply_fixed_tint(v, tint_color)
   end
+end
+
+local function scale_box(box, f)
+  if box[1] then
+    return {{box[1][1] * f, box[1][2] * f}, {box[2][1] * f, box[2][2] * f}}
+  end
+  return {
+    left_top     = {x = box.left_top.x * f,     y = box.left_top.y * f},
+    right_bottom = {x = box.right_bottom.x * f, y = box.right_bottom.y * f},
+  }
 end
 
 local hot_rod_red = {r=1, g=0.15, b=0.15, a=1}
@@ -245,20 +266,63 @@ ts_slow.target_movement_modifier = 0.1
 ts_slow.vehicle_speed_modifier   = 0.1
 data:extend({ts_slow})
 
+-- Simulac Mobile Fortress: scaled-up blue tank vehicle used as a Castra boss.
+-- Not gated on castra-prime because the vanilla tank prototype is always present.
+do
+  local SMF_SCALE = 3.0
+  local smf_blue  = {r = 0.05, g = 0.55, b = 1.0, a = 1}
+
+  local smf = table.deepcopy(data.raw["car"]["tank"])
+  smf.name             = "simulac-mobile-fortress"
+  smf.color            = smf_blue
+  smf.minable          = nil
+  smf.next_upgrade     = nil
+  smf.collision_mask   = {layers = {}}
+  smf.max_health       = 200000
+  smf.healing_per_tick = 400 / 60
+  smf.resistances = {
+    {type = "electric",  decrease = 20,  percent = 75},
+    {type = "explosion", decrease = 50,  percent = 50},
+    {type = "laser",     decrease = 100, percent = 85},
+    {type = "physical",  decrease = 25,  percent = 60},
+    {type = "poison",                    percent = 99},
+    {type = "fire",      decrease = 25,  percent = 85},
+  }
+
+  -- Collision box not scaled: mask is empty so it's irrelevant for physics,
+  -- and a large box caused shells to spawn inside the entity's zone.
+  smf.selection_box = scale_box(smf.selection_box, SMF_SCALE)
+  if smf.drawing_box_vertical_extension then
+    smf.drawing_box_vertical_extension = smf.drawing_box_vertical_extension * SMF_SCALE
+  end
+  force_scale_graphics(smf.graphics_set, SMF_SCALE)
+  apply_fixed_tint(smf.graphics_set, smf_blue)
+
+  -- Custom grid that also accepts armor-adventure-mk2 equipment (e.g. personal-combat-roboport).
+  local tank_grid_name = data.raw["car"]["tank"].equipment_grid
+  if tank_grid_name and data.raw["equipment-grid"][tank_grid_name] then
+    local smf_grid = table.deepcopy(data.raw["equipment-grid"][tank_grid_name])
+    smf_grid.name = "simulac-mobile-fortress-grid"
+    smf_grid.equipment_categories = {"armor", "armor-adventure-mk2"}
+    data:extend({smf_grid})
+    smf.equipment_grid = "simulac-mobile-fortress-grid"
+  end
+
+  data:extend({smf})
+end
+
+-- SMF projectile: passes through enemy buildings (collision = player layer only).
+do
+  local smf_shell = table.deepcopy(data.raw["projectile"]["cannon-projectile"])
+  smf_shell.name           = "simulac-mobile-fortress-shell"
+  smf_shell.collision_mask = {layers = {player = true}}
+  data:extend({smf_shell})
+end
+
 -- SIMULAC Commander: a gold-tinted heavyweight version of the Castra enemy tank.
 -- Only defined when castra-prime is loaded (provides castra-enemy-tank prototype).
 if mods["castra-prime"] then
   local SIMULAC_SCALE = 3.0
-
-  local function scale_box(box, f)
-    if box[1] then
-      return {{box[1][1] * f, box[1][2] * f}, {box[2][1] * f, box[2][2] * f}}
-    end
-    return {
-      left_top     = {x = box.left_top.x * f,     y = box.left_top.y * f},
-      right_bottom = {x = box.right_bottom.x * f, y = box.right_bottom.y * f},
-    }
-  end
 
   -- Ballistic cannon shell (direction_only = true, no homing).
   -- Deepcopy of vanilla cannon-projectile which is already non-tracking.
