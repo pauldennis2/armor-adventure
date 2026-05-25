@@ -294,3 +294,16 @@ if mods["planet-rabbasca"] then
     results         = {{type = "item", name = "personal-warp-pylon-equipment", amount = 1}},
   }})
 end
+
+data:extend({{
+  type            = "recipe",
+  name            = "pheromone-emitter",
+  enabled         = false,
+  energy_required = 5,
+  ingredients = {
+    {type = "item", name = "steel-plate",        amount = 10},
+    {type = "item", name = "electronic-circuit", amount = 20},
+    {type = "item", name = "grenade",            amount = 5},
+  },
+  results = {{type = "item", name = "pheromone-emitter", amount = 1}},
+}})

@@ -85,6 +85,13 @@ for _, proto in pairs(data.raw["roboport"] or {}) do
   proto.surface_conditions[#proto.surface_conditions + 1] = roboport_condition
 end
 
+-- Pheromone Emitter: flag Nauvis as its native surface so surface_conditions can gate placement.
+local nauvis_planet = data.raw["planet"]["nauvis"]
+if nauvis_planet then
+  nauvis_planet.surface_properties = nauvis_planet.surface_properties or {}
+  nauvis_planet.surface_properties["nauvis-native"] = 1
+end
+
 -- Personal Warp Pylon: invisible assembling-machine deepcopy of rabbasca-warp-pylon.
 -- Must be a crafting machine so Rabbasca's warp dispatch cycle (awake → trigger item → attempt_build_ghost) works.
 -- Graphics stripped via empty graphics_set so nothing is rendered.

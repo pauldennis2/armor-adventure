@@ -295,3 +295,25 @@ if mods["castra-prime"] then
     },
   })
 end
+
+data:extend({
+  {
+    type         = "item",
+    name         = "pheromone-emitter",
+    icon         = "__base__/graphics/icons/poison-capsule.png",
+    icon_size    = 64,
+    subgroup     = "armor-adventure-machines",
+    order        = "p[pheromone-emitter]",
+    stack_size   = 1,
+    place_result = "pheromone-emitter",
+  },
+  {
+    type       = "item",
+    name       = "nauvis-armor-piece",
+    icon       = "__base__/graphics/icons/medium-biter.png",
+    icon_size  = 64,
+    subgroup   = "armor-adventure-materials",
+    order      = "n[nauvis-armor-piece]",
+    stack_size = 10,
+  },
+})

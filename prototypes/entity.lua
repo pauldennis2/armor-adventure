@@ -463,3 +463,83 @@ for _, entry in ipairs(char_anims) do
     end
   end
 end
+
+-- Actuator spark burst: streaking sparks emitted when running with Overcharged Actuators.
+-- Uses vanilla spark-particle but with tails, high repeat count, and fast outward spread so
+-- each burst leaves visible glowing streaks rather than static dots.
+data:extend({{
+  type       = "explosion",
+  name       = "actuator-spark-burst",
+  flags      = {"not-on-map"},
+  hidden     = true,
+  animations = {{
+    filename        = "__core__/graphics/empty.png",
+    priority        = "extra-high",
+    width           = 1,
+    height          = 1,
+    frame_count     = 1,
+    animation_speed = 1,
+  }},
+  created_effect = {
+    type             = "direct",
+    action_delivery  = {
+      type           = "instant",
+      target_effects = {{
+        type                          = "create-particle",
+        repeat_count                  = 8,
+        particle_name                 = "spark-particle",
+        offset_deviation              = {{-0.2, -0.2}, {0.2, 0.2}},
+        initial_height                = 0.1,
+        initial_height_deviation      = 0.05,
+        initial_vertical_speed        = 0.0,
+        initial_vertical_speed_deviation = 0.01,
+        speed_from_center             = 0.07,
+        speed_from_center_deviation   = 0.05,
+        frame_speed                   = 1,
+        tail_length                   = 12,
+        tail_length_deviation         = 6,
+        tail_width                    = 4,
+      }},
+    },
+  },
+}})
+
+-- nauvis-native surface property: set to 1 on Nauvis (in data-final-fixes.lua).
+-- Used by surface_conditions on the Pheromone Emitter to restrict placement to Nauvis.
+data:extend({{
+  type          = "surface-property",
+  name          = "nauvis-native",
+  default_value = 0,
+}})
+
+-- Pheromone Emitter: placeable device that attracts and spawns biters via script.
+-- Based on vanilla beacon with all beacon effects zeroed out and void energy source.
+-- surface_conditions restricts placement to Nauvis (nauvis-native = 1).
+do
+  local emitter = table.deepcopy(data.raw["beacon"]["beacon"])
+  emitter.name                     = "pheromone-emitter"
+  emitter.minable                  = {mining_time = 0.5, result = "pheromone-emitter"}
+  emitter.max_health               = 1200
+  emitter.energy_source            = {type = "void"}
+  emitter.energy_usage             = "1W"
+  emitter.supply_area_distance     = 0
+  emitter.distribution_effectivity = 0
+  emitter.module_slots             = 0
+  emitter.allowed_effects          = {}
+  emitter.surface_conditions       = {{property = "nauvis-native", min = 1}}
+  data:extend({emitter})
+end
+
+-- Pheromone Emitter Nest: decorative invulnerable spawner placed around the emitter.
+-- Purely visual — all biter production is scripted. Placed on neutral force so player
+-- turrets and enemy AI ignore it. Destroyed by script when the emitter completes/fails.
+do
+  local nest = table.deepcopy(data.raw["unit-spawner"]["biter-spawner"])
+  nest.name                       = "pheromone-emitter-nest"
+  nest.destructible               = false
+  nest.spawning_cooldown          = {999999, 999999}
+  nest.max_count_of_owned_units   = 0
+  nest.minable                    = nil
+  nest.flags = {"not-blueprintable", "not-deconstructable", "not-repairable", "not-rotatable"}
+  data:extend({nest})
+end

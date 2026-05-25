@@ -10,6 +10,7 @@ local HAS_CASTRA = script.active_mods["castra-prime"] ~= nil
 
 local fulgora = require("quests.fulgora")
 local gleba   = require("quests.gleba")
+local nauvis  = require("quests.nauvis")
 local castra  = HAS_CASTRA and require("quests.castra") or nil
 
 local M = {}
@@ -17,7 +18,12 @@ local M = {}
 -- Returns the 59-tick handler for a surface name, or nil if not a quest surface
 -- or the required tech has not been researched.
 local function make_handler(surface_name)
-    if surface_name == "gleba" then
+    if surface_name == "nauvis" then
+        local tech = game.forces["player"].technologies["armor-adventure-nauvis"]
+        if tech and tech.researched then
+            return function() nauvis.on_tick_59() end
+        end
+    elseif surface_name == "gleba" then
         local tech = game.forces["player"].technologies["armor-adventure-gleba"]
         if tech and tech.researched then
             return function() gleba.on_tick_59() end
@@ -31,7 +37,9 @@ end
 -- Re-registers tick 59 from storage alone (no game access) — safe for on_load.
 local function make_handler_from_storage()
     local surface = storage.active_quest_surface
-    if surface == "gleba" then
+    if surface == "nauvis" then
+        return function() nauvis.on_tick_59() end
+    elseif surface == "gleba" then
         return function() gleba.on_tick_59() end
     elseif surface == "castra" and castra then
         return function() castra.on_tick_59() end
@@ -83,14 +91,19 @@ script.on_event(defines.events.on_player_changed_surface, function(_)
 end)
 
 -- MLC: drain every tick, rescan every 5s.
-script.on_nth_tick(1,   function() fulgora.on_tick_1() end)
+-- Nauvis emitter: charge every 60 ticks, attract biters every 300 ticks.
+-- NOTE: each interval has one combined handler — on_nth_tick(N, fn) replaces the
+-- previous registration for that N, so all callers for a given interval are merged here.
+script.on_nth_tick(1, function()
+    fulgora.on_tick_1()
+    if castra then castra.on_tick_smf() end
+end)
+script.on_nth_tick(20, function()
+    if castra then castra.on_tick_laser() end
+end)
+-- on_nth_tick(60) is owned by control.lua; nauvis charging is dispatched via M.on_tick_60().
 script.on_nth_tick(300, function() fulgora.on_tick_300() end)
-
--- Castra: laser attack (fast) + meter drain (once per minute).
--- SMF movement runs every tick for smooth teleportation; early-exits when no SMF is active.
 if castra then
-    script.on_nth_tick(1,    function() castra.on_tick_smf() end)
-    script.on_nth_tick(20,   function() castra.on_tick_laser() end)
     script.on_nth_tick(3600, function() castra.on_tick_3600() end)
 end
 
@@ -111,10 +124,26 @@ script.on_event(defines.events.on_player_mined_entity, on_harvester_removed, HAR
 script.on_event(defines.events.on_robot_mined_entity,  on_harvester_removed, HARVESTER_FILTER)
 script.on_event(defines.events.script_raised_destroy,  on_harvester_removed, HARVESTER_FILTER)
 
+-- Pheromone Emitter built/mined/destroyed.
+local EMITTER_FILTER = {{filter = "name", name = "pheromone-emitter"}}
+local function on_emitter_built(event)
+    nauvis.register_emitter(event.entity, event.player_index)
+end
+local function on_emitter_mined(event)
+    nauvis.unregister_emitter(event.entity)
+end
+
+script.on_event(defines.events.on_built_entity,        on_emitter_built,  EMITTER_FILTER)
+script.on_event(defines.events.on_robot_built_entity,  on_emitter_built,  EMITTER_FILTER)
+script.on_event(defines.events.script_raised_built,    on_emitter_built,  EMITTER_FILTER)
+script.on_event(defines.events.on_player_mined_entity, on_emitter_mined,  EMITTER_FILTER)
+script.on_event(defines.events.on_robot_mined_entity,  on_emitter_mined,  EMITTER_FILTER)
+
 -- Entity died: dispatch to the module that owns each entity name.
 local entity_died_filter = {
     {filter = "name", name = "harvester"},
     {filter = "name", name = "big-demolisher"},
+    {filter = "name", name = "pheromone-emitter"},
 }
 if HAS_CASTRA then
     table.insert(entity_died_filter, {filter = "name", name = "data-collector"})
@@ -126,6 +155,8 @@ script.on_event(defines.events.on_entity_died, function(event)
     local name = event.entity.name
     if name == "harvester" or name == "big-demolisher" then
         gleba.on_entity_died(event)
+    elseif name == "pheromone-emitter" then
+        nauvis.on_emitter_destroyed(event.entity)
     elseif castra and (name == "data-collector" or name == "simulac-commander" or name == "simulac-mobile-fortress") then
         castra.on_entity_died(event)
     end

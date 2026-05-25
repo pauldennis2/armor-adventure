@@ -300,6 +300,30 @@ data:extend({
     },
   },
   {
+    type     = "technology",
+    name     = "armor-adventure-nauvis",
+    icon     = "__base__/graphics/technology/military.png",
+    icon_size = 256,
+    prerequisites = {"mech-armor-mk2"},
+    unit = {
+      count = 10000,
+      ingredients = {
+        {"automation-science-pack",      1},
+        {"logistic-science-pack",        1},
+        {"chemical-science-pack",        1},
+        {"military-science-pack",        1},
+        {"production-science-pack",      1},
+        {"utility-science-pack",         1},
+        {"space-science-pack",           1},
+        {"promethium-science-pack",      1},
+      },
+      time = 60,
+    },
+    effects = {
+      {type = "unlock-recipe", recipe = "pheromone-emitter"},
+    },
+  },
+  {
     type = "technology",
     name = "forge-promethium-armor",
     icon = "__armor-adventure__/graphics/entity/armor-crafting-station/base/armor-crafting-station-icon.png",
@@ -309,6 +333,7 @@ data:extend({
       "armor-adventure-gleba",
       "armor-adventure-fulgora",
       "armor-adventure-aquilo",
+      "armor-adventure-nauvis",
     },
     unit = {
       count = 10000,

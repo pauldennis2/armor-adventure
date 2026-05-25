@@ -18,6 +18,7 @@ local sync_personal_warp_pylon
 
 local activate_time_stopper
 local deactivate_time_stopper
+local draw_time_stopper_aura
 
 local QUALITY_GATE_ENABLED = settings.startup["armor-adventure-quality-gate"].value
 local enforce_quality_gates_all_players
@@ -78,6 +79,8 @@ local function init_storage()
   storage.time_stopper_cooldown   = storage.time_stopper_cooldown or {}
   storage.acs_crafting_bonus      = storage.acs_crafting_bonus or {}
   storage.simulac_awaken_meter    = storage.simulac_awaken_meter or 0
+  storage.time_stopper_render     = storage.time_stopper_render or {}
+  storage.spark_last_pos          = storage.spark_last_pos or {}
   for _, player in pairs(game.players) do
     storage.mk2_penalties[player.index]      = storage.mk2_penalties[player.index] or {}
     storage.roboport_cooldowns[player.index] = storage.roboport_cooldowns[player.index] or {}
@@ -97,6 +100,8 @@ script.on_init(function()
   storage.acs_crafting_bonus      = {}
   storage.personal_warp_pylon_pos = {}
   storage.simulac_awaken_meter    = 0
+  storage.time_stopper_render     = {}
+  storage.spark_last_pos          = {}
   if HAS_CASTRA then
     for _, force in pairs(game.forces) do sync_pcr_visibility(force) end
   end
@@ -152,6 +157,13 @@ script.on_configuration_changed(function(data)
   if HAS_CASTRA then
     for _, force in pairs(game.forces) do sync_pcr_visibility(force) end
   end
+  -- LuaRenderObjects are not saved; wipe and recreate for any active time stoppers.
+  storage.time_stopper_render = {}
+  for _, player in pairs(game.players) do
+    if storage.time_stopper_active[player.index] then
+      storage.time_stopper_render[player.index] = draw_time_stopper_aura(player)
+    end
+  end
   quests.refresh()
 end)
 
@@ -164,6 +176,8 @@ script.on_event(defines.events.on_player_created, function(event)
   storage.time_stopper_active[event.player_index]     = nil
   storage.time_stopper_cooldown[event.player_index]   = nil
   storage.personal_warp_pylon_pos[event.player_index] = nil
+  storage.time_stopper_render[event.player_index]     = nil
+  storage.spark_last_pos[event.player_index]          = nil
 end)
 
 script.on_event(defines.events.on_player_armor_inventory_changed, function(event)
@@ -217,6 +231,10 @@ script.on_event(defines.events.on_player_respawned, function(event)
   -- New character starts at modifier=0; treat storage as unset so sync reapplies from grid.
   storage.acs_crafting_bonus[player.index] = nil
   sync_acs_crafting_bonus(player)
+  local render = storage.time_stopper_render and storage.time_stopper_render[player.index]
+  if render and render.valid then render.destroy() end
+  storage.time_stopper_render[player.index] = nil
+  storage.spark_last_pos[player.index]      = nil
 end)
 
 -- Unique equipment enforcement --
@@ -401,6 +419,42 @@ script.on_event(defines.events.on_equipment_removed, function(event)
   end
 end)
 
+-- Regenerative Plating Hit Effect --
+
+local REGEN_HIT_THRESHOLD = 100
+
+local function has_regen_plating(player)
+  local armor_inv = player.get_inventory(defines.inventory.character_armor)
+  if not armor_inv then return false end
+  local armor = armor_inv[1]
+  if not armor or not armor.valid_for_read then return false end
+  local grid = armor.grid
+  if not grid then return false end
+  for _, eq in pairs(grid.equipment) do
+    if eq.name == "regenerative-plating" then return true end
+  end
+  return false
+end
+
+script.on_event(defines.events.on_entity_damaged, function(event)
+  if event.final_damage_amount < REGEN_HIT_THRESHOLD then return end
+  local player = event.entity.player
+  if not player then return end
+  if not is_wearing_mk2(player) then return end
+  if not has_regen_plating(player) then return end
+  local pos     = event.entity.position
+  local surface = event.entity.surface
+  for _ = 1, 4 do
+    surface.create_entity({
+      name     = "explosion",
+      position = {
+        x = pos.x + (math.random() * 3 - 1.5),
+        y = pos.y + (math.random() * 3 - 1.5),
+      },
+    })
+  end
+end, {{filter = "type", type = "character"}})
+
 -- Personal Combat Roboport --
 
 local COMBAT_ROBOPORT_TECH    = "personal-combat-roboport"
@@ -439,6 +493,56 @@ local function spawn_bots(player, bot_name, quality_name)
     end
   end
 end
+
+-- Running Spark Trail --
+-- Generates spark particles trailing from the player's feet when running with
+-- the Mk2: Overcharged Actuators tech. Spark count scales with movement speed.
+
+local SPARK_ENTITY    = "spark-explosion"
+local SPARK_THRESHOLD = 0.3  -- minimum dist per poll before sparks appear
+local SPARK_MAX       = 5    -- max sparks spawned per poll
+
+script.on_nth_tick(4, function()
+  storage.spark_last_pos = storage.spark_last_pos or {}
+  for _, player in pairs(game.players) do
+    if not player.character then goto continue end
+    if not is_wearing_mk2(player) then goto continue end
+    if not has_tech(player, "mech-armor-mk2-running-speed") then goto continue end
+
+    local pos  = player.position
+    local last = storage.spark_last_pos[player.index]
+    storage.spark_last_pos[player.index] = {x = pos.x, y = pos.y}
+    if not last then goto continue end
+
+    local dx   = pos.x - last.x
+    local dy   = pos.y - last.y
+    local dist = math.sqrt(dx * dx + dy * dy)
+    if dist < SPARK_THRESHOLD then goto continue end
+
+    local count = math.min(SPARK_MAX, math.max(1, math.floor(dist * 2)))
+
+    -- Unit vector pointing backward (opposite movement) for the trailing offset,
+    -- and perpendicular vector for sideways spread.
+    local nx     = -dx / dist
+    local ny     = -dy / dist
+    local px     = -ny
+    local py     =  nx
+    local surface = player.surface
+    for _ = 1, count do
+      local spread = math.random() * 0.6 - 0.3
+      local back   = math.random() * 0.4
+      surface.create_entity({
+        name     = SPARK_ENTITY,
+        position = {
+          x = pos.x + nx * back + px * spread,
+          y = pos.y + ny * back + py * spread,
+        },
+      })
+    end
+
+    ::continue::
+  end
+end)
 
 -- Poll frequently so the roboport reacts quickly; cooldown is tracked in storage.
 script.on_nth_tick(30, function()
@@ -794,7 +898,11 @@ local function exit_pocket_dimension(player)
   end
   local ret = storage.pocket_dim_return[player.index]
   if not ret then return end
+  local pd_surface = player.surface
+  local pd_pos     = {x = player.position.x, y = player.position.y}
   player.teleport(ret.position, ret.surface)
+  pd_surface.create_entity({name = "big-explosion", position = pd_pos})
+  ret.surface.create_entity({name = "big-explosion", position = ret.position})
   storage.pocket_dim_return[player.index] = nil
   player.set_shortcut_toggled("pocket-dimension-toggle", false)
 end
@@ -811,16 +919,21 @@ local function enter_pocket_dimension(player)
   end
   if is_in_pocket_dimension(player) then return end
 
-  local q_level = get_pdg_quality_level(player)
-  local hq      = quality_to_half(q_level)
+  local q_level      = get_pdg_quality_level(player)
+  local hq           = quality_to_half(q_level)
+  local origin_surface = player.surface
+  local origin_pos     = {x = player.position.x, y = player.position.y}
   storage.pocket_dim_return[player.index] = {
-    position = {x = player.position.x, y = player.position.y},
-    surface  = player.surface,
+    position = {x = origin_pos.x, y = origin_pos.y},
+    surface  = origin_surface,
     hq       = hq,
   }
-  local surface = get_or_create_pocket_surface(player)
+  local surface  = get_or_create_pocket_surface(player)
   apply_pocket_area(surface, q_level)
-  player.teleport({0, hq - 4}, surface)
+  local dest_pos = {0, hq - 4}
+  origin_surface.create_entity({name = "big-explosion", position = origin_pos})
+  player.teleport(dest_pos, surface)
+  surface.create_entity({name = "big-explosion", position = dest_pos})
   player.set_shortcut_toggled("pocket-dimension-toggle", true)
 end
 
@@ -892,6 +1005,15 @@ script.on_event(defines.events.on_player_changed_position, function(event)
       exit_pocket_dimension(player)
     end
   end
+end)
+
+script.on_event(defines.events.on_player_changed_surface, function(event)
+  local player = game.players[event.player_index]
+  storage.spark_last_pos[player.index] = nil
+  if not (storage.time_stopper_active and storage.time_stopper_active[player.index]) then return end
+  local render = storage.time_stopper_render and storage.time_stopper_render[player.index]
+  if render and render.valid then render.destroy() end
+  storage.time_stopper_render[player.index] = draw_time_stopper_aura(player)
 end)
 
 -- Personal Warp Pylon (Rabbasca integration) --
@@ -993,9 +1115,25 @@ local function apply_time_stopper_slow(player)
   end
 end
 
+draw_time_stopper_aura = function(player)
+  if not (player.character and player.character.valid) then return nil end
+  return rendering.draw_circle({
+    color   = {r = 0.1, g = 0.7, b = 1.0, a = 0.6},
+    radius  = PTS_SLOW_RADIUS,
+    width   = 3,
+    filled  = false,
+    target  = player.character,
+    surface = player.surface,
+    players = {player},
+  })
+end
+
 deactivate_time_stopper = function(player)
   if not storage.time_stopper_active[player.index] then return end
   storage.time_stopper_active[player.index] = nil
+  local render = storage.time_stopper_render and storage.time_stopper_render[player.index]
+  if render and render.valid then render.destroy() end
+  storage.time_stopper_render[player.index] = nil
   if player.character and player.character.valid then
     player.character.character_running_speed_modifier =
       player.character.character_running_speed_modifier - PTS_SPEED_BONUS
@@ -1034,6 +1172,19 @@ activate_time_stopper = function(player)
     player.character.character_running_speed_modifier + PTS_SPEED_BONUS
   player.character.character_crafting_speed_modifier =
     player.character.character_crafting_speed_modifier + PTS_CRAFT_BONUS
+
+  -- Activation shockwave: ring of explosions expanding from the player
+  for i = 1, 8 do
+    local angle = (i - 1) * (math.pi * 2 / 8)
+    player.surface.create_entity({
+      name     = "medium-explosion",
+      position = {
+        x = player.position.x + math.cos(angle) * 6,
+        y = player.position.y + math.sin(angle) * 6,
+      },
+    })
+  end
+  storage.time_stopper_render[player.index] = draw_time_stopper_aura(player)
 
   apply_time_stopper_slow(player)
   player.set_shortcut_toggled("time-stopper-activate", true)
