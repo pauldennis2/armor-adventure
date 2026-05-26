@@ -12,45 +12,51 @@ Add safety to our Rabbasca integration until/unless our PR is merged.
 
 Personal beacon UI/UX improvement
 
-icons needed: personal beacon
-Personal combat roboports***
+icons needed: 
+personal beacon
 Pocket dimension generator**
 Regenerative plating
 Personal warp pylon***
 techs
-charged lightning gem (fulgora q)
 demolisher heart (vulcanus)
 gleba biomass*** (currently uses iron)
 mind control rocket**
 Bio interface*
 Personal time stopper*
-Harvester
-armor crafting station
-charged lightning gem
-demo heart
+Demo heart
+Ablative Chitocarbon Shell (Nauvis part)
 
 add localization for gleba parts, better name
 
 entity needed/preferred:
 Demo heart
 charged lightning gem
+elevator
+pheremone emitter
 
 Better visual on MC for gleba quest
 
-Better looting UX - chest or container?
+Eventual Gleba questline
+    Mind control a unit
+    Can this unlock a tech?
+    This unlocks the Harvester
+    Creating gleba parts unlocks 
 
 Balancing
 
 Remove personal robot stash - still visible
 
 Pocket dimension
-Make it more interesting looking
-Maybe it gets power from the generator itself
-Both edge cases:
-    Items on edge can get wiped if space becomes smaller
-    Also Items outside edge can be accessed
-Make chests invisible?
-factorissimo restriction
+    Make it more interesting looking
+    Maybe it gets power from the generator itself
+    Both edge cases:
+        Items on edge can get wiped if space becomes smaller
+        Also Items outside edge can be accessed
+    Make chests invisible if not unlocked? Scale chest size down?
+    factorissimo restriction
+    Free beacon?
+    Free power distribution
+    Disallow energetic concrete haha?
 
 Briefing concept
 
@@ -68,17 +74,20 @@ armor forging station packed - wrong stats/tooltip
 
 Barry allen sparks feature
 
-Any possible ideas for easily doable graphics? 
- Some kind of explosion when the armor takes more than 20%.
- A visual for the time stopper
-
-quests:
-    Nauvis quest - create a high pollution item, survive waves of attacks for duration
-    Aquilo - gem suggested something with heat and cold management, circuit wise. I thought about building an elevator to the core
-    Castra - kill a certain number of data collectors in a window and it spawns a big robot, kill the robot
-
-nauvis quest
-    change to create a humungoid spitter that eats the small guys
-    change to qual
+Nauvis quest
+    Make the big one eat the little ones and gain health/damage
+    Make them spawn way further away and be more aggressive about attacking the beacon 
+        or at least moving towards it?
 
 personal beacon still taking damage!
+
+0, 1, 110, 111, 100, 101
+
+
+Possible equipment notes:
+Increase firing rate
+Battery with high cap very slow recharge, very high rate of discharge
+Packable lasers with higher power consumption?
+"Grid scaling" - messy but cool concept; "increase all generators by 20%", "double PLD damage". 
+
+Cerys or other cold planet idea - personal heater
