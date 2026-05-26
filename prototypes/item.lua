@@ -64,6 +64,7 @@ data:extend({
     subgroup   = "armor-adventure-materials",
     order      = "d[rocket-launcher]-b[mind-control]",
     stack_size = 20,
+    weight     = 10 * tons,
   },
 })
 
@@ -71,7 +72,7 @@ data:extend({
   {
     type       = "item",
     name       = "charged-lightning-gem",
-    icon       = "__space-age__/graphics/icons/lightning-collector.png",
+    icon       = "__armor-adventure__/graphics/icons/charged-lightning-gem.png",
     subgroup   = "armor-adventure-materials",
     order      = "z[charged-lightning-gem]",
     stack_size = 10,
@@ -125,6 +126,22 @@ data:extend({
   },
   {
     type       = "item",
+    name       = "demolisher-heart-fragment-large",
+    icon       = "__base__/graphics/icons/heavy-armor.png",
+    subgroup   = "armor-adventure-materials",
+    order      = "z[demolisher-heart-fragment-a]",
+    stack_size = 10,
+  },
+  {
+    type       = "item",
+    name       = "demolisher-heart-fragment-small",
+    icon       = "__base__/graphics/icons/medium-biter.png",
+    subgroup   = "armor-adventure-materials",
+    order      = "z[demolisher-heart-fragment-b]",
+    stack_size = 50,
+  },
+  {
+    type       = "item",
     name       = "promethium-armor-chassis",
     icon       = "__space-age__/graphics/icons/tungsten-plate.png",
     subgroup   = "armor-adventure-materials",
@@ -149,15 +166,7 @@ data:extend({
     order                   = "z[quantum-coil]",
     stack_size              = 5,
   },
-  {
-    type         = "item",
-    name         = "legochest",
-    icon         = "__base__/graphics/icons/steel-chest.png",
-    place_result = "legochest",
-    subgroup     = "armor-adventure-machines",
-    order        = "z[legochest]",
-    stack_size   = 10,
-  },
+
 })
 
 data:extend({
@@ -199,7 +208,7 @@ data:extend({
   {
     type = "item",
     name = "personal-combat-roboport",
-    icon = "__base__/graphics/icons/personal-roboport-equipment.png",
+    icon = "__armor-adventure__/graphics/icons/pcr-defender.png",
     place_as_equipment_result = "personal-combat-roboport",
     subgroup = "armor-adventure-equipment",
     order = "f[personal-combat-roboport-a]",
@@ -208,7 +217,7 @@ data:extend({
   {
     type = "item",
     name = "personal-combat-roboport-distractor",
-    icon = "__base__/graphics/icons/distractor-capsule.png",
+    icon = "__armor-adventure__/graphics/icons/pcr-distractor.png",
     place_as_equipment_result = "personal-combat-roboport-distractor",
     subgroup = "armor-adventure-equipment",
     order = "f[personal-combat-roboport-b]",
@@ -217,7 +226,7 @@ data:extend({
   {
     type = "item",
     name = "personal-combat-roboport-destroyer",
-    icon = "__base__/graphics/icons/destroyer-capsule.png",
+    icon = "__armor-adventure__/graphics/icons/pcr-destroyer.png",
     place_as_equipment_result = "personal-combat-roboport-destroyer",
     subgroup = "armor-adventure-equipment",
     order = "f[personal-combat-roboport-c]",
@@ -316,6 +325,42 @@ data:extend({
     order        = "p[pheromone-emitter]",
     stack_size   = 1,
     place_result = "pheromone-emitter",
+  },
+  {
+    type       = "item",
+    name       = "cryovault-access-card",
+    icon       = "__base__/graphics/icons/electronic-circuit.png",
+    icon_size  = 64,
+    subgroup   = "armor-adventure-materials",
+    order      = "n[cryovault-access-card]",
+    stack_size = 1,
+  },
+  {
+    type       = "item",
+    name       = "cryo-core",
+    icon       = "__space-age__/graphics/icons/cryogenic-science-pack.png",
+    icon_size  = 64,
+    subgroup   = "armor-adventure-materials",
+    order      = "n[cryo-core]",
+    stack_size = 1,
+  },
+  {
+    type       = "item",
+    name       = "thermodynamic-regulator",
+    icon       = "__base__/graphics/icons/processing-unit.png",
+    icon_size  = 64,
+    subgroup   = "armor-adventure-materials",
+    order      = "n[thermodynamic-regulator]",
+    stack_size = 10,
+  },
+  {
+    type       = "item",
+    name       = "gigantic-chitinous-shell",
+    icon       = "__base__/graphics/icons/behemoth-biter.png",
+    icon_size  = 64,
+    subgroup   = "armor-adventure-materials",
+    order      = "n[gigantic-chitinous-shell]",
+    stack_size = 10,
   },
   {
     type       = "item",

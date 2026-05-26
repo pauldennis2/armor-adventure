@@ -4,7 +4,7 @@ data:extend({
     name = "mech-armor-mk2",
     icon = "__space-age__/graphics/technology/mech-armor.png",
     icon_size = 256,
-    prerequisites = {"mech-armor"},
+    prerequisites = {"mech-armor", "promethium-science-pack"},
     unit = {
       count = 50000,
       ingredients = {
@@ -219,6 +219,8 @@ data:extend({
       time = 60,
     },
     effects = {
+      {type = "unlock-recipe", recipe = "demolisher-heart-split"},
+      {type = "unlock-recipe", recipe = "demolisher-heart-fragment-compress"},
       {type = "unlock-recipe", recipe = "promethium-armor-chassis"},
     },
   },
@@ -295,7 +297,9 @@ data:extend({
       },
       time = 60,
     },
-    effects = {},
+    effects = {
+      {type = "unlock-recipe", recipe = "thermodynamic-regulator"},
+    },
   },
   {
     type             = "technology",
@@ -306,6 +310,22 @@ data:extend({
     research_trigger = {type = "mine-entity", entity = "aquilo-signal-source"},
     effects          = {
       {type = "unlock-recipe", recipe = "aquilo-elevator-shaft"},
+    },
+  },
+  {
+    type          = "technology",
+    name          = "nauvis-defense-complete",
+    icon          = "__base__/graphics/technology/military.png",
+    icon_size     = 256,
+    prerequisites = {"armor-adventure-nauvis"},
+    enabled       = false,
+    unit = {
+      count       = 1,
+      ingredients = {{"automation-science-pack", 1}},
+      time        = 1,
+    },
+    effects = {
+      {type = "unlock-recipe", recipe = "nauvis-armor-piece"},
     },
   },
   {
@@ -333,6 +353,17 @@ data:extend({
     },
   },
   {
+    type             = "technology",
+    name             = "cryo-core-acquired",
+    icon             = "__space-age__/graphics/icons/cryogenic-science-pack.png",
+    icon_size        = 64,
+    prerequisites    = {"aquilo-scanning-complete"},
+    research_trigger = {type = "mine-entity", entity = "vault-card-reader"},
+    effects          = {
+      {type = "unlock-recipe", recipe = "cryovault-access-card"},
+    },
+  },
+  {
     type = "technology",
     name = "forge-promethium-armor",
     icon = "__armor-adventure__/graphics/entity/armor-crafting-station/base/armor-crafting-station-icon.png",
@@ -341,8 +372,8 @@ data:extend({
       "armor-adventure-vulcanus",
       "armor-adventure-gleba",
       "armor-adventure-fulgora",
-      "armor-adventure-aquilo",
-      "armor-adventure-nauvis",
+      "cryo-core-acquired",
+      "nauvis-defense-complete",
     },
     unit = {
       count = 10000,
@@ -458,4 +489,27 @@ if mods["castra-prime"] then
       },
     },
   })
+end
+
+if mods["metal-and-stars"] then
+  data:extend({{
+    type          = "technology",
+    name          = "armor-adventure-metal-and-stars",
+    icon          = "__metal-and-stars-graphics__/graphics/technology/prototype-mech-armor.png",
+    icon_size     = 256,
+    prerequisites = {"forge-promethium-armor"},
+    unit = {
+      count = 5000,
+      ingredients = {
+        {"promethium-science-pack", 1},
+        {"space-science-pack",      1},
+        {"nanite-science-pack",     1},
+        {"anomaly-science-pack",    1},
+        {"quantum-science-pack",    1},
+        {"ring-science-pack",       1},
+      },
+      time = 60,
+    },
+    effects = {},
+  }})
 end

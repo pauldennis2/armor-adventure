@@ -145,7 +145,7 @@ local PUZZLE_CONFIGS = {
     },
     {
         pos        = {x = -DEPOT_CORNER_INSET, y = -DEPOT_CORNER_INSET},
-        clue_lines = {"The kind of thing an idiot", "would have on his luggage."},
+        clue_lines = {"The kind of thing an idiot", "would have on his luggage.", "(5 digits)"},
         check      = function(s)
             for _, n in ipairs({"signal-1","signal-2","signal-3","signal-4","signal-5"}) do
                 if (s[n] or 0) <= 0 then return false end
@@ -307,14 +307,8 @@ function aquilo.check_combinator_puzzle(entity)
         if not solved[i] then all_done = false; break end
     end
     if all_done then
-        game.print("[color=cyan]All Fulgoran systems online. The armor component is yours.[/color]")
-        local surface = game.surfaces[DEPOT_SURFACE_NAME]
-        for _, p in pairs(game.players) do
-            if p.character and p.character.valid and p.surface == surface then
-                p.insert({name = "aquilo-prom-suit-component", count = 1})
-                break
-            end
-        end
+        storage.aquilo_depot.vault_unlocked = true
+        game.print("[color=cyan]All Fulgoran systems online. The cryovault has been unsealed.[/color]")
     end
 end
 
@@ -355,19 +349,54 @@ function aquilo.get_or_create_depot_surface()
     end
     surface.set_tiles(tiles, true)
 
-    -- Constant combinators at puzzle corner positions (non-minable)
+    -- Constant combinators at puzzle corner positions (non-minable, indestructible)
     for _, cfg in ipairs(PUZZLE_CONFIGS) do
         local comb = surface.create_entity({name = "constant-combinator", position = cfg.pos, force = "player"})
-        if comb and comb.valid then comb.minable_flag = false end
+        if comb and comb.valid then
+            comb.minable_flag  = false
+            comb.destructible  = false
+        end
     end
 
-    -- Ascent elevator placeholder at center
+    -- Ascent elevator placeholder at center (indestructible)
     local ascent = surface.create_entity({
         name     = "aquilo-depot-ascent",
         position = {0, 0},
         force    = "neutral",
     })
     if ascent and ascent.valid then ascent.destructible = false end
+
+    -- Cryovault chest: locked until all puzzles are solved. Spawned at north wall, left of center.
+    local vault = surface.create_entity({
+        name     = "cryovault-chest",
+        position = {-2, -9},
+        force    = "neutral",
+    })
+    if vault and vault.valid then
+        vault.destructible = false
+        vault.insert({name = "cryovault-access-card", count = 1})
+    end
+
+    -- Vault card reader: player inserts access card, closes chest; script does quality-matched swap.
+    local reader = surface.create_entity({
+        name     = "vault-card-reader",
+        position = {2, -9},
+        force    = "neutral",
+    })
+    if reader and reader.valid then
+        reader.destructible = false
+    end
+
+    rendering.draw_text{
+        text          = "Insert vault access card",
+        surface       = surface,
+        target        = {2, -9},
+        target_offset = {0, -2},
+        color         = {r = 0.7, g = 0.9, b = 1.0, a = 1},
+        scale         = 0.9,
+        alignment     = "center",
+        use_rich_text = false,
+    }
 
     setup_depot_puzzles(surface)
 

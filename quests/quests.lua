@@ -35,7 +35,10 @@ local function make_handler(surface_name)
     elseif surface_name == "nauvis" then
         local tech = game.forces["player"].technologies["armor-adventure-nauvis"]
         if tech and tech.researched then
-            return function() nauvis.on_tick_59() end
+            local done = game.forces["player"].technologies["nauvis-defense-complete"]
+            if not (done and done.researched) then
+                return function() nauvis.on_tick_59() end
+            end
         end
     elseif surface_name == "gleba" then
         local tech = game.forces["player"].technologies["armor-adventure-gleba"]
@@ -178,6 +181,7 @@ local entity_died_filter = {
     {filter = "name", name = "big-demolisher"},
     {filter = "name", name = "pheromone-emitter"},
     {filter = "name", name = "gigantoid-spitter"},
+    {filter = "name", name = "big-worm-turret"},
     {filter = "name", name = "aquilo-elevator-shaft"},
 }
 if HAS_CASTRA then
@@ -197,6 +201,8 @@ script.on_event(defines.events.on_entity_died, function(event)
         refresh()
     elseif name == "gigantoid-spitter" then
         nauvis.on_gigantoid_died(event.entity)
+    elseif name == "big-worm-turret" then
+        nauvis.on_big_worm_died(event.entity)
     elseif castra and (name == "data-collector" or name == "simulac-commander" or name == "simulac-mobile-fortress") then
         castra.on_entity_died(event)
     end

@@ -175,18 +175,20 @@ data:extend({massive_lc})
 local forging_station = table.deepcopy(data.raw["assembling-machine"]["assembling-machine-3"])
 forging_station.name                      = "armor-forging-station"
 forging_station.minable                   = {mining_time = 0.5, result = "armor-forging-station"}
-forging_station.crafting_categories       = {"armor-forging"}
+forging_station.crafting_categories       = {"armor-forging", "crafting", "advanced-crafting"}
 forging_station.allowed_effects           = {"speed", "consumption", "pollution"}
 forging_station.allowed_module_categories = {"speed", "efficiency"}
 forging_station.factoriopedia_simulation  = nil
-forging_station.collision_box             = {{-2.9, -2.9}, {2.9, 2.9}}
-forging_station.selection_box             = {{-3.0, -3.0}, {3.0, 3.0}}
+forging_station.collision_box             = {{-1.9, -1.9}, {1.9, 1.9}}
+forging_station.selection_box             = {{-2.0, -2.0}, {2.0, 2.0}}
 forging_station.fluid_boxes               = nil
 forging_station.fluid_boxes_off_when_no_fluid_recipe = nil
 forging_station.icon                      = "__armor-adventure__/graphics/entity/armor-crafting-station/base/armor-crafting-station-icon.png"
 forging_station.icon_size                 = 640
 -- frame_count=64 estimated from the 4000×3840 sheet (8 cols × 500px, 8 rows × 480px).
 -- color1 tint mask and frozen sprites exist but are not yet wired.
+-- scale=0.33 matches the 4×4 collision box (was 0.5 for the original 6×6 footprint).
+-- Rule: always scale collision box AND sprite together.
 forging_station.graphics_set = {
   animation = {
     layers = {
@@ -200,7 +202,7 @@ forging_station.graphics_set = {
         repeat_count    = 64,
         draw_as_shadow  = true,
         animation_speed = 0.3,
-        scale           = 0.5,
+        scale           = 0.33,
         shift           = {0, -1},
       },
       {
@@ -211,7 +213,7 @@ forging_station.graphics_set = {
         frame_count     = 64,
         line_length     = 10,
         animation_speed = 0.3,
-        scale           = 0.5,
+        scale           = 0.33,
         shift           = {0, -1},
       },
       {
@@ -222,7 +224,7 @@ forging_station.graphics_set = {
         frame_count     = 64,
         line_length     = 10,
         animation_speed = 0.3,
-        scale           = 0.5,
+        scale           = 0.33,
         shift           = {0, -1},
         draw_as_glow    = true,
         blend_mode      = "additive",
@@ -235,7 +237,7 @@ forging_station.graphics_set = {
         frame_count     = 64,
         line_length     = 10,
         animation_speed = 0.3,
-        scale           = 0.5,
+        scale           = 0.33,
         shift           = {0, -1},
         draw_as_glow    = true,
         blend_mode      = "additive",
@@ -252,12 +254,6 @@ quantum_coil_turret.name    = "quantum-coil-turret"
 quantum_coil_turret.minable = {mining_time = 0.5, result = "quantum-coil"}
 data:extend({quantum_coil_turret})
 
--- Legochest: concept-test for quality-gated recipe ingredients
-local legochest = table.deepcopy(data.raw["container"]["steel-chest"])
-legochest.name           = "legochest"
-legochest.minable        = {mining_time = 0.5, result = "legochest"}
-legochest.inventory_size = 100
-data:extend({legochest})
 
 local ts_slow = table.deepcopy(data.raw["sticker"]["tesla-turret-slow"])
 ts_slow.name                     = "time-stopper-slow"
@@ -430,6 +426,8 @@ local elevator_shaft = table.deepcopy(data.raw["assembling-machine"]["assembling
 elevator_shaft.name                = "aquilo-elevator-shaft"
 elevator_shaft.minable             = {mining_time = 0.5, result = "aquilo-elevator-shaft"}
 elevator_shaft.crafting_categories = {"aquilo-elevator-construction"}
+elevator_shaft.crafting_speed      = 1.0
+elevator_shaft.surface_conditions  = {{property = "aquilo-native", min = 1}}
 data:extend({elevator_shaft})
 
 -- Placeholder completed elevator (surface side) — chemical plant with no valid recipes.
@@ -488,6 +486,26 @@ pd_chest.destructible   = false
 pd_chest.flags          = {"not-blueprintable", "not-deconstructable"}
 pd_chest.inventory_size = 40
 data:extend({pd_chest})
+
+-- Cryovault chest: locked story chest in the Fulgoran depot room.
+-- Player cannot open it (blocked in control.lua) until all puzzles are solved.
+local cryovault_chest = table.deepcopy(data.raw["container"]["steel-chest"])
+cryovault_chest.name           = "cryovault-chest"
+cryovault_chest.minable        = nil
+cryovault_chest.destructible   = false
+cryovault_chest.flags          = {"not-blueprintable", "not-deconstructable"}
+cryovault_chest.inventory_size = 10
+data:extend({cryovault_chest})
+
+-- Vault card reader: player inserts an access card and closes the chest;
+-- script detects it via on_gui_closed and swaps it for a quality-matched cryo core.
+local vault_reader = table.deepcopy(data.raw["container"]["iron-chest"])
+vault_reader.name           = "vault-card-reader"
+vault_reader.minable        = nil
+vault_reader.destructible   = false
+vault_reader.flags          = {"not-blueprintable", "not-deconstructable"}
+vault_reader.inventory_size = 5
+data:extend({vault_reader})
 
 data:extend({
   {
@@ -559,13 +577,12 @@ data:extend({{
   },
 }})
 
--- nauvis-native surface property: set to 1 on Nauvis (in data-final-fixes.lua).
--- Used by surface_conditions on the Pheromone Emitter to restrict placement to Nauvis.
-data:extend({{
-  type          = "surface-property",
-  name          = "nauvis-native",
-  default_value = 0,
-}})
+-- nauvis-native / aquilo-native surface properties: set to 1 on their respective planets
+-- (in data-final-fixes.lua). Used by surface_conditions to restrict entity placement.
+data:extend({
+  {type = "surface-property", name = "nauvis-native", default_value = 0},
+  {type = "surface-property", name = "aquilo-native", default_value = 0},
+})
 
 -- Pheromone Emitter: placeable device that attracts and spawns biters via script.
 -- Based on vanilla beacon with all beacon effects zeroed out and void energy source.
@@ -598,6 +615,7 @@ do
   nest.flags = {"not-blueprintable", "not-deconstructable", "not-repairable", "not-rotatable"}
   data:extend({nest})
 end
+
 
 -- Gigantoid Spitter: boss summoned when the Pheromone Emitter fully charges.
 -- 5× visual scale of behemoth-spitter, 10× health and damage.

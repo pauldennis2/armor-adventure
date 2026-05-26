@@ -85,11 +85,17 @@ for _, proto in pairs(data.raw["roboport"] or {}) do
   proto.surface_conditions[#proto.surface_conditions + 1] = roboport_condition
 end
 
--- Pheromone Emitter: flag Nauvis as its native surface so surface_conditions can gate placement.
+-- Flag each planet as its native surface so surface_conditions can gate entity placement.
 local nauvis_planet = data.raw["planet"]["nauvis"]
 if nauvis_planet then
   nauvis_planet.surface_properties = nauvis_planet.surface_properties or {}
   nauvis_planet.surface_properties["nauvis-native"] = 1
+end
+
+local aquilo_planet = data.raw["planet"]["aquilo"]
+if aquilo_planet then
+  aquilo_planet.surface_properties = aquilo_planet.surface_properties or {}
+  aquilo_planet.surface_properties["aquilo-native"] = 1
 end
 
 -- Personal Warp Pylon: invisible assembling-machine deepcopy of rabbasca-warp-pylon.

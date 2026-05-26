@@ -1029,6 +1029,11 @@ script.on_event(defines.events.on_gui_opened, function(event)
       player.opened = nil
       player.print({"armor-adventure.pocket-dimension-chest-locked"})
     end
+  elseif entity.name == "cryovault-chest" then
+    if not (storage.aquilo_depot and storage.aquilo_depot.vault_unlocked) then
+      player.opened = nil
+      player.print({"armor-adventure.cryovault-locked"})
+    end
   elseif entity.name == "aquilo-elevator-complete" then
     player.opened = nil
     open_elevator_gui(player)
@@ -1060,9 +1065,30 @@ script.on_event(defines.events.on_gui_closed, function(event)
   end
   if event.gui_type == defines.gui_type.entity and event.entity then
     local ent = event.entity
-    if ent.valid and ent.name == "constant-combinator"
+    if not ent.valid then return end
+    if ent.name == "constant-combinator"
        and ent.surface.name == "aquilo-fulgoran-depot" then
       aquilo_quest.check_combinator_puzzle(ent)
+    elseif ent.name == "vault-card-reader" then
+      local inv = ent.get_inventory(defines.inventory.chest)
+      if inv then
+        for i = 1, #inv do
+          local stack = inv[i]
+          if stack.valid_for_read and stack.name == "cryovault-access-card" then
+            local quality_name = stack.quality.name
+            stack.clear()
+            local player = game.players[event.player_index]
+            if player and player.valid then
+              player.insert({name = "cryo-core", count = 1, quality = quality_name})
+              player.print("[color=cyan]Cryovault access card accepted. Cryo Core extracted.[/color]")
+              local tech = player.force.technologies["cryo-core-acquired"]
+              if tech and not tech.researched then
+                tech.researched = true
+              end
+            end
+          end
+        end
+      end
     end
   end
 end)
