@@ -10,6 +10,7 @@ local sync_personal_beacon
 
 local HAS_RABBASCA = script.active_mods["planet-rabbasca"] ~= nil
 local HAS_CASTRA   = script.active_mods["castra-prime"]    ~= nil
+local HAS_MOSHINE  = script.active_mods["Moshine"]         ~= nil
 local sync_pcr_visibility
 local PERSONAL_WARP_PYLON_EQUIP  = "personal-warp-pylon-equipment"
 local PERSONAL_WARP_PYLON_ENTITY = "armor-adventure-personal-warp-pylon"
@@ -110,6 +111,7 @@ script.on_init(function()
   if HAS_CASTRA then
     for _, force in pairs(game.forces) do sync_pcr_visibility(force) end
   end
+  quests.refresh()
 end)
 
 script.on_configuration_changed(function(data)
@@ -1137,10 +1139,14 @@ script.on_event(defines.events.on_player_changed_surface, function(event)
   if player.surface.name == "aquilo-fulgoran-depot" then
     aquilo_quest.rebuild_depot_renders()
   end
-  if not (storage.time_stopper_active and storage.time_stopper_active[player.index]) then return end
+  if not (storage.time_stopper_active and storage.time_stopper_active[player.index]) then
+    quests.refresh()
+    return
+  end
   local render = storage.time_stopper_render and storage.time_stopper_render[player.index]
   if render and render.valid then render.destroy() end
   storage.time_stopper_render[player.index] = draw_time_stopper_aura(player)
+  quests.refresh()
 end)
 
 -- Personal Warp Pylon (Rabbasca integration) --
@@ -1371,4 +1377,29 @@ script.on_nth_tick(60, function()
       end
     end
   end
+
+  -- Moshine debug: floating speed label over every train stop on the Moshine surface.
+  -- Shows the speed (tiles/tick) of the first train found on the surface.
+  -- TTL of 70 ticks auto-expires the label before the next redraw, so no storage needed.
+  if HAS_MOSHINE then
+    local moshine = game.surfaces["moshine"]
+    if moshine then
+      local locos  = moshine.find_entities_filtered({type = "locomotive"})
+      local first  = locos[1] and locos[1].train
+      local speed_text = first and string.format("%.3f t/t", math.abs(first.speed)) or "no trains"
+      for _, stop in pairs(moshine.find_entities_filtered({type = "train-stop"})) do
+        rendering.draw_text({
+          text          = speed_text,
+          surface       = moshine,
+          target        = stop,
+          target_offset = {0, -2},
+          color         = {r = 1, g = 1, b = 0.2},
+          scale         = 1.5,
+          alignment     = "center",
+          time_to_live  = 70,
+        })
+      end
+    end
+  end
 end)
+

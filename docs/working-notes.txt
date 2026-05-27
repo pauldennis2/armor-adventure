@@ -1,5 +1,3 @@
-incorporate power transfer
-
 + increase radius? no, not necessarily good
 improve mining speed?
 unique roboport with high capacity?
@@ -43,6 +41,7 @@ Eventual Gleba questline
     Creating gleba parts unlocks 
 
 Balancing
+make packed AFS available earlier and fit in regular mech armor
 
 Remove personal robot stash - still visible
 
@@ -91,3 +90,112 @@ Packable lasers with higher power consumption?
 "Grid scaling" - messy but cool concept; "increase all generators by 20%", "double PLD damage". 
 
 Cerys or other cold planet idea - personal heater
+
+personal tesla turret recipe
+    includes neodymium/magnets
+    neo rails?
+
+    recipe:
+    neo rails
+    charged vortex crystal
+    tesla turret
+    AI core
+    Modules?
+    
+panglia quest line
+    Use a nuke or a crafting building to "frack" the speed zones
+    This disturbs the worms, so you will need to protect your extractors
+        While they work without the benefit of the zone
+    Seed of a speed world -> universe simulation -> time crystals
+    Personal Time Stopper
+        Time crystals
+        Sentient chips
+        Branbalite slurry
+        Panglite
+        Blue chips
+
+        What extra thing does it do? Maybe it's also a shield
+            It should be able to increase its OWN regen rate
+
+Notes from playthrough
+
+Consider upping tech requirements. AFS research took about 10 seconds
+Aquilo radio scanning needs more feedback, if it's even working
+
+Aquilo Field Research -> "Aquilo Signal Investigation" 
+Icon: A signal under ice maybe
+
+"Dig deeper into the mysteries of Aquilo... could anyone have come to this cold world before us?"
+
+Signal Located -> Signal Triangulation
+
+"You've detected a strange EM emission from somewhere deeper in the planet. 
+You could set up radar stations to try to pinpoint the source."
+
+On completion print or add to armor journal
+
+Armor Forging Station :
+AFS research icon: use the AFS
+
+possible trigger tech: craft AFS
+
+tech description: "unlocks the Armor Forging Station, [add->] your mechanical companion on this journey."
+Armor Forging Station item description:
+"Used for forging all components for the Promethium Armor as well as the armor itself.
+ Due to the nature of the materials involved, cannot accept quality modules."
+
+Nauvis Field Research -> Nauvis Biter Investigation
+"Dig deeper into the mysteries of Nauvis... who knows what monsters lurk in the depths?"
+pheremone emitter
+    remove/hide distribution efficiency
+    desperately needs icon
+    unknown key surface-property-unit.nauvis-native
+    Change description. More vague, but add the suggestion of quality matters
+
+Fulgora field research - Fulgora Climate Investigation
+"Dig deeper into the mysteries of Fulgora... could you find a way to harness the power of the skies even further?"
+
+Massive Lighting Collector -> Massive Lightning Funnel
+
+Reduce to maybe 3-5 charged lightning gems - too much upcylcing or maybe ONE
+
+Description: 
+"Draws in lightning strikes from a much wider area, but does not send any electricity to the grid.
+Where could all that power be going? Best placed far from your base."
+
+Packable forge description:
+"crafting speed doubled -> crafting speed increased 100%
+
+Promethium armor icon use icon for promethium armor (most desperately needed)
+
+Trigger tech for vulcanus
+
+Vulcanus field research -> "Vulcanus Demolisher Anatomy Investigation"
+Remove/hide quantum coil
+
+Important!!! Remove all non armor crafting recipes from AFS
+
+Allow machining assembler to craft massive lightning funnel?
+MLF -> Icon w big lightning? dunno
+only buildable on Fulgora
+Make charged gems easier to see or go into a chest (ideally require coal or something to start?)
+    or mark automatically for deconstruction
+Damage effect if you're standing nearby? nah
+
+Charged lightning gem description
+
+Gleba
+Mind control rocket needs description
+Quality should matter
+
+Gleba field research -> "Gleba Pentapod Investigation"
+needs desc
+
+biointerface needs a technology!
+mind control doesn't work at all!!!!!!
+pheremone emitter - does nothing
+
+
+Fix:
+Thermodynamic regulator needs icon, and should be discovered on Cryo core acquired
+Remove movement speed bonus from AFS tooltip

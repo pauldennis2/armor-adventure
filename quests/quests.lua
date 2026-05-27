@@ -16,97 +16,36 @@ local castra  = HAS_CASTRA and require("quests.castra") or nil
 
 local M = {}
 
--- Returns the 59-tick handler for a surface name, or nil if not a quest surface
--- or the required tech has not been researched.
-local function make_handler(surface_name)
-    if surface_name == "aquilo" then
-        local tech = game.forces["player"].technologies["armor-adventure-aquilo"]
-        if not (tech and tech.researched) then return nil end
-        local scan_done = game.forces["player"].technologies["aquilo-scanning-complete"]
-        -- Active during scanning phase and during elevator construction phase.
-        if not (scan_done and scan_done.researched) then
-            return function() aquilo.on_tick_59() end
-        end
-        local elev = storage.aquilo_elevator
-        if elev and not elev.complete then
-            return function() aquilo.on_tick_59() end
-        end
-        return nil
-    elseif surface_name == "nauvis" then
-        local tech = game.forces["player"].technologies["armor-adventure-nauvis"]
-        if tech and tech.researched then
-            local done = game.forces["player"].technologies["nauvis-defense-complete"]
-            if not (done and done.researched) then
-                return function() nauvis.on_tick_59() end
-            end
-        end
-    elseif surface_name == "gleba" then
-        local tech = game.forces["player"].technologies["armor-adventure-gleba"]
-        if tech and tech.researched then
-            return function() gleba.on_tick_59() end
-        end
-    elseif surface_name == "castra" and castra then
-        return function() castra.on_tick_59() end
+-- Always-on handler: call every quest module's tick-59 function unconditionally.
+-- Each module guards its own work with early-return when nothing is active, so
+-- this is safe and cheap when quests are idle.
+--
+-- Previously the handler was registered dynamically only when a player was present
+-- on the relevant planet surface (UPS-friendly, see git history). That approach
+-- breaks when surface-change events are suppressed (e.g. bunnyhop engine), so we
+-- run all modules unconditionally until a more robust trigger is available.
+local function make_always_handler()
+    return function()
+        aquilo.on_tick_59()
+        nauvis.on_tick_59()
+        gleba.on_tick_59()
+        if castra then castra.on_tick_59() end
     end
-    return nil
 end
 
--- Re-registers tick 59 from storage alone (no game access) — safe for on_load.
-local function make_handler_from_storage()
-    local surface = storage.active_quest_surface
-    if surface == "aquilo" then
-        return function() aquilo.on_tick_59() end
-    elseif surface == "nauvis" then
-        return function() nauvis.on_tick_59() end
-    elseif surface == "gleba" then
-        return function() gleba.on_tick_59() end
-    elseif surface == "castra" and castra then
-        return function() castra.on_tick_59() end
-    end
-    return nil
-end
-
--- Scans all players and registers the correct 59-tick handler:
---   * No players on a quest surface  → deregister (nil)
---   * All quest-surface players on the same planet → register that planet's handler
---   * Players on different quest surfaces → deregister (split-party rule)
+-- Called from control.lua whenever state that affects quest activation changes.
 local function refresh()
-    local active_surface = nil
-    local active_handler = nil
-    for _, player in pairs(game.players) do
-        if not (player.character and player.character.valid) then goto continue end
-        local name = player.surface.name
-        local h    = make_handler(name)
-        if h then
-            if active_surface and active_surface ~= name then
-                storage.active_quest_surface = nil
-                script.on_nth_tick(59, nil)
-                return
-            end
-            active_surface = name
-            active_handler = h
-        end
-        ::continue::
-    end
-    storage.active_quest_surface = active_surface
-    script.on_nth_tick(59, active_handler)
+    script.on_nth_tick(59, make_always_handler())
+    storage.active_quest_surface = "active"
 end
 
--- Called from control.lua whenever state that affects quest activation changes:
--- on_configuration_changed, on_research_finished, and on_player_changed_surface.
 function M.refresh()
     refresh()
 end
 
--- Re-register tick 59 on every game load (game is nil here; use storage only).
+-- Re-register tick 59 on every game load (game is nil here; closures are valid).
 script.on_load(function()
-    script.on_nth_tick(59, make_handler_from_storage())
-end)
-
--- Surface change is the primary trigger; registered here since control.lua
--- has no on_player_changed_surface handler to conflict with.
-script.on_event(defines.events.on_player_changed_surface, function(_)
-    refresh()
+    script.on_nth_tick(59, make_always_handler())
 end)
 
 -- MLC: drain every tick, rescan every 5s.

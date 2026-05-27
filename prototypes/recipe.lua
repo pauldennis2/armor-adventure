@@ -276,6 +276,22 @@ data:extend({
   },
 })
 
+if mods["Moshine"] then
+  data:extend({{
+    type            = "recipe",
+    name            = "unstable-magnetized-data-core",
+    enabled         = true,  -- TODO: lock behind armor-adventure-moshine tech
+    energy_required = 120,
+    category        = "metallurgy",
+    ingredients = {
+      {type = "fluid", name = "raw-data",    amount = 5000},
+      {type = "fluid", name = "molten-iron", amount = 500},
+      {type = "item",  name = "magnet",      amount = 50},
+    },
+    results = {{type = "item", name = "unstable-magnetized-data-core", amount = 1}},
+  }})
+end
+
 if mods["castra-prime"] then
   data:extend({
     {

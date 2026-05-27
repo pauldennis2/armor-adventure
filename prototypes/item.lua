@@ -282,6 +282,18 @@ data:extend({
   },
 })
 
+if mods["Moshine"] then
+  data:extend({{
+    type        = "item",
+    name        = "unstable-magnetized-data-core",
+    icon        = "__base__/graphics/icons/uranium-fuel-cell.png",
+    icon_size   = 64,
+    subgroup    = "armor-adventure-materials",
+    order       = "z[unstable-magnetized-data-core]",
+    stack_size  = 1,
+  }})
+end
+
 if mods["planet-rabbasca"] then
   data:extend({{
     type = "item",
