@@ -1,16 +1,20 @@
 {
   "name": "armor-adventure",
-  "version": "0.0.3",
+  "version": "0.1.0",
   "title": "Armor Adventure",
   "author": "erronius",
   "contact": "",
   "homepage": "",
-  "description": "Upgraded armor variants.",
+  "description": "Adds a late-game armor upgrade with a sprawling quest.",
   "factorio_version": "2.0",
   "dependencies": [
     "base >= 2.0.0",
     "space-age >= 2.0.0",
     "? castra-prime",
-    "? factorissimo-2-notnotmelon"
+    "? factorissimo-2-notnotmelon",
+    "? Moshine",
+    "? panglia_planet",
+    "? planet-rabbasca",
+    "? metal-and-stars"
   ]
 }
