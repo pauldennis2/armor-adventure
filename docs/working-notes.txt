@@ -91,18 +91,6 @@ Packable lasers with higher power consumption?
 
 Cerys or other cold planet idea - personal heater
 
-personal tesla turret recipe
-    includes neodymium/magnets
-    neo rails?
-
-    recipe:
-    neo rails
-    charged vortex crystal
-    tesla turret
-    AI core
-    Modules?
-    
-
 Panglia quest updates  
     Involve the roots somehow
     Universe sim? ^^
@@ -112,15 +100,7 @@ Panglia quest updates
 
 Notes from playthrough
 
-Consider upping tech requirements. AFS research took about 10 seconds
-Aquilo radio scanning needs more feedback, if it's even working
 
-Aquilo Field Research -> "Aquilo Signal Investigation" 
-Icon: A signal under ice maybe
-
-"Dig deeper into the mysteries of Aquilo... could anyone have come to this cold world before us?"
-
-Signal Located -> Signal Triangulation
 
 "You've detected a strange EM emission from somewhere deeper in the planet. 
 You could set up radar stations to try to pinpoint the source."
