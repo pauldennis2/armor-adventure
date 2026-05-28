@@ -658,3 +658,78 @@ do
   gs.absorptions_to_join_attack = nil
   data:extend({gs})
 end
+
+if mods["panglia_planet"] then
+  -- Crystal node spawned at each destroyed beacon position after a nuke.
+  -- Mining it drops essence-of-speed and triggers the time-fracking research.
+  data:extend({{
+    type           = "simple-entity",
+    name           = "panglia-essence-node",
+    icon           = "__base__/graphics/icons/speed-module-3.png",
+    icon_size      = 64,
+    flags          = {"placeable-neutral", "not-blueprintable"},
+    render_layer   = "object",
+    destructible   = false,
+    collision_mask = {layers = {}},
+    minable = {
+      mining_time = 1,
+      results     = {{type = "item", name = "panglia-essence-of-speed", amount = 5}},
+    },
+    picture = {
+      filename = "__base__/graphics/icons/speed-module-3.png",
+      width    = 64,
+      height   = 64,
+      scale    = 2,
+    },
+    collision_box = {{-0.4, -0.4}, {0.4, 0.4}},
+    selection_box = {{-0.6, -0.6}, {0.6, 0.6}},
+  }})
+end
+
+if mods["panglia_planet"] and mods["Moshine"] then
+  local minutes = 60 * 60
+  data:extend({{
+    type    = "plant",
+    name    = "processing-grid-process-essence-of-speed",
+    icon    = "__base__/graphics/icons/speed-module-3.png",
+    flags   = {"placeable-neutral"},
+    minable = {
+      mining_particle = "wooden-particle",
+      mining_time     = 0.2,
+      results         = {{type = "item", name = "panglia-refined-speed", amount = 1}},
+    },
+    growth_ticks    = 4 * minutes,
+    max_health      = 50,
+    collision_box   = {{-0.3, -0.3}, {0.3, 0.3}},
+    selection_box   = {{-1, -1}, {1, 1}},
+    sticker_box     = {{-1, -1}, {1, 1}},
+    drawing_box_vertical_extension = 0.8,
+    impact_category = "tree",
+    autoplace       = {probability_expression = 0, tile_restriction = {"webbed_processor_tile"}},
+    tile_buildability_rules = {{
+      area           = {{-0.5, -0.5}, {0.5, 0.5}},
+      required_tiles = {layers = {ground_tile = true}},
+    }},
+    -- Reuse the Moshine equation-plant glow animation as a placeholder.
+    stateless_visualisation_variations = {{
+      animation = {
+        sheets = {{
+          variation_count = 1,
+          filenames       = {"__Moshine-assets__/graphics/entity/quantum-computer/plant.png"},
+          size            = 128,
+          lines_per_file  = 25,
+          frame_count     = 100,
+          animation_speed = 0.15,
+          scale           = 0.5,
+          draw_as_glow    = true,
+          frame_sequence  = {
+            1,2,3,1,4,5,6,1,7,8,9,10,10,11,12,1,1,13,14,15,15,13,16,17,1,18,1,19,19,20,21,22,1,22,23,1,24,25,1,12,5,6,1,15,11,7,1,8,5,4,
+            1,1,3,1,11,5,6,1,22,8,9,1,10,1,12,1,1,3,4,1,1,13,16,17,1,16,1,1,1,1,1,22,1,22,7,1,24,6,1,1,1,1,1,1,7,7,1,11,5,1
+          },
+        }},
+      },
+    }},
+    pictures  = {layers = {{filename = "__core__/graphics/empty.png", width = 1, height = 1}}},
+    map_color = {200, 150, 255},
+  }})
+end

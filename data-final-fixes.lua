@@ -117,6 +117,26 @@ if mods["Moshine"] then
   end
 end
 
+-- Panglia: allow essence-of-speed to be planted in Moshine's compute farm.
+if mods["panglia_planet"] and mods["Moshine"] then
+    local pg = data.raw["agricultural-tower"]["processing-grid"]
+    if pg and pg.accepted_seeds then
+        table.insert(pg.accepted_seeds, "panglia-essence-of-speed")
+    end
+end
+
+-- Panglia: inject a script trigger as the first effect on the atomic-rocket so we
+-- can detect nuke detonations before area damage fires (beacons still alive at that point).
+if mods["panglia_planet"] then
+    local rocket = data.raw["projectile"]["atomic-rocket"]
+    if rocket and rocket.action and rocket.action.action_delivery then
+        table.insert(rocket.action.action_delivery.target_effects, 1, {
+            type      = "script",
+            effect_id = "armor_adventure_nuke_on_panglia",
+        })
+    end
+end
+
 -- Personal Warp Pylon: invisible assembling-machine deepcopy of rabbasca-warp-pylon.
 -- Must be a crafting machine so Rabbasca's warp dispatch cycle (awake → trigger item → attempt_build_ghost) works.
 -- Graphics stripped via empty graphics_set so nothing is rendered.

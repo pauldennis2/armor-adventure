@@ -85,6 +85,7 @@ local function init_storage()
   storage.simulac_awaken_meter    = storage.simulac_awaken_meter or 0
   storage.time_stopper_render     = storage.time_stopper_render or {}
   storage.spark_last_pos          = storage.spark_last_pos or {}
+  storage.panglia_pending_essence = storage.panglia_pending_essence or {}
   for _, player in pairs(game.players) do
     storage.mk2_penalties[player.index]      = storage.mk2_penalties[player.index] or {}
     storage.roboport_cooldowns[player.index] = storage.roboport_cooldowns[player.index] or {}

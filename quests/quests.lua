@@ -6,8 +6,9 @@
 -- surfaces, all quest handlers are disabled. Quests are cooperative — one
 -- planet at a time.
 
-local HAS_CASTRA   = script.active_mods["castra-prime"] ~= nil
-local HAS_MOSHINE  = script.active_mods["Moshine"]     ~= nil
+local HAS_CASTRA   = script.active_mods["castra-prime"]  ~= nil
+local HAS_MOSHINE  = script.active_mods["Moshine"]       ~= nil
+local HAS_PANGLIA  = script.active_mods["panglia_planet"] ~= nil
 
 local aquilo  = require("quests.aquilo")
 local fulgora = require("quests.fulgora")
@@ -15,6 +16,7 @@ local gleba   = require("quests.gleba")
 local nauvis  = require("quests.nauvis")
 local castra  = HAS_CASTRA  and require("quests.castra")  or nil
 local moshine = HAS_MOSHINE and require("quests.moshine") or nil
+local panglia = HAS_PANGLIA and require("quests.panglia") or nil
 
 local M = {}
 
@@ -31,7 +33,8 @@ local function make_always_handler()
         aquilo.on_tick_59()
         nauvis.on_tick_59()
         gleba.on_tick_59()
-        if castra then castra.on_tick_59() end
+        if castra  then castra.on_tick_59()  end
+        if panglia then panglia.on_tick_59() end
     end
 end
 
@@ -78,7 +81,9 @@ end
 -- Script trigger effects (mind control hit, tesla turret damage).
 script.on_event(defines.events.on_script_trigger_effect, function(event)
     gleba.on_script_trigger_effect(event)
+    if panglia then panglia.on_script_trigger_effect(event) end
 end)
+
 
 -- NOTE: script.on_event replaces the previous handler for the same event id, so
 -- all built/mined handlers MUST be merged into a single registration per event type

@@ -102,20 +102,13 @@ personal tesla turret recipe
     AI core
     Modules?
     
-panglia quest line
-    Use a nuke or a crafting building to "frack" the speed zones
-    This disturbs the worms, so you will need to protect your extractors
-        While they work without the benefit of the zone
-    Seed of a speed world -> universe simulation -> time crystals
-    Personal Time Stopper
-        Time crystals
-        Sentient chips
-        Branbalite slurry
-        Panglite
-        Blue chips
 
-        What extra thing does it do? Maybe it's also a shield
-            It should be able to increase its OWN regen rate
+Panglia quest updates  
+    Involve the roots somehow
+    Universe sim? ^^
+    Reduce number of essence dropped
+    Better names? icons
+    Add universe sim to get speed
 
 Notes from playthrough
 

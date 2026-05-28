@@ -251,31 +251,60 @@ data:extend({
     },
     results = {{type = "item", name = "massive-lightning-collector", amount = 1}},
   },
-  {
+})
+
+if mods["Moshine"] then
+  data:extend({{
     type            = "recipe",
     name            = "personal-tesla-turret",
     enabled         = false,
     energy_required = 10,
     category        = "armor-forging",
     ingredients = {
-      {type = "item", name = "personal-laser-defense-equipment", amount = 1},
-      {type = "item", name = "tesla-turret",                     amount = 1},
+      {type = "item", name = "personal-laser-defense-equipment", amount =  1},
+      {type = "item", name = "tesla-turret",                     amount =  1},
+      {type = "item", name = "vortex-data-card",                 amount = 10},
+      {type = "item", name = "rail-minimal",                      amount = 10},
+      {type = "item", name = "processing-unit",                  amount = 50},
     },
     results = {{type = "item", name = "personal-tesla-turret", amount = 1}},
-  },
-  {
+  }})
+end
+
+if mods["panglia_planet"] and mods["Moshine"] then
+  data:extend({{
+    type               = "recipe",
+    name               = "panglia-essence-of-speed",
+    category           = "data-processing",
+    enabled            = false,
+    energy_required    = 1000,
+    allow_productivity = false,
+    auto_recycle       = false,
+    ingredients = {
+      {type = "item", name = "panglia-essence-of-speed", amount = 1},
+    },
+    results = {
+      {type = "item", name = "panglia-refined-speed", amount = 1},
+    },
+  }})
+end
+
+if mods["panglia_planet"] then
+  data:extend({{
     type            = "recipe",
     name            = "personal-time-stopper",
     enabled         = false,
     energy_required = 10,
     category        = "armor-forging",
     ingredients = {
-      {type = "item", name = "battery-mk2-equipment", amount = 1},
-      {type = "item", name = "steel-plate",           amount = 10},
+      {type = "item", name = "battery-mk2-equipment", amount = 2},
+      {type = "item", name = "panglia-refined-speed", amount = 3},
+      {type = "item", name = "efficiency-module-3",   amount = 2},
+      {type = "item", name = "speed-module-3",        amount = 4},
     },
     results = {{type = "item", name = "personal-time-stopper", amount = 1}},
-  },
-})
+  }})
+end
 
 if mods["Moshine"] then
   data:extend({{

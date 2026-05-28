@@ -30,6 +30,7 @@ data:extend({
   {
     type = "technology",
     name = "mech-armor-mk2-running-speed",
+    hidden = true,
     icon = "__base__/graphics/technology/exoskeleton-equipment.png",
     icon_size = 256,
     prerequisites = {"forge-promethium-armor"},
@@ -47,10 +48,15 @@ data:extend({
     name          = "packable-forge",
     icon          = "__armor-adventure__/graphics/entity/armor-crafting-station/base/armor-crafting-station-icon.png",
     icon_size     = 640,
-    prerequisites = {"forge-promethium-armor"},
+    prerequisites = {"mech-armor-mk2"},
     unit = {
-      count       = 10,
-      ingredients = {{"logistic-science-pack", 1}},
+      count       = 1000,
+      ingredients = {
+        {"automation-science-pack", 1},
+        {"logistic-science-pack",   1},
+        {"chemical-science-pack",   1},
+        {"promethium-science-pack", 1},
+      },
       time        = 60,
     },
     effects = {},
@@ -80,6 +86,7 @@ data:extend({
   {
     type = "technology",
     name = "personal-beacon",
+    hidden = true,
     icon = "__base__/graphics/technology/personal-roboport-equipment.png",
     icon_size = 256,
     prerequisites = {"forge-promethium-armor"},
@@ -112,79 +119,101 @@ data:extend({
   },
 })
 
-data:extend({
-  {
-    type = "technology",
-    name = "pocket-dimension",
-    icon = "__base__/graphics/technology/personal-roboport-equipment.png",
-    icon_size = 256,
-    prerequisites = {"forge-promethium-armor"},
-    unit = {
-      count = 10,
-      ingredients = {{"automation-science-pack", 1}},
-      time = 60,
+if mods["metal-and-stars"] then
+  data:extend({
+    {
+      type = "technology",
+      name = "pocket-dimension",
+      icon = "__base__/graphics/technology/personal-roboport-equipment.png",
+      icon_size = 256,
+      prerequisites = {"armor-adventure-metal-and-stars"},
+      unit = {
+        count = 10,
+        ingredients = {{"automation-science-pack", 1}},
+        time = 60,
+      },
+      effects = {
+        {type = "unlock-recipe", recipe = "pocket-dimension-generator"},
+      },
     },
-    effects = {
-      {type = "unlock-recipe", recipe = "pocket-dimension-generator"},
+    {
+      type = "technology",
+      name = "pocket-dimension-roboport",
+      icon = "__base__/graphics/technology/construction-robotics.png",
+      icon_size = 256,
+      prerequisites = {"pocket-dimension"},
+      unit = {
+        count = 10,
+        ingredients = {{"logistic-science-pack", 1}},
+        time = 60,
+      },
     },
-  },
-})
+  })
+end
 
-data:extend({
-  {
-    type = "technology",
-    name = "pocket-dimension-roboport",
-    icon = "__base__/graphics/technology/construction-robotics.png",
-    icon_size = 256,
-    prerequisites = {"pocket-dimension"},
-    unit = {
-      count = 10,
-      ingredients = {{"logistic-science-pack", 1}},
-      time = 60,
-    },
-  },
-})
-
-data:extend({
-  {
+if mods["Moshine"] then
+  data:extend({{
     type = "technology",
     name = "personal-tesla-turret",
-    icon = "__base__/graphics/technology/personal-laser-defense-equipment.png",
-    icon_size = 256,
-    prerequisites = {"forge-promethium-armor", "tesla-weapons"},
+    icon = "__space-age__/graphics/icons/teslagun.png",
+    icon_size = 64,
+    prerequisites = {"forge-promethium-armor"},
     unit = {
-      count = 20,
-      ingredients = {{"electromagnetic-science-pack", 1}},
-      time = 60,
+      count = 30,
+      ingredients = {
+        {"datacell-raw-data",      1},
+        {"datacell-ai-model-data", 1},
+      },
+      time = 400000,
     },
     effects = {
       {type = "unlock-recipe", recipe = "personal-tesla-turret"},
+      {type = "unlock-recipe", recipe = "vortex-data-card"},
     },
-  },
-})
+  }})
+end
 
-data:extend({
-  {
-    type = "technology",
-    name = "personal-time-stopper",
-    icon = "__base__/graphics/technology/battery-mk2-equipment.png",
-    icon_size = 256,
-    prerequisites = {"forge-promethium-armor"},
-    unit = {
-      count = 20,
-      ingredients = {{"electromagnetic-science-pack", 1}},
-      time = 60,
+if mods["panglia_planet"] then
+  data:extend({
+    {
+      type             = "technology",
+      name             = "time-fracking",
+      icon             = "__base__/graphics/technology/battery-mk2-equipment.png",
+      icon_size        = 256,
+      prerequisites    = {"forge-promethium-armor"},
+      research_trigger = {type = "mine-entity", entity = "panglia-essence-node"},
+      effects = {
+        {type = "unlock-recipe", recipe = "panglia-essence-of-speed"},
+      },
     },
-    effects = {
-      {type = "unlock-recipe", recipe = "personal-time-stopper"},
+    {
+      type = "technology",
+      name = "personal-time-stopper",
+      icon = "__base__/graphics/technology/battery-mk2-equipment.png",
+      icon_size = 256,
+      prerequisites = {"time-fracking"},
+      unit = {
+        count = 30,
+        ingredients = {
+          {"datacell-raw-data",       1},
+          {"datacell-ai-model-data",  1},
+          {"datacell-solved-equation", 1},
+          {"datacell-dna-sequenced",  1},
+        },
+        time = 400000,
+      },
+      effects = {
+        {type = "unlock-recipe", recipe = "personal-time-stopper"},
+      },
     },
-  },
-})
+  })
+end
 
 data:extend({
   {
     type = "technology",
     name = "personal-fridge",
+    hidden = true,
     icon = "__space-age__/graphics/technology/agriculture.png",
     icon_size = 256,
     prerequisites = {"forge-promethium-armor"},

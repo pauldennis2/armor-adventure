@@ -168,8 +168,31 @@ local acs_eq = {
     scale    = 0.5,
   },
   shape              = {width = 2, height = 2, type = "full"},
-  categories         = MK2_CATEGORY,
+  categories         = {"armor", "armor-adventure-mk2"},
   energy_source      = {type = "electric", usage_priority = "secondary-input", buffer_capacity = "1J", input_flow_limit = "1W"},
   energy_consumption = "1W",
 }
 data:extend({acs_eq})
+
+-- Planet component equipment: passive 1×1 slots in any modular armor.
+-- belt-immunity-equipment with a void energy source does nothing when equipped.
+local BOTH_CATEGORIES = {"armor", "armor-adventure-mk2"}
+local function component_eq(name, icon)
+  return {
+    type               = "belt-immunity-equipment",
+    name               = name .. "-equipment",
+    take_result        = name,
+    sprite             = {filename = icon, width = 64, height = 64, scale = 0.5},
+    shape              = {width = 1, height = 1, type = "full"},
+    categories         = BOTH_CATEGORIES,
+    energy_source      = {type = "electric", usage_priority = "secondary-input", buffer_capacity = "1J", input_flow_limit = "1W"},
+    energy_consumption = "1W",
+  }
+end
+data:extend({
+  component_eq("bio-interface",                "__base__/graphics/icons/electronic-circuit.png"),
+  component_eq("promethium-armor-chassis",     "__space-age__/graphics/icons/tungsten-plate.png"),
+  component_eq("promethium-armor-electronics", "__base__/graphics/icons/processing-unit.png"),
+  component_eq("thermodynamic-regulator",      "__base__/graphics/icons/processing-unit.png"),
+  component_eq("nauvis-armor-piece",           "__base__/graphics/icons/medium-biter.png"),
+})

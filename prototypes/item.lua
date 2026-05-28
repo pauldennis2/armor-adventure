@@ -102,11 +102,12 @@ data:extend({
   },
   {
     type       = "item",
-    name       = "bio-interface",
-    icon       = "__base__/graphics/icons/electronic-circuit.png",
-    subgroup   = "armor-adventure-materials",
-    order      = "z[bio-interface]",
-    stack_size = 50,
+    name                      = "bio-interface",
+    icon                      = "__base__/graphics/icons/electronic-circuit.png",
+    subgroup                  = "armor-adventure-materials",
+    order                     = "z[bio-interface]",
+    stack_size                = 50,
+    place_as_equipment_result = "bio-interface-equipment",
   },
   {
     type       = "item",
@@ -142,19 +143,21 @@ data:extend({
   },
   {
     type       = "item",
-    name       = "promethium-armor-chassis",
-    icon       = "__space-age__/graphics/icons/tungsten-plate.png",
-    subgroup   = "armor-adventure-materials",
-    order      = "z[promethium-armor-chassis]",
-    stack_size = 10,
+    name                      = "promethium-armor-chassis",
+    icon                      = "__space-age__/graphics/icons/tungsten-plate.png",
+    subgroup                  = "armor-adventure-materials",
+    order                     = "z[promethium-armor-chassis]",
+    stack_size                = 10,
+    place_as_equipment_result = "promethium-armor-chassis-equipment",
   },
   {
     type       = "item",
-    name       = "promethium-armor-electronics",
-    icon       = "__base__/graphics/icons/processing-unit.png",
-    subgroup   = "armor-adventure-materials",
-    order      = "z[promethium-armor-electronics]",
-    stack_size = 10,
+    name                      = "promethium-armor-electronics",
+    icon                      = "__base__/graphics/icons/processing-unit.png",
+    subgroup                  = "armor-adventure-materials",
+    order                     = "z[promethium-armor-electronics]",
+    stack_size                = 10,
+    place_as_equipment_result = "promethium-armor-electronics-equipment",
   },
   {
     type                    = "item",
@@ -354,6 +357,39 @@ if mods["Moshine"] then
   })
 end
 
+if mods["panglia_planet"] then
+  if mods["Moshine"] then
+    -- tool type so agricultural-tower (compute farm) can plant it; durability=1 = one use per seed
+    data:extend({{
+      type         = "tool",
+      name         = "panglia-essence-of-speed",
+      icon         = "__base__/graphics/icons/speed-module-3.png",
+      subgroup     = "armor-adventure-materials",
+      order        = "z[panglia-essence-of-speed]",
+      stack_size   = 50,
+      durability   = 1,
+      plant_result = "processing-grid-process-essence-of-speed",
+    }})
+  else
+    data:extend({{
+      type       = "item",
+      name       = "panglia-essence-of-speed",
+      icon       = "__base__/graphics/icons/speed-module-3.png",
+      subgroup   = "armor-adventure-materials",
+      order      = "z[panglia-essence-of-speed]",
+      stack_size = 50,
+    }})
+  end
+  data:extend({{
+    type       = "item",
+    name       = "panglia-refined-speed",
+    icon       = "__panglia_planet__/graphics/icons/panglia_hidden_beacon.png",
+    subgroup   = "armor-adventure-materials",
+    order      = "z[panglia-refined-speed]",
+    stack_size = 50,
+  }})
+end
+
 if mods["planet-rabbasca"] then
   data:extend({{
     type = "item",
@@ -418,12 +454,13 @@ data:extend({
   },
   {
     type       = "item",
-    name       = "thermodynamic-regulator",
-    icon       = "__base__/graphics/icons/processing-unit.png",
-    icon_size  = 64,
-    subgroup   = "armor-adventure-materials",
-    order      = "n[thermodynamic-regulator]",
-    stack_size = 10,
+    name                      = "thermodynamic-regulator",
+    icon                      = "__base__/graphics/icons/processing-unit.png",
+    icon_size                 = 64,
+    subgroup                  = "armor-adventure-materials",
+    order                     = "n[thermodynamic-regulator]",
+    stack_size                = 10,
+    place_as_equipment_result = "thermodynamic-regulator-equipment",
   },
   {
     type       = "item",
@@ -436,11 +473,12 @@ data:extend({
   },
   {
     type       = "item",
-    name       = "nauvis-armor-piece",
-    icon       = "__base__/graphics/icons/medium-biter.png",
-    icon_size  = 64,
-    subgroup   = "armor-adventure-materials",
-    order      = "n[nauvis-armor-piece]",
-    stack_size = 10,
+    name                      = "nauvis-armor-piece",
+    icon                      = "__base__/graphics/icons/medium-biter.png",
+    icon_size                 = 64,
+    subgroup                  = "armor-adventure-materials",
+    order                     = "n[nauvis-armor-piece]",
+    stack_size                = 10,
+    place_as_equipment_result = "nauvis-armor-piece-equipment",
   },
 })
