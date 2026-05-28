@@ -194,8 +194,37 @@ needs desc
 biointerface needs a technology!
 mind control doesn't work at all!!!!!!
 pheremone emitter - does nothing
+Update: still nothing
+
+Aquilo elevator
+    It should dump out more junk but currently it's giving too much back - I don't want players to build these for resources
+    Prob reduce iron ore to 2, stone to 75, and also put out 50 ice or something useless
+    Quality doesn't matter (except for crafting speed). Maybe require quality shaft components? too mean?
+    More gracefully handle extra items on completion? Cerys is similar issue
+
+Fulgoran depot
+    Serious flavor needed. broken console, some kind of "complete missing sequences to authenticate"
+    Put "A" 1 in as default for 3
+    Add negbin puzzle?
+    Sliding door? Wall opens up?
+    Let user know to check inventory for the core?
+    Hint at "bring back another card for another core?
+
+important!!! promethium armor tech has invisible prereq???
+
+what happens on peaceful/no enemies mode? No armor on the latter
 
 
 Fix:
 Thermodynamic regulator needs icon, and should be discovered on Cryo core acquired
 Remove movement speed bonus from AFS tooltip
+
+prevent castra prime forge from crafting our armor parts
+cryovault access card should be producable in EM PLant? with no prod...?
+access card should be in our armor adventure tab
+
+Turn the high level pieces into 1x1 equipment items
+
+Remove 5 steel plates from final armor
+
+Mind controlled units don't follow very well - 2 steps forward 1 back

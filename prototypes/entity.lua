@@ -130,10 +130,14 @@ data:extend({harvester})
 
 -- Mind Control Rocket: deepcopy of vanilla rocket projectile, damage replaced with
 -- a script trigger that reassigns the hit entity's force to "player".
+-- Area action (not direct) is required so target_entity is populated in
+-- on_script_trigger_effect — direct actions on terrain-landing projectiles
+-- produce nil target_entity, silently swallowed by the event handler.
 local mc_proj = table.deepcopy(data.raw["projectile"]["rocket"])
 mc_proj.name   = "mind-control-rocket-projectile"
 mc_proj.action = {
-    type = "direct",
+    type   = "area",
+    radius = 2.5,
     action_delivery = {
         type = "instant",
         target_effects = {
@@ -175,7 +179,7 @@ data:extend({massive_lc})
 local forging_station = table.deepcopy(data.raw["assembling-machine"]["assembling-machine-3"])
 forging_station.name                      = "armor-forging-station"
 forging_station.minable                   = {mining_time = 0.5, result = "armor-forging-station"}
-forging_station.crafting_categories       = {"armor-forging", "crafting", "advanced-crafting"}
+forging_station.crafting_categories       = {"armor-forging"}
 forging_station.allowed_effects           = {"speed", "consumption", "pollution"}
 forging_station.allowed_module_categories = {"speed", "efficiency"}
 forging_station.factoriopedia_simulation  = nil
@@ -250,8 +254,9 @@ data:extend({forging_station})
 
 -- Quantum Coil: hybrid item — laser turret when placed, laser defense when equipped
 local quantum_coil_turret = table.deepcopy(data.raw["electric-turret"]["laser-turret"])
-quantum_coil_turret.name    = "quantum-coil-turret"
-quantum_coil_turret.minable = {mining_time = 0.5, result = "quantum-coil"}
+quantum_coil_turret.name         = "quantum-coil-turret"
+quantum_coil_turret.minable      = {mining_time = 0.5, result = "quantum-coil"}
+quantum_coil_turret.next_upgrade = nil
 data:extend({quantum_coil_turret})
 
 

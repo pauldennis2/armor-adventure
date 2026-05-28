@@ -165,6 +165,7 @@ data:extend({
     subgroup                = "armor-adventure-equipment",
     order                   = "z[quantum-coil]",
     stack_size              = 5,
+    hidden                  = true,
   },
 
 })
@@ -292,6 +293,65 @@ if mods["Moshine"] then
     order       = "z[unstable-magnetized-data-core]",
     stack_size  = 1,
   }})
+
+  -- Moshine quest: motion-data outputs and their hidden scripted-ingredient tokens.
+  -- Tokens are inserted by quests/moshine.lua when a qualifying train is detected;
+  -- the data-processor recipe consumes one token + 100 raw-data per craft.
+  data:extend({
+    {
+      type        = "item",
+      name        = "deosil-motion-data",
+      icon        = "__base__/graphics/icons/iron-plate.png",
+      icon_size   = 64,
+      subgroup    = "moshine-processes",
+      order       = "z[deosil-motion-data]",
+      stack_size  = 50,
+      spoil_ticks = 120,  -- 2 seconds
+    },
+    {
+      type        = "item",
+      name        = "widdershins-motion-data",
+      icon        = "__base__/graphics/icons/copper-plate.png",
+      icon_size   = 64,
+      subgroup    = "moshine-processes",
+      order       = "z[widdershins-motion-data]",
+      stack_size  = 50,
+      spoil_ticks = 120,  -- 2 seconds
+    },
+    {
+      type                    = "item",
+      name                    = "deosil-scan-token",
+      icon                    = "__base__/graphics/icons/green-wire.png",
+      icon_size               = 64,
+      hidden                  = true,
+      hidden_in_factoriopedia = true,
+      subgroup                = "moshine-processes",
+      order                   = "z[deosil-scan-token]",
+      stack_size              = 1,
+      spoil_ticks             = 60,
+    },
+    {
+      type                    = "item",
+      name                    = "widdershins-scan-token",
+      icon                    = "__base__/graphics/icons/red-wire.png",
+      icon_size               = 64,
+      hidden                  = true,
+      hidden_in_factoriopedia = true,
+      subgroup                = "moshine-processes",
+      order                   = "z[widdershins-scan-token]",
+      stack_size              = 1,
+      spoil_ticks             = 60,
+    },
+    {
+      type       = "item",
+      name       = "vortex-data-card",
+      icon       = "__Moshine__/graphics/icons/datacell-solved-equation.png",
+      icon_size  = 64,
+      subgroup   = "moshine-processes",
+      order      = "z[vortex-data-card]",
+      stack_size = 20,
+    },
+  })
 end
 
 if mods["planet-rabbasca"] then

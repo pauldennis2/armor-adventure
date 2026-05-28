@@ -2,8 +2,8 @@ data:extend({
   {
     type = "technology",
     name = "mech-armor-mk2",
-    icon = "__space-age__/graphics/technology/mech-armor.png",
-    icon_size = 256,
+    icon = "__armor-adventure__/graphics/entity/armor-crafting-station/base/armor-crafting-station-icon.png",
+    icon_size = 640,
     prerequisites = {"mech-armor", "promethium-science-pack"},
     unit = {
       count = 50000,
@@ -248,6 +248,7 @@ data:extend({
     effects = {
       {type = "unlock-recipe", recipe = "harvester"},
       {type = "unlock-recipe", recipe = "mind-control-rocket"},
+      {type = "unlock-recipe", recipe = "bio-interface"},
     },
   },
   {
@@ -313,12 +314,13 @@ data:extend({
     },
   },
   {
-    type          = "technology",
-    name          = "nauvis-defense-complete",
-    icon          = "__base__/graphics/technology/military.png",
-    icon_size     = 256,
-    prerequisites = {"armor-adventure-nauvis"},
-    enabled       = false,
+    type                  = "technology",
+    name                  = "nauvis-defense-complete",
+    icon                  = "__base__/graphics/technology/military.png",
+    icon_size             = 256,
+    prerequisites         = {"armor-adventure-nauvis"},
+    enabled               = false,
+    visible_when_disabled = true,
     unit = {
       count       = 1,
       ingredients = {{"automation-science-pack", 1}},

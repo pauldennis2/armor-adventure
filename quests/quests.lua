@@ -6,13 +6,15 @@
 -- surfaces, all quest handlers are disabled. Quests are cooperative — one
 -- planet at a time.
 
-local HAS_CASTRA = script.active_mods["castra-prime"] ~= nil
+local HAS_CASTRA   = script.active_mods["castra-prime"] ~= nil
+local HAS_MOSHINE  = script.active_mods["Moshine"]     ~= nil
 
 local aquilo  = require("quests.aquilo")
 local fulgora = require("quests.fulgora")
 local gleba   = require("quests.gleba")
 local nauvis  = require("quests.nauvis")
-local castra  = HAS_CASTRA and require("quests.castra") or nil
+local castra  = HAS_CASTRA  and require("quests.castra")  or nil
+local moshine = HAS_MOSHINE and require("quests.moshine") or nil
 
 local M = {}
 
@@ -37,6 +39,7 @@ end
 local function refresh()
     script.on_nth_tick(59, make_always_handler())
     storage.active_quest_surface = "active"
+    gleba.rescan_harvesters()
 end
 
 function M.refresh()
@@ -65,54 +68,52 @@ if castra then
     script.on_nth_tick(3600, function() castra.on_tick_3600() end)
 end
 
+-- Train-rotation detection for Moshine motion-data recipes (every 3 ticks = 20/s).
+-- High frequency needed because the target train completes multiple laps per second;
+-- combined with distance-adaptive sampling in moshine.lua this stays cheap.
+if moshine then
+    script.on_nth_tick(3, function() moshine.on_tick_3() end)
+end
+
 -- Script trigger effects (mind control hit, tesla turret damage).
 script.on_event(defines.events.on_script_trigger_effect, function(event)
     gleba.on_script_trigger_effect(event)
 end)
 
--- Harvester built/removed.
-local HARVESTER_FILTER = {{filter = "name", name = "harvester"}}
-local function on_harvester_built(event)   gleba.register_harvester(event.entity)   end
-local function on_harvester_removed(event) gleba.unregister_harvester(event.entity) end
-
-script.on_event(defines.events.on_built_entity,        on_harvester_built,   HARVESTER_FILTER)
-script.on_event(defines.events.on_robot_built_entity,  on_harvester_built,   HARVESTER_FILTER)
-script.on_event(defines.events.script_raised_built,    on_harvester_built,   HARVESTER_FILTER)
-script.on_event(defines.events.on_player_mined_entity, on_harvester_removed, HARVESTER_FILTER)
-script.on_event(defines.events.on_robot_mined_entity,  on_harvester_removed, HARVESTER_FILTER)
-script.on_event(defines.events.script_raised_destroy,  on_harvester_removed, HARVESTER_FILTER)
-
--- Pheromone Emitter built/mined/destroyed.
-local EMITTER_FILTER = {{filter = "name", name = "pheromone-emitter"}}
-local function on_emitter_built(event)
-    nauvis.register_emitter(event.entity, event.player_index)
+-- NOTE: script.on_event replaces the previous handler for the same event id, so
+-- all built/mined handlers MUST be merged into a single registration per event type
+-- (the same rule that applies to on_nth_tick). One combined filter + dispatch here.
+local BUILT_FILTER = {
+    {filter = "name", name = "harvester"},
+    {filter = "name", name = "pheromone-emitter"},
+    {filter = "name", name = "aquilo-elevator-shaft"},
+}
+local function on_entity_built(event)
+    local name = event.entity.name
+    if     name == "harvester"            then gleba.register_harvester(event.entity)
+    elseif name == "pheromone-emitter"    then nauvis.register_emitter(event.entity, event.player_index)
+    elseif name == "aquilo-elevator-shaft" then aquilo.register_elevator(event.entity); refresh()
+    end
 end
-local function on_emitter_mined(event)
-    nauvis.unregister_emitter(event.entity)
-end
+script.on_event(defines.events.on_built_entity,       on_entity_built, BUILT_FILTER)
+script.on_event(defines.events.on_robot_built_entity, on_entity_built, BUILT_FILTER)
+script.on_event(defines.events.script_raised_built,   on_entity_built, BUILT_FILTER)
 
-script.on_event(defines.events.on_built_entity,        on_emitter_built,  EMITTER_FILTER)
-script.on_event(defines.events.on_robot_built_entity,  on_emitter_built,  EMITTER_FILTER)
-script.on_event(defines.events.script_raised_built,    on_emitter_built,  EMITTER_FILTER)
-script.on_event(defines.events.on_player_mined_entity, on_emitter_mined,  EMITTER_FILTER)
-script.on_event(defines.events.on_robot_mined_entity,  on_emitter_mined,  EMITTER_FILTER)
-
--- Elevator shaft built/removed.
-local ELEVATOR_FILTER = {{filter = "name", name = "aquilo-elevator-shaft"}}
-local function on_elevator_built(event)
-    aquilo.register_elevator(event.entity)
-    refresh()
+local MINED_FILTER = {
+    {filter = "name", name = "harvester"},
+    {filter = "name", name = "pheromone-emitter"},
+    {filter = "name", name = "aquilo-elevator-shaft"},
+}
+local function on_entity_mined(event)
+    local name = event.entity.name
+    if     name == "harvester"             then gleba.unregister_harvester(event.entity)
+    elseif name == "pheromone-emitter"     then nauvis.unregister_emitter(event.entity)
+    elseif name == "aquilo-elevator-shaft" then aquilo.unregister_elevator(event.entity); refresh()
+    end
 end
-local function on_elevator_removed(event)
-    aquilo.unregister_elevator(event.entity)
-    refresh()
-end
-
-script.on_event(defines.events.on_built_entity,        on_elevator_built,   ELEVATOR_FILTER)
-script.on_event(defines.events.on_robot_built_entity,  on_elevator_built,   ELEVATOR_FILTER)
-script.on_event(defines.events.script_raised_built,    on_elevator_built,   ELEVATOR_FILTER)
-script.on_event(defines.events.on_player_mined_entity, on_elevator_removed, ELEVATOR_FILTER)
-script.on_event(defines.events.on_robot_mined_entity,  on_elevator_removed, ELEVATOR_FILTER)
+script.on_event(defines.events.on_player_mined_entity, on_entity_mined, MINED_FILTER)
+script.on_event(defines.events.on_robot_mined_entity,  on_entity_mined, MINED_FILTER)
+script.on_event(defines.events.script_raised_destroy,  on_entity_mined, MINED_FILTER)
 
 -- Entity died: dispatch to the module that owns each entity name.
 local entity_died_filter = {

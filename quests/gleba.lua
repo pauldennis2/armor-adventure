@@ -54,9 +54,9 @@ function gleba.on_script_trigger_effect(event)
         local target = event.target_entity
         if not target or not target.valid then return end
         if target.surface.name ~= "gleba" then return end
-        if target.type ~= "unit" then return end
+        if target.type ~= "unit" and target.type ~= "spider-unit" then return end
         if target.force.name ~= "enemy" then return end
-        target.force = "player"
+        target.force = "neutral"
         if target.commandable then
             target.commandable.set_command{type = defines.command.wander, distraction = defines.distraction.none}
         end
@@ -97,6 +97,20 @@ function gleba.unregister_harvester(entity)
     local uid = entity.unit_number
     storage.harvesters[uid] = nil
     if storage.harvester_hp then storage.harvester_hp[uid] = nil end
+end
+
+-- Scans all surfaces for placed harvesters and registers any that aren't tracked.
+-- Called on configuration-changed to recover harvesters placed while scripts were inactive.
+function gleba.rescan_harvesters()
+    storage.harvesters   = storage.harvesters   or {}
+    storage.harvester_hp = storage.harvester_hp or {}
+    for _, surface in pairs(game.surfaces) do
+        for _, entity in pairs(surface.find_entities_filtered{name = "harvester"}) do
+            if entity.valid and not storage.harvesters[entity.unit_number] then
+                gleba.register_harvester(entity)
+            end
+        end
+    end
 end
 
 function gleba.on_tick_59()

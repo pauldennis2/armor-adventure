@@ -100,7 +100,7 @@ data:extend({
     energy_required = 60,
     category        = "armor-forging",
     ingredients = {
-      {type = "item", name = "charged-lightning-gem",  amount = 10},
+      {type = "item", name = "charged-lightning-gem",  amount = 1},
       {type = "item", name = "superconductor",         amount = 100},
       {type = "item", name = "speed-module-3",         amount = 3},
       {type = "item", name = "efficiency-module-3",    amount = 3},
@@ -176,7 +176,7 @@ data:extend({
   {
     type            = "recipe",
     name            = "bio-interface",
-    enabled         = true,
+    enabled         = false,
     energy_required = 10,
     category        = "armor-forging",
     ingredients = {
@@ -200,7 +200,8 @@ data:extend({
   {
     type            = "recipe",
     name            = "quantum-coil",
-    enabled         = true,
+    hidden          = true,
+    enabled         = false,
     energy_required = 5,
     category        = "armor-forging",
     ingredients = {
@@ -290,6 +291,64 @@ if mods["Moshine"] then
     },
     results = {{type = "item", name = "unstable-magnetized-data-core", amount = 1}},
   }})
+
+  -- Motion-data recipes for the data-processor.
+  -- The scan tokens are the "scripted ingredient" — quests/moshine.lua inserts
+  -- them when a qualifying train (carrying magnets, rotating in the right direction)
+  -- is detected within TOKEN_RADIUS tiles of the machine.
+  data:extend({
+    {
+      type                      = "recipe",
+      name                      = "deosil-motion-data",
+      category                  = "data-processing",
+      hide_from_player_crafting = true,
+      enabled                   = true,
+      energy_required           = 1,
+      allow_productivity        = false,
+      auto_recycle              = false,
+      reset_freshness_on_craft  = true,
+      ingredients = {
+        {type = "fluid", name = "raw-data",          amount = 100},
+        {type = "item",  name = "deosil-scan-token", amount = 1},
+      },
+      results = {{type = "item", name = "deosil-motion-data", amount = 1}},
+    },
+    {
+      type                      = "recipe",
+      name                      = "widdershins-motion-data",
+      category                  = "data-processing",
+      hide_from_player_crafting = true,
+      enabled                   = true,
+      energy_required           = 1,
+      allow_productivity        = false,
+      auto_recycle              = false,
+      reset_freshness_on_craft  = true,
+      ingredients = {
+        {type = "fluid", name = "raw-data",               amount = 100},
+        {type = "item",  name = "widdershins-scan-token", amount = 1},
+      },
+      results = {{type = "item", name = "widdershins-motion-data", amount = 1}},
+    },
+    -- Combines simultaneous deosil + widdershins motion data onto a blank datacell.
+    -- Requires both data types to arrive within their 1-second spoil window,
+    -- enforcing the inner/outer ring setup.
+    {
+      type                      = "recipe",
+      name                      = "vortex-data-card",
+      category                  = "data-processing",
+      hide_from_player_crafting = true,
+      enabled                   = true,
+      energy_required           = 1,
+      allow_productivity        = false,
+      auto_recycle              = false,
+      ingredients = {
+        {type = "item", name = "deosil-motion-data",    amount = 5},
+        {type = "item", name = "widdershins-motion-data", amount = 5},
+        {type = "item", name = "datacell-empty",          amount = 1},
+      },
+      results = {{type = "item", name = "vortex-data-card", amount = 1}},
+    },
+  })
 end
 
 if mods["castra-prime"] then
