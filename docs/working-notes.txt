@@ -209,3 +209,5 @@ Turn the high level pieces into 1x1 equipment items
 Remove 5 steel plates from final armor
 
 Mind controlled units don't follow very well - 2 steps forward 1 back
+
+Idea of having a spidertron version (discoverable from some planet) that can use the new gear

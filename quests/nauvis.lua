@@ -214,28 +214,26 @@ function nauvis.on_gigantoid_died(entity)
     local pos     = entity.position
     local surface = entity.surface
     local quality = entity.quality.name
-    local chest_pos = surface.find_non_colliding_position("iron-chest", pos, 5, 0.5) or pos
-    local chest = surface.create_entity({name = "iron-chest", position = chest_pos, force = "neutral"})
-    if chest and chest.valid then
-        chest.insert({name = "gigantic-chitinous-shell", count = 1, quality = quality})
-    else
-        surface.spill_item_stack{position = chest_pos, stack = {name = "gigantic-chitinous-shell", count = 1, quality = quality}, enable_looted = true}
-    end
-    local tech = game.forces["player"].technologies["nauvis-defense-complete"]
-    if tech and not tech.researched then
-        tech.researched = true
-    end
-    rendering.draw_text{
-        text          = "★ Collect the Chitinous Shell",
-        surface       = surface,
-        target        = chest_pos,
-        target_offset = {0, -2.5},
-        color         = {r = 1, g = 0.8, b = 0, a = 1},
-        scale         = 1.5,
-        alignment     = "center",
-        time_to_live  = 3600,
+    surface.spill_item_stack{
+        position      = pos,
+        stack         = {name = "gigantic-chitinous-shell", count = 1, quality = quality},
+        enable_looted = true,
     }
-    game.print("[color=yellow]The Gigantoid Spitter has fallen! The Nauvis field survey is complete — collect the Chitinous Shell.[/color]")
+    local remains_pos = surface.find_non_colliding_position("gigantoid-remains", pos, 5, 0.5) or pos
+    local remains = surface.create_entity({name = "gigantoid-remains", position = remains_pos, force = "neutral"})
+    if remains and remains.valid then
+        rendering.draw_text{
+            text          = "★ Survey the remains",
+            surface       = surface,
+            target        = remains,
+            target_offset = {0, -2.5},
+            color         = {r = 1, g = 0.8, b = 0, a = 1},
+            scale         = 1.5,
+            alignment     = "center",
+            time_to_live  = 3600,
+        }
+    end
+    game.print("[color=yellow]The Gigantoid Spitter has fallen! Collect the Chitinous Shell, then mine its remains to complete the field survey.[/color]")
 end
 
 function nauvis.on_tick_59()

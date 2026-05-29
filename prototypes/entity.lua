@@ -134,7 +134,7 @@ data:extend({harvester})
 -- on_script_trigger_effect — direct actions on terrain-landing projectiles
 -- produce nil target_entity, silently swallowed by the event handler.
 local mc_proj = table.deepcopy(data.raw["projectile"]["rocket"])
-mc_proj.name   = "mind-control-rocket-projectile"
+mc_proj.name   = "neural-override-dart-projectile"
 mc_proj.action = {
     type   = "area",
     radius = 2.5,
@@ -455,6 +455,58 @@ depot_ascent.crafting_categories = {"aquilo-elevator-dummy"}
 depot_ascent.destructible        = false
 depot_ascent.energy_source       = {type = "void"}
 data:extend({depot_ascent})
+
+-- Remains entity spawned at a Big Demolisher's death position.
+-- Mining it gives the Demolisher Heart and triggers "big-demolisher-hunt" research.
+-- collision_mask empty so it can be placed on any tile.
+data:extend({{
+  type           = "simple-entity",
+  name           = "big-demolisher-remains",
+  icon           = "__base__/graphics/icons/heavy-armor.png",
+  icon_size      = 64,
+  flags          = {"placeable-neutral", "not-blueprintable", "not-deconstructable"},
+  render_layer   = "object",
+  destructible   = false,
+  collision_mask = {layers = {}},
+  minable = {
+    mining_time = 2,
+    results     = {{type = "item", name = "demolisher-heart", amount = 1}},
+  },
+  picture = {
+    filename = "__base__/graphics/icons/heavy-armor.png",
+    width    = 64,
+    height   = 64,
+    scale    = 4,
+  },
+  collision_box = {{-0.9, -0.9}, {0.9, 0.9}},
+  selection_box = {{-1.2, -1.2}, {1.2, 1.2}},
+}})
+
+-- Remains entity spawned at the Gigantoid Spitter's death position.
+-- Mining it triggers the "nauvis-defense-complete" research.
+-- collision_mask empty so it can be placed on any tile.
+data:extend({{
+  type           = "simple-entity",
+  name           = "gigantoid-remains",
+  icon           = "__base__/graphics/icons/medium-biter.png",
+  icon_size      = 64,
+  flags          = {"placeable-neutral", "not-blueprintable", "not-deconstructable"},
+  render_layer   = "object",
+  destructible   = false,
+  collision_mask = {layers = {}},
+  minable = {
+    mining_time = 2,
+    results     = {{type = "item", name = "iron-plate", amount = 1}},
+  },
+  picture = {
+    filename = "__base__/graphics/icons/medium-biter.png",
+    width    = 64,
+    height   = 64,
+    scale    = 3,
+  },
+  collision_box = {{-0.9, -0.9}, {0.9, 0.9}},
+  selection_box = {{-1.2, -1.2}, {1.2, 1.2}},
+}})
 
 -- Signal source entity spawned by script when Aquilo scanning completes.
 -- Mining it triggers the "aquilo-scanning-complete" research.

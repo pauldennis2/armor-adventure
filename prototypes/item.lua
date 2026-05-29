@@ -16,10 +16,10 @@ data:extend({
   },
   {
     type         = "item",
-    name         = "gleba-parts",
+    name         = "pentapod-tissue-samples",
     icon         = "__base__/graphics/icons/behemoth-biter.png",
     subgroup     = "armor-adventure-materials",
-    order        = "z[gleba-parts]",
+    order        = "z[pentapod-tissue-samples]",
     stack_size   = 50,
     spoil_ticks  = 7200,
     spoil_result = "spoilage",
@@ -48,7 +48,7 @@ data:extend({
 data:extend({
   {
     type          = "ammo",
-    name          = "mind-control-rocket",
+    name          = "neural-override-dart",
     icon          = "__base__/graphics/icons/rocket.png",
     ammo_category = "rocket",
     ammo_type = {
@@ -56,13 +56,13 @@ data:extend({
         type = "direct",
         action_delivery = {
           type           = "projectile",
-          projectile     = "mind-control-rocket-projectile",
+          projectile     = "neural-override-dart-projectile",
           starting_speed = 0.1,
         }
       }
     },
     subgroup   = "armor-adventure-materials",
-    order      = "d[rocket-launcher]-b[mind-control]",
+    order      = "d[rocket-launcher]-b[neural-override]",
     stack_size = 20,
     weight     = 10 * tons,
   },
@@ -178,7 +178,7 @@ data:extend({
     type = "equipment-grid",
     name = "armor-adventure-mech-mk2-grid",
     width = 12,
-    height = 14,
+    height = 12,
     equipment_categories = {"armor", "armor-adventure-mk2"},
   },
 })
@@ -186,17 +186,34 @@ data:extend({
 local mech_mk2 = table.deepcopy(data.raw["armor"]["mech-armor"])
 mech_mk2.name                     = "mech-armor-mk2"
 mech_mk2.equipment_grid           = "armor-adventure-mech-mk2-grid"
-mech_mk2.inventory_size_bonus     = 60
+mech_mk2.inventory_size_bonus     = 50
 mech_mk2.subgroup                 = "armor-adventure-armor"
 mech_mk2.order                    = "f[mech-armor-mk2]"
 mech_mk2.factoriopedia_simulation = nil
-mech_mk2.resistances = {
-  { type = "physical",  decrease = 20, percent = 65 },
-  { type = "acid",      decrease = 10, percent = 80 },
-  { type = "explosion", decrease = 70, percent = 60 },
-  { type = "fire",      decrease = 20, percent = 80 },
-  { type = "laser",     decrease = 10, percent = 20 },
-}
+if settings.startup["armor-adventure-buffed-resistances"].value then
+  mech_mk2.resistances = {
+    { type = "physical",  decrease = 25, percent = 60 },
+    { type = "acid",      decrease = 10, percent = 85 },
+    { type = "explosion", decrease = 70, percent = 60 },
+    { type = "fire",      decrease = 20, percent = 85 },
+    { type = "laser",     decrease = 10, percent = 50 },
+    { type = "poison",    decrease =  5, percent = 80 },
+    { type = "electric",  decrease = 10, percent = 50 },
+    { type = "impact",    decrease =  0, percent = 50 },
+  }
+  if mods["bobwarfare"] then
+    table.insert(mech_mk2.resistances, { type = "bob-plasma", decrease = 0, percent = 90 })
+  end
+else
+  mech_mk2.resistances = {
+    { type = "physical",  decrease = 20, percent = 65 },
+    { type = "acid",      decrease = 10, percent = 80 },
+    { type = "explosion", decrease = 70, percent = 60 },
+    { type = "fire",      decrease = 20, percent = 80 },
+    { type = "laser",     decrease = 10, percent = 20 },
+    { type = "poison",    decrease =  0, percent = 70 },
+  }
+end
 data:extend({ mech_mk2 })
 
 data:extend({

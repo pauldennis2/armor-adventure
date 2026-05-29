@@ -89,7 +89,7 @@ function gleba.register_harvester(entity)
     local uid = entity.unit_number
     storage.harvesters[uid]   = entity
     storage.harvester_hp[uid] = storage.harvester_hp[uid] or 0
-    entity.set_recipe("gleba-parts-from-biomass")
+    entity.set_recipe("pentapod-tissue-samples-from-biomass")
 end
 
 function gleba.unregister_harvester(entity)
@@ -191,11 +191,21 @@ function gleba.on_entity_died(event)
             radius   = HEART_DROP_RANGE,
         })
         if #nearby == 0 then return end
-        ent.surface.spill_item_stack{
-            position      = ent.position,
-            stack         = {name = "demolisher-heart", count = 1},
-            enable_looted = true,
-        }
+        local remains_pos = ent.surface.find_non_colliding_position("big-demolisher-remains", ent.position, 5, 0.5) or ent.position
+        local remains = ent.surface.create_entity({name = "big-demolisher-remains", position = remains_pos, force = "neutral"})
+        if remains and remains.valid then
+            rendering.draw_text{
+                text          = "★ Extract the heart",
+                surface       = ent.surface,
+                target        = remains,
+                target_offset = {0, -3},
+                color         = {r = 1, g = 0.6, b = 0, a = 1},
+                scale         = 1.5,
+                alignment     = "center",
+                time_to_live  = 3600,
+            }
+        end
+        game.print("[color=yellow]Big Demolisher slain! Mine its remains to extract the Demolisher Heart.[/color]")
     end
 end
 

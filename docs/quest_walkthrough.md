@@ -10,17 +10,21 @@ This document describes every quest in explicit detail. If you want hints only, 
 
 ## Getting Started
 
-You need to reach **promethium science** in the base Space Age tech tree before anything here is accessible. Once you have promethium science packs, research **Armor Forging Station** (all 12 science packs, 50,000 units). This unlocks the Armor Forging Station recipe and building.
+You need to reach **promethium science** in the base Space Age tech tree before anything here is accessible. Once you have promethium science packs, research **Armor Forging Station**. This unlocks the Armor Forging Station recipe and building.
 
-Build at least one Armor Forging Station. It is the crafting machine for almost all Promethium Armor components. It does not accept quality modules.
+In order to get the most out of the armor you will need to be able to craft high-quality versions of most of the equipment. If you don't have plenty of epic/legendary materials to craft with, it's better to work towards that first. Also, because of the high research costs involved, pursuing this tech is not recommended when you first unlock Research Prod. 
 
-From the Armor Forging Station unlock, five planetary investigation technologies become available simultaneously — one for each Space Age planet. They can be researched and completed in any order. All five must be completed to unlock the final **Forge Promethium Armor** technology.
+Build at least one Armor Forging Station. It is the crafting machine for almost all Promethium Armor components. It does not accept quality modules. If you want to craft a legendary armor, you will need legendary components.
+
+There are five components crafted by various "quests" on the original planets of Nauvis, Fulgora, Vulcanus, Gleba, and Aquilo. All five must be completed to forge your armor. You can complete them in any order, and the components can be stored in your armor for convenient travel between planets. The AFS can also be "packed".
+
+Note: Almost all planetary quests require or strongly encourage their components to be crafted on that planet with the player present. You cannot handle this challenge remotely.
 
 ---
 
 ## Nauvis: Biter Investigation
 
-**Technology:** Nauvis Biter Investigation (all science packs, 10,000 units)
+**Technology:** Nauvis Biter Investigation
 
 **Unlocks:** Pheromone Emitter recipe
 
@@ -29,16 +33,10 @@ From the Armor Forging Station unlock, five planetary investigation technologies
 ### Steps
 
 1. Research **Nauvis Biter Investigation**.
-2. Craft a **Pheromone Emitter** (Armor Forging Station recipe). Higher quality emitters may attract a higher quality boss.
-3. Go to Nauvis and place the Pheromone Emitter somewhere you can defend. The emitter must be placed on Nauvis — it will be returned to you if placed elsewhere.
-4. On placement, four **Pheromone Emitter Nests** appear at cardinal directions about 70 tiles away. These are neutral structures and cannot be damaged. Waves of biters will stream from them.
-5. Defend the emitter for **60 seconds**. Surge waves hit at 25%, 50%, and 75% charge. The biter mix escalates from big biters toward behemoths and spitters as the charge climbs.
-6. When the emitter reaches full charge, it explodes and a **Gigantoid Spitter** spawns nearby. Kill it.
-7. The Gigantoid drops a **Gigantic Chitinous Shell** in a nearby chest. Collect it.
-8. The **Nauvis Defense Complete** technology auto-researches when the Gigantoid dies, unlocking the **Ablative Chitocarbon Shell** recipe.
-9. Craft the **Ablative Chitocarbon Shell** (Armor Forging Station) using the Chitinous Shell. This is one of the five armor components.
-
-**Note:** Big worms also drop Chitinous Shells, but these are non-quality and are not the component you need for the armor itself — they're a secondary byproduct if you happen to be clearing worms.
+2. Craft a **Pheromone Emitter** (Armor Forging Station recipe). Higher quality emitters attract a higher quality boss.
+3. Place the Pheromone Emitter on Nauvis, somewhere you can defend.
+4. On placement, waves of big and behemoth biters will attack. Defend the emitter for **60 seconds** and a **Gigantoid Spitter** will emerge.
+5. Kill the Gigantoid and pick up the shell it drops - this will allow you to craft the **Ablative Chitocarbon Shell**.
 
 ---
 
@@ -52,41 +50,36 @@ From the Armor Forging Station unlock, five planetary investigation technologies
 
 ### Steps
 
-1. Research **Vulcanus Demolisher Anatomy Investigation**.
-2. Go to Vulcanus and kill a **Big Demolisher**. You must be within 50 tiles of it when it dies — if no player character is nearby, no drop occurs.
-3. Collect the **Demolisher Heart** from the ground.
-4. Use the **Split Demolisher Heart** recipe to split it into **Large Demolisher Heart Fragments**.
+
+1. Go to Vulcanus and kill a **Big Demolisher**. You must be nearby to receive credit. Loot the heart.
+2. Research **Vulcanus Demolisher Anatomy Investigation**.
+3. Use the **Split Demolisher Heart** recipe to split it into **Large Demolisher Heart Fragments**.
 5. Use the **Compress Heart Fragments** recipe to compress fragments into the refined form needed for the chassis.
 6. Craft the **Promethium Armor Chassis** at the Armor Forging Station using the processed heart material and other components.
-
-The chassis is one of the five armor components and also equippable as a passive 1×1 module in any modular armor.
 
 ---
 
 ## Gleba: Pentapod Investigation
 
-**Technology:** Gleba Pentapod Investigation (all science packs + agricultural, 10,000 units)
+**Technology:** Gleba Pentapod Investigation
 
-**Unlocks:** Harvester recipe, Mind Control Rocket recipe, Bio Interface recipe
+**Unlocks:** Harvester recipe, Neural Override Dart recipe, Bio Interface recipe
 
 **Goal:** Craft a Bio Interface
 
 ### Steps
 
 1. Research **Gleba Pentapod Investigation**.
-2. Craft **Mind Control Rockets** (unlocked by the research). These are fired from a regular rocket launcher or rocket turret.
-3. Go to Gleba and fire Mind Control Rockets at **enemy pentapods** (units and spider-units only — the rockets have no effect on structures or other entity types). Successfully hit enemies will switch to neutral force and begin wandering.
-4. Build a **Harvester** near where the mind-controlled enemies are roaming. The Harvester must be powered. It automatically searches a 10-tile radius, consumes any mind-controlled enemies it finds, and converts their health into **Enemy Biomass** (1 biomass per 1000 HP consumed). It runs the "Gleba Parts from Biomass" recipe automatically.
-5. Collect **Gleba Parts** from the Harvester's output.
-6. Craft a **Bio Interface** at the Armor Forging Station using Gleba Parts and other components.
-
-The Bio Interface is one of the five armor components and also equippable as a passive 1×1 module in any modular armor.
+2. Craft **Neural Override Darts** (unlocked by the research). These are fired from a regular rocket launcher or rocket turret.
+3. Fire the darts at **enemy pentapods**. Successfully hit enemies will switch to follow the player, although they may wander a bit.
+4. Build a **Harvester**. It automatically consumes any nearby mind-controlled enemies it finds, and converts their health into **Enemy Biomass** (1 biomass per 1000 HP consumed).
+5. The Harvester further converts biomass to Pentapod Tissue Samples. Combine these with circuits to craft the **Bio Interface**.
 
 ---
 
 ## Fulgora: Climate Investigation
 
-**Technology:** Fulgora Climate Investigation (all science packs + electromagnetic, 10,000 units)
+**Technology:** Fulgora Climate Investigation
 
 **Unlocks:** Massive Lightning Funnel recipe, Superconducting Telemetry Core recipe
 

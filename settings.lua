@@ -13,4 +13,11 @@ data:extend({
     default_value = true,
     order         = "b",
   },
+  {
+    type          = "bool-setting",
+    name          = "armor-adventure-buffed-resistances",
+    setting_type  = "startup",
+    default_value = true,
+    order         = "c",
+  },
 })

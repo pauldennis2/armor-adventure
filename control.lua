@@ -34,14 +34,16 @@ if EXPLORATION_MODE then
     ["packable-forge-covered"]           = "packable-forge",
     ["armor-adventure-nauvis-covered"]   = "armor-adventure-nauvis",
     ["nauvis-defense-complete-covered"]  = "nauvis-defense-complete",
+    ["big-demolisher-hunt-covered"]      = "big-demolisher-hunt",
     ["armor-adventure-vulcanus-covered"] = "armor-adventure-vulcanus",
     ["armor-adventure-gleba-covered"]    = "armor-adventure-gleba",
     ["armor-adventure-fulgora-covered"]  = "armor-adventure-fulgora",
     ["armor-adventure-aquilo-covered"]   = "armor-adventure-aquilo",
     ["aquilo-scanning-complete-covered"] = "aquilo-scanning-complete",
     ["cryo-core-acquired-covered"]       = "cryo-core-acquired",
-    ["forge-promethium-armor-covered"]   = "forge-promethium-armor",
-    ["regenerative-armor-covered"]       = "regenerative-armor",
+    ["forge-promethium-armor-covered"]         = "forge-promethium-armor",
+    ["regenerative-armor-covered"]             = "regenerative-armor",
+    ["dissection-analysis-complete-covered"]   = "dissection-analysis-complete",
   }
   if HAS_MOSHINE     then COVERED_TECHS["personal-tesla-turret-covered"]          = "personal-tesla-turret" end
   if HAS_PANGLIA     then COVERED_TECHS["time-fracking-covered"]                  = "time-fracking" end

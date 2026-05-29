@@ -46,7 +46,7 @@ if mods["planet-rabbasca"] then
   local personal_warp_pylon_eq               = table.deepcopy(data.raw["movement-bonus-equipment"]["exoskeleton-equipment"])
   personal_warp_pylon_eq.name                = "personal-warp-pylon-equipment"
   personal_warp_pylon_eq.take_result         = "personal-warp-pylon-equipment"
-  personal_warp_pylon_eq.movement_bonus      = 0
+  personal_warp_pylon_eq.movement_bonus      = 0.4
   personal_warp_pylon_eq.energy_consumption  = "1W"
   personal_warp_pylon_eq.shape               = {width = 2, height = 2, type = "full"}
   personal_warp_pylon_eq.categories          = MK2_CATEGORY
@@ -76,9 +76,11 @@ table.insert(ptbb.action.action_delivery.target_effects, {type = "script", effec
 data:extend({ptbb})
 
 -- Chain trigger: 5 jumps, 12-tile range per jump, references our bounce beam.
+-- probability=1.0 ensures all jumps fire; vanilla default is 0.05 (shows "5% jump chance").
 local ptc = table.deepcopy(data.raw["chain-active-trigger"]["chain-tesla-turret-chain"])
-ptc.name      = "personal-tesla-turret-chain"
-ptc.max_jumps = 5
+ptc.name               = "personal-tesla-turret-chain"
+ptc.max_jumps          = 5
+ptc.action.probability = 1.0
 ptc.action.action_delivery.beam = "personal-tesla-turret-beam-bounce"
 data:extend({ptc})
 

@@ -180,7 +180,7 @@ data:extend({
     energy_required = 10,
     category        = "armor-forging",
     ingredients = {
-      {type = "item", name = "gleba-parts",       amount = 20},
+      {type = "item", name = "pentapod-tissue-samples", amount = 20},
       {type = "item", name = "electronic-circuit", amount = 50},
       {type = "item", name = "advanced-circuit",   amount = 50},
       {type = "item", name = "processing-unit",    amount = 20},
@@ -189,13 +189,13 @@ data:extend({
   },
   {
     type            = "recipe",
-    name            = "gleba-parts-from-biomass",
+    name            = "pentapod-tissue-samples-from-biomass",
     hidden          = true,
     enabled         = true,
     energy_required = 1,
     category        = "harvesting",
-    ingredients     = {{type = "item", name = "enemy-biomass", amount = 1}},
-    results         = {{type = "item", name = "gleba-parts",   amount = 1}},
+    ingredients     = {{type = "item", name = "enemy-biomass",          amount = 1}},
+    results         = {{type = "item", name = "pentapod-tissue-samples", amount = 1}},
   },
   {
     type            = "recipe",
@@ -224,7 +224,7 @@ data:extend({
   },
   {
     type            = "recipe",
-    name            = "mind-control-rocket",
+    name            = "neural-override-dart",
     enabled         = false,
     energy_required = 5,
     ingredients = {
@@ -234,7 +234,7 @@ data:extend({
       {type = "item", name = "bioflux",      amount = 10},
       {type = "item", name = "yumako",       amount = 2},
     },
-    results = {{type = "item", name = "mind-control-rocket", amount = 1}},
+    results = {{type = "item", name = "neural-override-dart", amount = 1}},
   },
   {
     type             = "recipe",

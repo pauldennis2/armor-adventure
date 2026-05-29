@@ -227,11 +227,20 @@ data:extend({
 
 data:extend({
   {
+    type             = "technology",
+    name             = "big-demolisher-hunt",
+    icon             = "__base__/graphics/icons/heavy-armor.png",
+    icon_size        = 64,
+    prerequisites    = {"mech-armor-mk2"},
+    research_trigger = {type = "mine-entity", entity = "big-demolisher-remains"},
+    effects = {},
+  },
+  {
     type = "technology",
     name = "armor-adventure-vulcanus",
     icon = "__space-age__/graphics/icons/metallurgic-science-pack.png",
     icon_size = 64,
-    prerequisites = {"mech-armor-mk2"},
+    prerequisites = {"big-demolisher-hunt"},
     unit = {
       count = 10000,
       ingredients = {
@@ -276,7 +285,17 @@ data:extend({
     },
     effects = {
       {type = "unlock-recipe", recipe = "harvester"},
-      {type = "unlock-recipe", recipe = "mind-control-rocket"},
+      {type = "unlock-recipe", recipe = "neural-override-dart"},
+    },
+  },
+  {
+    type             = "technology",
+    name             = "dissection-analysis-complete",
+    icon             = "__space-age__/graphics/technology/agriculture.png",
+    icon_size        = 256,
+    prerequisites    = {"armor-adventure-gleba"},
+    research_trigger = {type = "craft-item", item = "pentapod-tissue-samples"},
+    effects = {
       {type = "unlock-recipe", recipe = "bio-interface"},
     },
   },
@@ -343,18 +362,12 @@ data:extend({
     },
   },
   {
-    type                  = "technology",
-    name                  = "nauvis-defense-complete",
-    icon                  = "__base__/graphics/technology/military.png",
-    icon_size             = 256,
-    prerequisites         = {"armor-adventure-nauvis"},
-    enabled               = false,
-    visible_when_disabled = true,
-    unit = {
-      count       = 1,
-      ingredients = {{"automation-science-pack", 1}},
-      time        = 1,
-    },
+    type             = "technology",
+    name             = "nauvis-defense-complete",
+    icon             = "__base__/graphics/technology/military.png",
+    icon_size        = 256,
+    prerequisites    = {"armor-adventure-nauvis"},
+    research_trigger = {type = "mine-entity", entity = "gigantoid-remains"},
     effects = {
       {type = "unlock-recipe", recipe = "nauvis-armor-piece"},
     },
@@ -407,7 +420,7 @@ data:extend({
       "nauvis-defense-complete",
     },
     unit = {
-      count = 10000,
+      count = 100000,
       ingredients = {
         {"automation-science-pack",      1},
         {"logistic-science-pack",        1},
@@ -533,6 +546,7 @@ if settings.startup["armor-adventure-exploration-mode"].value then
     "packable-forge",
     "armor-adventure-nauvis",
     "nauvis-defense-complete",
+    "big-demolisher-hunt",
     "armor-adventure-vulcanus",
     "armor-adventure-gleba",
     "armor-adventure-fulgora",
@@ -541,6 +555,7 @@ if settings.startup["armor-adventure-exploration-mode"].value then
     "cryo-core-acquired",
     "forge-promethium-armor",
     "regenerative-armor",
+    "dissection-analysis-complete",
   }
   if mods["Moshine"]         then table.insert(to_cover, "personal-tesla-turret") end
   if mods["panglia_planet"]  then table.insert(to_cover, "time-fracking") end
