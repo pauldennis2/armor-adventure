@@ -1,3 +1,11 @@
+Goals for 0.2.0:
+1. Quest refinements to existing content
+2. Add icons, particularly on worst placeholders
+3. Build out spoiler free tech tree
+4. Build out tips and tricks
+5. Further content additions: quests for Metal and Stars, Rabbasca, Maraxsis hopefully
+6. Review and rewrite Claude's docs
+
 + increase radius? no, not necessarily good
 improve mining speed?
 unique roboport with high capacity?

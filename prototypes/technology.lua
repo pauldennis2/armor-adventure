@@ -461,25 +461,6 @@ end
 if mods["castra-prime"] then
   data:extend({
     {
-      -- Shadow tech: visible "???" placeholder in the tree occupying the same slot as PCR.
-      -- Script (sync_pcr_visibility) manages which is enabled: shadow shown before core-hunt,
-      -- real PCR shown after. The unit cost is astronomically high so it can never be
-      -- researched normally.
-      type          = "technology",
-      name          = "simulac-pcr-unknown",
-      icon          = "__base__/graphics/technology/military.png",
-      icon_size     = 256,
-      localised_name        = {"", "???"},
-      localised_description = {"", "Something awaits on Castra..."},
-      prerequisites = {"forge-promethium-armor", "core-hunt"},
-      unit = {
-        count       = 100000000,
-        ingredients = {{"promethium-science-pack", 1}},
-        time        = 60,
-      },
-      effects = {},
-    },
-    {
       type             = "technology",
       name             = "core-hunt",
       icon             = "__base__/graphics/technology/uranium-ammo.png",
@@ -495,8 +476,6 @@ if mods["castra-prime"] then
       name = "personal-combat-roboport",
       icon = "__base__/graphics/technology/personal-roboport-equipment.png",
       icon_size = 256,
-      enabled               = false,
-      visible_when_disabled = false,
       prerequisites = {"forge-promethium-armor", "core-hunt"},
       unit = {
         count = 10000,
@@ -543,4 +522,58 @@ if mods["metal-and-stars"] then
     },
     effects = {},
   }})
+end
+
+-- Exploration mode: cover all quest techs (except mech-armor-mk2) with ??? shadow
+-- techs until their prerequisites are researched. The shadow has the same position
+-- in the tree but an impossibly large cost so it can never be researched normally.
+-- Runtime logic in control.lua swaps shadow → real when all prereqs are met.
+if settings.startup["armor-adventure-exploration-mode"].value then
+  local to_cover = {
+    "packable-forge",
+    "armor-adventure-nauvis",
+    "nauvis-defense-complete",
+    "armor-adventure-vulcanus",
+    "armor-adventure-gleba",
+    "armor-adventure-fulgora",
+    "armor-adventure-aquilo",
+    "aquilo-scanning-complete",
+    "cryo-core-acquired",
+    "forge-promethium-armor",
+    "regenerative-armor",
+  }
+  if mods["Moshine"]         then table.insert(to_cover, "personal-tesla-turret") end
+  if mods["panglia_planet"]  then table.insert(to_cover, "time-fracking") end
+  if mods["panglia_planet"]  then table.insert(to_cover, "personal-time-stopper") end
+  if mods["planet-rabbasca"] then table.insert(to_cover, "personal-warp-pylon") end
+  if mods["castra-prime"]    then table.insert(to_cover, "core-hunt") end
+  if mods["castra-prime"]    then table.insert(to_cover, "personal-combat-roboport") end
+  if mods["metal-and-stars"] then table.insert(to_cover, "armor-adventure-metal-and-stars") end
+  if mods["metal-and-stars"] then table.insert(to_cover, "pocket-dimension") end
+  if mods["metal-and-stars"] then table.insert(to_cover, "pocket-dimension-roboport") end
+
+  local shadows = {}
+  for _, tech_name in ipairs(to_cover) do
+    local real = data.raw.technology[tech_name]
+    if real then
+      real.enabled               = false
+      real.visible_when_disabled = false
+      shadows[#shadows + 1] = {
+        type                  = "technology",
+        name                  = tech_name .. "-covered",
+        icon                  = real.icon,
+        icon_size             = real.icon_size,
+        localised_name        = {"", "???"},
+        localised_description = {"", "Complete the prerequisites to reveal the details of this research."},
+        prerequisites         = real.prerequisites,
+        unit = {
+          count       = 100000000,
+          ingredients = {{"promethium-science-pack", 1}},
+          time        = 60,
+        },
+        effects = {},
+      }
+    end
+  end
+  if #shadows > 0 then data:extend(shadows) end
 end

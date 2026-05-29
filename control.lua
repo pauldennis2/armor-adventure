@@ -8,10 +8,11 @@ local create_personal_beacon
 local destroy_personal_beacon
 local sync_personal_beacon
 
-local HAS_RABBASCA = script.active_mods["planet-rabbasca"] ~= nil
-local HAS_CASTRA   = script.active_mods["castra-prime"]    ~= nil
-local HAS_MOSHINE  = script.active_mods["Moshine"]         ~= nil
-local sync_pcr_visibility
+local HAS_RABBASCA    = script.active_mods["planet-rabbasca"] ~= nil
+local HAS_CASTRA      = script.active_mods["castra-prime"]    ~= nil
+local HAS_MOSHINE     = script.active_mods["Moshine"]         ~= nil
+local HAS_PANGLIA     = script.active_mods["panglia_planet"]  ~= nil
+local HAS_METAL_STARS = script.active_mods["metal-and-stars"] ~= nil
 local PERSONAL_WARP_PYLON_EQUIP  = "personal-warp-pylon-equipment"
 local PERSONAL_WARP_PYLON_ENTITY = "armor-adventure-personal-warp-pylon"
 local create_personal_warp_pylon
@@ -23,7 +24,53 @@ local deactivate_time_stopper
 local draw_time_stopper_aura
 
 local QUALITY_GATE_ENABLED = settings.startup["armor-adventure-quality-gate"].value
+local EXPLORATION_MODE     = settings.startup["armor-adventure-exploration-mode"].value
 local enforce_quality_gates_all_players
+
+-- Shadow-to-real tech mapping for exploration mode.
+local COVERED_TECHS
+if EXPLORATION_MODE then
+  COVERED_TECHS = {
+    ["packable-forge-covered"]           = "packable-forge",
+    ["armor-adventure-nauvis-covered"]   = "armor-adventure-nauvis",
+    ["nauvis-defense-complete-covered"]  = "nauvis-defense-complete",
+    ["armor-adventure-vulcanus-covered"] = "armor-adventure-vulcanus",
+    ["armor-adventure-gleba-covered"]    = "armor-adventure-gleba",
+    ["armor-adventure-fulgora-covered"]  = "armor-adventure-fulgora",
+    ["armor-adventure-aquilo-covered"]   = "armor-adventure-aquilo",
+    ["aquilo-scanning-complete-covered"] = "aquilo-scanning-complete",
+    ["cryo-core-acquired-covered"]       = "cryo-core-acquired",
+    ["forge-promethium-armor-covered"]   = "forge-promethium-armor",
+    ["regenerative-armor-covered"]       = "regenerative-armor",
+  }
+  if HAS_MOSHINE     then COVERED_TECHS["personal-tesla-turret-covered"]          = "personal-tesla-turret" end
+  if HAS_PANGLIA     then COVERED_TECHS["time-fracking-covered"]                  = "time-fracking" end
+  if HAS_PANGLIA     then COVERED_TECHS["personal-time-stopper-covered"]          = "personal-time-stopper" end
+  if HAS_RABBASCA    then COVERED_TECHS["personal-warp-pylon-covered"]            = "personal-warp-pylon" end
+  if HAS_CASTRA      then COVERED_TECHS["core-hunt-covered"]                      = "core-hunt" end
+  if HAS_CASTRA      then COVERED_TECHS["personal-combat-roboport-covered"]       = "personal-combat-roboport" end
+  if HAS_METAL_STARS then COVERED_TECHS["armor-adventure-metal-and-stars-covered"] = "armor-adventure-metal-and-stars" end
+  if HAS_METAL_STARS then COVERED_TECHS["pocket-dimension-covered"]               = "pocket-dimension" end
+  if HAS_METAL_STARS then COVERED_TECHS["pocket-dimension-roboport-covered"]      = "pocket-dimension-roboport" end
+end
+
+local function reveal_all_exploration_techs(force)
+  if not EXPLORATION_MODE then return end
+  for shadow_name, real_name in pairs(COVERED_TECHS) do
+    local shadow = force.technologies[shadow_name]
+    local real   = force.technologies[real_name]
+    if shadow and real and shadow.enabled then
+      local all_done = true
+      for _, prereq_tech in pairs(real.prerequisites) do
+        if not prereq_tech.researched then all_done = false; break end
+      end
+      if all_done then
+        real.enabled   = true
+        shadow.enabled = false
+      end
+    end
+  end
+end
 
 local QUANTUM_COIL_ITEM  = "quantum-coil"
 local QUANTUM_COIL_EQUIP = "quantum-coil-equipment"
@@ -109,8 +156,8 @@ script.on_init(function()
   storage.simulac_awaken_meter    = 0
   storage.time_stopper_render     = {}
   storage.spark_last_pos          = {}
-  if HAS_CASTRA then
-    for _, force in pairs(game.forces) do sync_pcr_visibility(force) end
+  if EXPLORATION_MODE then
+    for _, force in pairs(game.forces) do reveal_all_exploration_techs(force) end
   end
   quests.refresh()
 end)
@@ -162,8 +209,8 @@ script.on_configuration_changed(function(data)
     sync_acs_crafting_bonus(player)
   end
   if QUALITY_GATE_ENABLED then enforce_quality_gates_all_players() end
-  if HAS_CASTRA then
-    for _, force in pairs(game.forces) do sync_pcr_visibility(force) end
+  if EXPLORATION_MODE then
+    for _, force in pairs(game.forces) do reveal_all_exploration_techs(force) end
   end
   -- LuaRenderObjects are not saved; wipe and recreate for any active time stoppers.
   storage.time_stopper_render = {}
@@ -201,19 +248,9 @@ script.on_event(defines.events.on_player_armor_inventory_changed, function(event
   sync_acs_crafting_bonus(player)
 end)
 
-sync_pcr_visibility = function(force)
-  local core_hunt = force.technologies["core-hunt"]
-  local pcr       = force.technologies["personal-combat-roboport"]
-  local shadow    = force.technologies["simulac-pcr-unknown"]
-  if not (core_hunt and pcr and shadow) then return end
-  local revealed = core_hunt.researched
-  pcr.enabled    = revealed
-  shadow.enabled = not revealed
-end
-
 script.on_event(defines.events.on_research_finished, function(event)
-  if HAS_CASTRA and event.research.name == "core-hunt" then
-    sync_pcr_visibility(event.research.force)
+  if EXPLORATION_MODE then
+    reveal_all_exploration_techs(event.research.force)
   end
   if event.research.name == "pocket-dimension-roboport" then
     for _, p in pairs(event.research.force.players) do
