@@ -88,13 +88,10 @@ Note: Almost all planetary quests require or strongly encourage their components
 ### Steps
 
 1. Research **Fulgora Climate Investigation**.
-2. Craft a **Massive Lightning Funnel** (the item is called "Massive Lightning Funnel" in your inventory).
+2. Craft a **Massive Lightning Funnel**. A high-quality funnel will work much better for this quest.
 3. Place it on Fulgora **far from your base**. It draws in lightning from a wide area but does not connect to the power grid — the energy goes somewhere else. Having it near your base disrupts your power supply.
 4. Wait for the funnel to accumulate 1 TJ (1,000,000,000,000 J) of energy from lightning strikes. When this threshold is reached, it converts the stored energy into a **Charged Lightning Gem** that drops on the ground nearby.
-5. Collect the Charged Lightning Gem. The funnel resets and begins accumulating again, so you can farm multiple gems over time.
-6. Craft a **Superconducting Telemetry Core** at the Armor Forging Station using the Charged Lightning Gem and other components.
-
-The Telemetry Core is one of the five armor components and also equippable as a passive 1×1 module in any modular armor.
+5. Craft a **Superconducting Telemetry Core** at the Armor Forging Station using the Charged Lightning Gem and other components.
 
 ---
 
@@ -109,14 +106,10 @@ This quest has three sub-phases.
 ### Phase 1: EM Scanning
 
 1. Research **Aquilo Signal Investigation**.
-2. Go to Aquilo and build powered **Radars** on the surface. The scanning progress accumulates based on the number of active radars each ~59 ticks. With 1 radar it takes roughly 20 minutes; with 20 radars it takes about 1 minute.
-3. At 50% you receive a notification. At 100%, an **Anomalous Signal Source** entity spawns 60–80 tiles from your current position on Aquilo.
-4. Go find and **mine** the Anomalous Signal Source. Mining it triggers the **Signal Triangulation** technology automatically (no research cost — it fires the moment you mine the entity).
-5. Signal Triangulation unlocks the **Aquilo Elevator Shaft** recipe.
-
-### Phase 2: Elevator Construction
-
-1. Craft an **Aquilo Elevator Shaft** (Armor Forging Station recipe, requires concrete and steel among other things).
+2. Go to Aquilo and build powered **Radars** on the surface. The scanning scales with the number of radars scanning, and takes about 20 minutes with only one going.
+3. When scanning is complete, an **Anomalous Signal Source** spawns within 60–80 tiles of your current position.
+4. Loot the Anomalous Signal Source, which should trigger the **Signal Triangulation**.
+5. Craft an **Aquilo Elevator Shaft** (Armor Forging Station recipe, requires concrete and steel among other things).
 2. Place it on Aquilo. It runs the **Excavate Elevator Segment** recipe automatically — you need to feed it **concrete** and **steel plate**. It produces **stone** and **iron ore** as byproducts; route these away to keep it running.
 3. The shaft must complete **100 cycles**. A counter above the machine tracks progress.
 4. At 100 cycles, the shaft is replaced by an **Aquilo Elevator** placeholder. You will see a notification.

@@ -738,6 +738,50 @@ if mods["panglia_planet"] then
   }})
 end
 
+if mods["planet-rabbasca"] then
+  -- vault-entry-portal: placed by vault-entry-pass; on_built_entity teleports player and destroys it.
+  local vault_portal = table.deepcopy(data.raw["container"]["iron-chest"])
+  vault_portal.name           = "vault-entry-portal"
+  vault_portal.minable        = {mining_time = 0.5, result = "vault-entry-pass"}
+  vault_portal.inventory_size = 1
+  vault_portal.flags          = {"not-blueprintable", "not-deconstructable"}
+  data:extend({vault_portal})
+
+  -- vault-tunnel-exit: indestructible entity placed in the tunnel; on_gui_opened shows Return GUI.
+  local tunnel_exit = table.deepcopy(data.raw["assembling-machine"]["chemical-plant"])
+  tunnel_exit.name                = "vault-tunnel-exit"
+  tunnel_exit.minable             = nil
+  tunnel_exit.flags               = {"placeable-neutral", "not-blueprintable", "not-deconstructable"}
+  tunnel_exit.crafting_categories = {"aquilo-elevator-dummy"}
+  tunnel_exit.destructible        = false
+  tunnel_exit.energy_source       = {type = "void"}
+  data:extend({tunnel_exit})
+
+  -- rabbit-mcguffin entity: placed in the tunnel; mining it triggers the conquer-the-vault research.
+  data:extend({{
+    type           = "simple-entity",
+    name           = "rabbit-mcguffin",
+    icon           = "__base__/graphics/icons/copper-ore.png",
+    icon_size      = 64,
+    flags          = {"placeable-neutral", "not-blueprintable", "not-deconstructable"},
+    render_layer   = "object",
+    destructible   = false,
+    collision_mask = {layers = {}},
+    minable = {
+      mining_time = 2,
+      results     = {},  -- quality item given manually by on_player_mined_entity handler
+    },
+    picture = {
+      filename = "__base__/graphics/icons/copper-ore.png",
+      width    = 64,
+      height   = 64,
+      scale    = 3,
+    },
+    collision_box = {{-0.9, -0.9}, {0.9, 0.9}},
+    selection_box = {{-1.2, -1.2}, {1.2, 1.2}},
+  }})
+end
+
 if mods["panglia_planet"] and mods["Moshine"] then
   local minutes = 60 * 60
   data:extend({{

@@ -408,15 +408,53 @@ if mods["panglia_planet"] then
 end
 
 if mods["planet-rabbasca"] then
-  data:extend({{
-    type = "item",
-    name = "personal-warp-pylon-equipment",
-    icon = "__base__/graphics/icons/roboport.png",
-    place_as_equipment_result = "personal-warp-pylon-equipment",
-    subgroup = "armor-adventure-equipment",
-    order = "f[personal-warp-pylon-equipment]",
-    stack_size = 1,
-  }})
+  -- Private ammo category with no associated gun — the excavation key is ammo by type
+  -- (matching the Rabbasca key aesthetic) but cannot be loaded into any weapon.
+  data:extend({{type = "ammo-category", name = "armor-adventure-vault-key"}})
+
+  data:extend({
+    {
+      type                      = "item",
+      name                      = "personal-warp-pylon-equipment",
+      icon                      = "__base__/graphics/icons/roboport.png",
+      place_as_equipment_result = "personal-warp-pylon-equipment",
+      subgroup                  = "armor-adventure-equipment",
+      order                     = "f[personal-warp-pylon-equipment]",
+      stack_size                = 1,
+    },
+    {
+      type      = "ammo",
+      name      = "vault-excavation-key",
+      icon      = "__base__/graphics/icons/electronic-circuit.png",
+      icon_size = 64,
+      subgroup  = "armor-adventure-materials",
+      order     = "z[vault-excavation-key]",
+      stack_size    = 10,
+      ammo_category = "armor-adventure-vault-key",
+      ammo_type = {
+        action = {type = "direct", action_delivery = {type = "instant"}},
+      },
+    },
+    {
+      type         = "item",
+      name         = "vault-entry-pass",
+      icon         = "__base__/graphics/icons/advanced-circuit.png",
+      icon_size    = 64,
+      subgroup     = "armor-adventure-materials",
+      order        = "z[vault-entry-pass]",
+      stack_size   = 1,
+      place_result = "vault-entry-portal",
+    },
+    {
+      type       = "item",
+      name       = "rabbit-mcguffin",
+      icon       = "__base__/graphics/icons/copper-ore.png",
+      icon_size  = 64,
+      subgroup   = "armor-adventure-materials",
+      order      = "z[rabbit-mcguffin]",
+      stack_size = 1,
+    },
+  })
 end
 
 if mods["castra-prime"] then

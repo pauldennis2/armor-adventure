@@ -6,17 +6,19 @@
 -- surfaces, all quest handlers are disabled. Quests are cooperative — one
 -- planet at a time.
 
-local HAS_CASTRA   = script.active_mods["castra-prime"]  ~= nil
-local HAS_MOSHINE  = script.active_mods["Moshine"]       ~= nil
-local HAS_PANGLIA  = script.active_mods["panglia_planet"] ~= nil
+local HAS_CASTRA   = script.active_mods["castra-prime"]    ~= nil
+local HAS_MOSHINE  = script.active_mods["Moshine"]         ~= nil
+local HAS_PANGLIA  = script.active_mods["panglia_planet"]  ~= nil
+local HAS_RABBASCA = script.active_mods["planet-rabbasca"] ~= nil
 
-local aquilo  = require("quests.aquilo")
-local fulgora = require("quests.fulgora")
-local gleba   = require("quests.gleba")
-local nauvis  = require("quests.nauvis")
-local castra  = HAS_CASTRA  and require("quests.castra")  or nil
-local moshine = HAS_MOSHINE and require("quests.moshine") or nil
-local panglia = HAS_PANGLIA and require("quests.panglia") or nil
+local aquilo   = require("quests.aquilo")
+local fulgora  = require("quests.fulgora")
+local gleba    = require("quests.gleba")
+local nauvis   = require("quests.nauvis")
+local castra   = HAS_CASTRA   and require("quests.castra")   or nil
+local moshine  = HAS_MOSHINE  and require("quests.moshine")  or nil
+local panglia  = HAS_PANGLIA  and require("quests.panglia")  or nil
+local rabbasca = HAS_RABBASCA and require("quests.rabbasca") or nil
 
 local M = {}
 
@@ -93,11 +95,21 @@ local BUILT_FILTER = {
     {filter = "name", name = "pheromone-emitter"},
     {filter = "name", name = "aquilo-elevator-shaft"},
 }
+if HAS_RABBASCA then
+    table.insert(BUILT_FILTER, {filter = "name", name = "vault-entry-portal"})
+end
 local function on_entity_built(event)
     local name = event.entity.name
-    if     name == "harvester"            then gleba.register_harvester(event.entity)
-    elseif name == "pheromone-emitter"    then nauvis.register_emitter(event.entity, event.player_index)
+    if     name == "harvester"             then gleba.register_harvester(event.entity)
+    elseif name == "pheromone-emitter"     then nauvis.register_emitter(event.entity, event.player_index)
     elseif name == "aquilo-elevator-shaft" then aquilo.register_elevator(event.entity); refresh()
+    elseif name == "vault-entry-portal" and rabbasca then
+        local player = event.player_index and game.players[event.player_index]
+        if player then
+            local quality_name = event.entity.quality and event.entity.quality.name or "normal"
+            rabbasca.enter_tunnel(player, quality_name)
+        end
+        if event.entity.valid then event.entity.destroy() end
     end
 end
 script.on_event(defines.events.on_built_entity,       on_entity_built, BUILT_FILTER)
@@ -109,11 +121,25 @@ local MINED_FILTER = {
     {filter = "name", name = "pheromone-emitter"},
     {filter = "name", name = "aquilo-elevator-shaft"},
 }
+if HAS_RABBASCA then
+    table.insert(MINED_FILTER, {filter = "name", name = "rabbit-mcguffin"})
+end
 local function on_entity_mined(event)
     local name = event.entity.name
     if     name == "harvester"             then gleba.unregister_harvester(event.entity)
     elseif name == "pheromone-emitter"     then nauvis.unregister_emitter(event.entity)
     elseif name == "aquilo-elevator-shaft" then aquilo.unregister_elevator(event.entity); refresh()
+    elseif name == "rabbit-mcguffin" then
+        local player = event.player_index and game.players[event.player_index]
+        if player then
+            local ret = storage.vault_tunnel_return and storage.vault_tunnel_return[player.index]
+            local quality_name = ret and ret.quality or "normal"
+            local inserted = player.insert({name = "rabbit-mcguffin", count = 1, quality = quality_name})
+            if inserted == 0 then
+                player.surface.spill_item_stack(player.position, {name = "rabbit-mcguffin", count = 1, quality = quality_name}, true)
+            end
+            player.print("[color=gold]You've claimed the vault's prize. The path to the Warp Pylon is now open.[/color]")
+        end
     end
 end
 script.on_event(defines.events.on_player_mined_entity, on_entity_mined, MINED_FILTER)

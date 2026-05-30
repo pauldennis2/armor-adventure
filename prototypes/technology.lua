@@ -444,31 +444,68 @@ data:extend({
 })
 
 if mods["planet-rabbasca"] then
-  data:extend({{
-    type = "technology",
-    name = "personal-warp-pylon",
-    icon = "__base__/graphics/technology/personal-roboport-equipment.png",
-    icon_size = 256,
-    prerequisites = {"forge-promethium-armor", "interplanetary-construction-1"},
-    unit = {
-      count = 10000,
-      ingredients = {
-        {"automation-science-pack", 1},
-        {"logistic-science-pack",   1},
-        {"chemical-science-pack",   1},
-        {"military-science-pack",   1},
-        {"production-science-pack", 1},
-        {"utility-science-pack",    1},
-        {"space-science-pack",      1},
-        {"athletic-science-pack",   1},
-        {"promethium-science-pack", 1},
+  data:extend({
+    {
+      type = "technology",
+      name = "armor-adventure-rabbasca",
+      icon = "__base__/graphics/technology/radar.png",
+      icon_size = 256,
+      prerequisites = {"forge-promethium-armor"},
+      unit = {
+        count = 5000,
+        ingredients = {
+          {"automation-science-pack",  1},
+          {"logistic-science-pack",    1},
+          {"chemical-science-pack",    1},
+          {"military-science-pack",    1},
+          {"production-science-pack",  1},
+          {"utility-science-pack",     1},
+          {"space-science-pack",       1},
+          {"athletic-science-pack",    1},
+          {"promethium-science-pack",  1},
+        },
+        time = 60,
       },
-      time = 60,
+      effects = {
+        {type = "unlock-recipe", recipe = "vault-excavation-key"},
+        {type = "unlock-recipe", recipe = "vault-entry-extraction"},
+      },
     },
-    effects = {
-      {type = "unlock-recipe", recipe = "personal-warp-pylon-equipment"},
+    {
+      type             = "technology",
+      name             = "conquer-the-vault",
+      icon             = "__base__/graphics/technology/military.png",
+      icon_size        = 256,
+      prerequisites    = {"armor-adventure-rabbasca"},
+      research_trigger = {type = "mine-entity", entity = "rabbit-mcguffin"},
+      effects          = {},
     },
-  }})
+    {
+      type = "technology",
+      name = "personal-warp-pylon",
+      icon = "__base__/graphics/technology/personal-roboport-equipment.png",
+      icon_size = 256,
+      prerequisites = {"conquer-the-vault", "interplanetary-construction-1"},
+      unit = {
+        count = 10000,
+        ingredients = {
+          {"automation-science-pack",  1},
+          {"logistic-science-pack",    1},
+          {"chemical-science-pack",    1},
+          {"military-science-pack",    1},
+          {"production-science-pack",  1},
+          {"utility-science-pack",     1},
+          {"space-science-pack",       1},
+          {"athletic-science-pack",    1},
+          {"promethium-science-pack",  1},
+        },
+        time = 60,
+      },
+      effects = {
+        {type = "unlock-recipe", recipe = "personal-warp-pylon-equipment"},
+      },
+    },
+  })
 end
 
 if mods["castra-prime"] then
@@ -487,8 +524,8 @@ if mods["castra-prime"] then
     {
       type = "technology",
       name = "personal-combat-roboport",
-      icon = "__base__/graphics/technology/personal-roboport-equipment.png",
-      icon_size = 256,
+      icon = "__armor-adventure__/graphics/icons/pcr-destroyer.png",
+      icon_size = 64,
       prerequisites = {"forge-promethium-armor", "core-hunt"},
       unit = {
         count = 10000,
@@ -560,7 +597,11 @@ if settings.startup["armor-adventure-exploration-mode"].value then
   if mods["Moshine"]         then table.insert(to_cover, "personal-tesla-turret") end
   if mods["panglia_planet"]  then table.insert(to_cover, "time-fracking") end
   if mods["panglia_planet"]  then table.insert(to_cover, "personal-time-stopper") end
-  if mods["planet-rabbasca"] then table.insert(to_cover, "personal-warp-pylon") end
+  if mods["planet-rabbasca"] then
+    table.insert(to_cover, "armor-adventure-rabbasca")
+    table.insert(to_cover, "conquer-the-vault")
+    table.insert(to_cover, "personal-warp-pylon")
+  end
   if mods["castra-prime"]    then table.insert(to_cover, "core-hunt") end
   if mods["castra-prime"]    then table.insert(to_cover, "personal-combat-roboport") end
   if mods["metal-and-stars"] then table.insert(to_cover, "armor-adventure-metal-and-stars") end

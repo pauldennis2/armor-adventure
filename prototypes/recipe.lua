@@ -452,19 +452,49 @@ if mods["castra-prime"] then
 end
 
 if mods["planet-rabbasca"] then
-  data:extend({{
-    type            = "recipe",
-    name            = "personal-warp-pylon-equipment",
-    enabled         = false,
-    energy_required = 10,
-    category        = "armor-forging",
-    ingredients = {
-      {type = "item", name = "rabbasca-warp-pylon",  amount = 2},
-      {type = "item", name = "speed-module-3",       amount = 2},
-      {type = "item", name = "efficiency-module-3",  amount = 2},
+  data:extend({
+    {
+      type            = "recipe",
+      name            = "personal-warp-pylon-equipment",
+      enabled         = false,
+      energy_required = 10,
+      category        = "armor-forging",
+      ingredients = {
+        {type = "item", name = "rabbasca-warp-pylon",  amount = 2},
+        {type = "item", name = "speed-module-3",       amount = 2},
+        {type = "item", name = "efficiency-module-3",  amount = 2},
+      },
+      results = {{type = "item", name = "personal-warp-pylon-equipment", amount = 1}},
     },
-    results         = {{type = "item", name = "personal-warp-pylon-equipment", amount = 1}},
-  }})
+    -- Crafted at the Armor Forging Station after researching armor-adventure-rabbasca.
+    -- Consumed by the vault-entry-extraction recipe in the vault-crafter.
+    {
+      type            = "recipe",
+      name            = "vault-excavation-key",
+      enabled         = false,
+      energy_required = 30,
+      category        = "armor-forging",
+      ingredients = {
+        {type = "item", name = "vault-security-key",    amount = 5},
+        {type = "item", name = "processing-unit",       amount = 10},
+        {type = "item", name = "low-density-structure", amount = 20},
+      },
+      results = {{type = "item", name = "vault-excavation-key", amount = 1}},
+    },
+    -- Run in the vault-crafter (rabbasca-vault-extraction category) while a hack is active.
+    -- Consumes the vault-excavation-key and produces a vault-entry-pass the player places to enter.
+    {
+      type            = "recipe",
+      name            = "vault-entry-extraction",
+      category        = "rabbasca-vault-extraction",
+      enabled         = false,
+      energy_required = 60,
+      ingredients = {
+        {type = "item", name = "vault-excavation-key", amount = 1},
+      },
+      results = {{type = "item", name = "vault-entry-pass", amount = 1}},
+    },
+  })
 end
 
 data:extend({{
@@ -571,3 +601,31 @@ data:extend({{
   },
   allow_productivity = true,
 }})
+
+-- Prevent Castra Prime's Forge from re-categorizing our recipes.
+-- Must be set here (data.lua stage) — Castra reads this flag in data-updates.lua,
+-- before data-final-fixes.lua runs, so setting it there is always too late.
+do
+  local our_recipes = {
+    "mech-armor-mk2", "promethium-armor-chassis", "promethium-armor-electronics",
+    "demolisher-heart-split", "demolisher-heart-fragment-compress",
+    "regenerative-plating", "personal-robot-stash", "personal-beacon-equipment",
+    "pocket-dimension-generator", "armor-forging-station", "bio-interface",
+    "pentapod-tissue-samples-from-biomass", "quantum-coil",
+    "harvester", "neural-override-dart", "massive-lightning-collector",
+    "pheromone-emitter", "nauvis-armor-piece", "cryovault-access-card",
+    "thermodynamic-regulator", "aquilo-elevator-shaft", "aquilo-elevator-dig",
+    "personal-tesla-turret", "unstable-magnetized-data-core",
+    "deosil-motion-data", "widdershins-motion-data", "vortex-data-card",
+    "personal-time-stopper", "panglia-essence-of-speed",
+    "personal-combat-roboport", "personal-combat-roboport-distractor",
+    "personal-combat-roboport-destroyer", "simulac-core",
+    "personal-warp-pylon-equipment",
+    "vault-excavation-key",
+    "vault-entry-extraction",
+  }
+  for _, name in ipairs(our_recipes) do
+    local r = data.raw["recipe"][name]
+    if r then r.castra_prime_ignore = true end
+  end
+end

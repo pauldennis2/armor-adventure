@@ -1,5 +1,6 @@
-local quests       = require("quests.quests")
-local aquilo_quest = require("quests.aquilo")
+local quests          = require("quests.quests")
+local aquilo_quest    = require("quests.aquilo")
+local rabbasca_quest  = script.active_mods["planet-rabbasca"] ~= nil and require("quests.rabbasca") or nil
 
 local ARMOR_NAME = "mech-armor-mk2"
 
@@ -48,7 +49,11 @@ if EXPLORATION_MODE then
   if HAS_MOSHINE     then COVERED_TECHS["personal-tesla-turret-covered"]          = "personal-tesla-turret" end
   if HAS_PANGLIA     then COVERED_TECHS["time-fracking-covered"]                  = "time-fracking" end
   if HAS_PANGLIA     then COVERED_TECHS["personal-time-stopper-covered"]          = "personal-time-stopper" end
-  if HAS_RABBASCA    then COVERED_TECHS["personal-warp-pylon-covered"]            = "personal-warp-pylon" end
+  if HAS_RABBASCA    then
+    COVERED_TECHS["personal-warp-pylon-covered"]          = "personal-warp-pylon"
+    COVERED_TECHS["armor-adventure-rabbasca-covered"]     = "armor-adventure-rabbasca"
+    COVERED_TECHS["conquer-the-vault-covered"]            = "conquer-the-vault"
+  end
   if HAS_CASTRA      then COVERED_TECHS["core-hunt-covered"]                      = "core-hunt" end
   if HAS_CASTRA      then COVERED_TECHS["personal-combat-roboport-covered"]       = "personal-combat-roboport" end
   if HAS_METAL_STARS then COVERED_TECHS["armor-adventure-metal-and-stars-covered"] = "armor-adventure-metal-and-stars" end
@@ -66,7 +71,7 @@ local function reveal_all_exploration_techs(force)
       for _, prereq_tech in pairs(real.prerequisites) do
         if not prereq_tech.researched then all_done = false; break end
       end
-      if all_done then
+      if all_done or real.researched then
         real.enabled   = true
         shadow.enabled = false
       end
@@ -135,6 +140,7 @@ local function init_storage()
   storage.time_stopper_render     = storage.time_stopper_render or {}
   storage.spark_last_pos          = storage.spark_last_pos or {}
   storage.panglia_pending_essence = storage.panglia_pending_essence or {}
+  storage.vault_tunnel_return     = storage.vault_tunnel_return     or {}
   for _, player in pairs(game.players) do
     storage.mk2_penalties[player.index]      = storage.mk2_penalties[player.index] or {}
     storage.roboport_cooldowns[player.index] = storage.roboport_cooldowns[player.index] or {}
@@ -158,6 +164,7 @@ script.on_init(function()
   storage.simulac_awaken_meter    = 0
   storage.time_stopper_render     = {}
   storage.spark_last_pos          = {}
+  storage.vault_tunnel_return     = {}
   if EXPLORATION_MODE then
     for _, force in pairs(game.forces) do reveal_all_exploration_techs(force) end
   end
@@ -234,6 +241,7 @@ script.on_event(defines.events.on_player_created, function(event)
   storage.personal_beacons[event.player_index]        = nil
   storage.pocket_dim_return[event.player_index]       = nil
   storage.personal_warp_pylons[event.player_index]    = nil
+  storage.vault_tunnel_return[event.player_index]     = nil
   storage.time_stopper_active[event.player_index]     = nil
   storage.time_stopper_cooldown[event.player_index]   = nil
   storage.personal_warp_pylon_pos[event.player_index] = nil
@@ -1056,6 +1064,29 @@ local function close_depot_gui(player)
   if frame and frame.valid then frame.destroy() end
 end
 
+local function open_vault_exit_gui(player)
+  if player.gui.screen["vault-exit-gui"] then return end
+  local frame = player.gui.screen.add{
+    type      = "frame",
+    name      = "vault-exit-gui",
+    caption   = {"armor-adventure.vault-exit-gui-title"},
+    direction = "vertical",
+  }
+  frame.auto_center = true
+  frame.add{
+    type    = "button",
+    name    = "vault-exit-ascend",
+    caption = {"armor-adventure.vault-exit-ascend"},
+    style   = "confirm_button",
+  }
+  player.opened = frame
+end
+
+local function close_vault_exit_gui(player)
+  local frame = player.gui.screen["vault-exit-gui"]
+  if frame and frame.valid then frame.destroy() end
+end
+
 -- ─────────────────────────────────────────────────────────────────────────────
 
 -- Block access to tiered pocket chests whose quality exceeds the player's PDG quality.
@@ -1082,6 +1113,9 @@ script.on_event(defines.events.on_gui_opened, function(event)
   elseif entity.name == "aquilo-depot-ascent" then
     player.opened = nil
     open_depot_gui(player)
+  elseif entity.name == "vault-tunnel-exit" then
+    player.opened = nil
+    open_vault_exit_gui(player)
   end
 end)
 
@@ -1094,13 +1128,16 @@ script.on_event(defines.events.on_gui_click, function(event)
   elseif name == "aquilo-depot-ascend" then
     close_depot_gui(player)
     aquilo_quest.ascend_from_depot(player)
+  elseif name == "vault-exit-ascend" then
+    close_vault_exit_gui(player)
+    if rabbasca_quest then rabbasca_quest.exit_tunnel(player) end
   end
 end)
 
 script.on_event(defines.events.on_gui_closed, function(event)
   if event.element then
     local n = event.element.name
-    if n == "aquilo-elevator-gui" or n == "aquilo-depot-gui" then
+    if n == "aquilo-elevator-gui" or n == "aquilo-depot-gui" or n == "vault-exit-gui" then
       if event.element.valid then event.element.destroy() end
     end
     return
@@ -1442,4 +1479,10 @@ script.on_nth_tick(60, function()
     end
   end
 end)
+
+if HAS_RABBASCA and rabbasca_quest then
+  script.on_event(defines.events.on_chunk_generated, function(event)
+    rabbasca_quest.on_chunk_generated(event)
+  end)
+end
 
