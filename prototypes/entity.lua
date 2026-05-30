@@ -57,6 +57,7 @@ local PERSONAL_BEACON_TIERS = {
 for _, tier in ipairs(PERSONAL_BEACON_TIERS) do
   local pb = table.deepcopy(data.raw["beacon"]["beacon"])
   pb.name                          = "personal-beacon" .. tier.suffix
+  pb.next_upgrade                  = nil
   pb.distribution_effectivity      = tier.effectivity
   pb.minable                       = nil
   pb.allow_copy_paste              = false
@@ -429,6 +430,7 @@ end
 -- aquilo-elevator-construction category so it only accepts the dig recipe.
 local elevator_shaft = table.deepcopy(data.raw["assembling-machine"]["assembling-machine-3"])
 elevator_shaft.name                = "aquilo-elevator-shaft"
+elevator_shaft.next_upgrade        = nil
 elevator_shaft.minable             = {mining_time = 0.5, result = "aquilo-elevator-shaft"}
 elevator_shaft.crafting_categories = {"aquilo-elevator-construction"}
 elevator_shaft.crafting_speed      = 1.0
@@ -439,6 +441,7 @@ data:extend({elevator_shaft})
 -- Intentionally terrible so it gets replaced with real art.
 local elevator_complete = table.deepcopy(data.raw["assembling-machine"]["chemical-plant"])
 elevator_complete.name                = "aquilo-elevator-complete"
+elevator_complete.next_upgrade        = nil
 elevator_complete.minable             = nil
 elevator_complete.flags               = {"placeable-neutral", "not-blueprintable", "not-deconstructable"}
 elevator_complete.crafting_categories = {"aquilo-elevator-dummy"}
@@ -449,6 +452,7 @@ data:extend({elevator_complete})
 -- Placeholder ascent elevator (depot side) — same chemical plant hack.
 local depot_ascent = table.deepcopy(data.raw["assembling-machine"]["chemical-plant"])
 depot_ascent.name                = "aquilo-depot-ascent"
+depot_ascent.next_upgrade        = nil
 depot_ascent.minable             = nil
 depot_ascent.flags               = {"placeable-neutral", "not-blueprintable", "not-deconstructable"}
 depot_ascent.crafting_categories = {"aquilo-elevator-dummy"}
@@ -538,6 +542,7 @@ data:extend({{
 -- into each player's pocket surface. Never craftable or placeable by the player.
 local pd_chest = table.deepcopy(data.raw["container"]["steel-chest"])
 pd_chest.name           = "pocket-dimension-chest"
+pd_chest.next_upgrade   = nil
 pd_chest.minable        = nil
 pd_chest.destructible   = false
 pd_chest.flags          = {"not-blueprintable", "not-deconstructable"}
@@ -548,6 +553,7 @@ data:extend({pd_chest})
 -- Player cannot open it (blocked in control.lua) until all puzzles are solved.
 local cryovault_chest = table.deepcopy(data.raw["container"]["steel-chest"])
 cryovault_chest.name           = "cryovault-chest"
+cryovault_chest.next_upgrade   = nil
 cryovault_chest.minable        = nil
 cryovault_chest.destructible   = false
 cryovault_chest.flags          = {"not-blueprintable", "not-deconstructable"}
@@ -558,6 +564,7 @@ data:extend({cryovault_chest})
 -- script detects it via on_gui_closed and swaps it for a quality-matched cryo core.
 local vault_reader = table.deepcopy(data.raw["container"]["iron-chest"])
 vault_reader.name           = "vault-card-reader"
+vault_reader.next_upgrade   = nil
 vault_reader.minable        = nil
 vault_reader.destructible   = false
 vault_reader.flags          = {"not-blueprintable", "not-deconstructable"}
@@ -742,6 +749,7 @@ if mods["planet-rabbasca"] then
   -- vault-entry-portal: placed by vault-entry-pass; on_built_entity teleports player and destroys it.
   local vault_portal = table.deepcopy(data.raw["container"]["iron-chest"])
   vault_portal.name           = "vault-entry-portal"
+  vault_portal.next_upgrade   = nil
   vault_portal.minable        = {mining_time = 0.5, result = "vault-entry-pass"}
   vault_portal.inventory_size = 1
   vault_portal.flags          = {"not-blueprintable", "not-deconstructable"}
@@ -750,6 +758,7 @@ if mods["planet-rabbasca"] then
   -- vault-tunnel-exit: indestructible entity placed in the tunnel; on_gui_opened shows Return GUI.
   local tunnel_exit = table.deepcopy(data.raw["assembling-machine"]["chemical-plant"])
   tunnel_exit.name                = "vault-tunnel-exit"
+  tunnel_exit.next_upgrade        = nil
   tunnel_exit.minable             = nil
   tunnel_exit.flags               = {"placeable-neutral", "not-blueprintable", "not-deconstructable"}
   tunnel_exit.crafting_categories = {"aquilo-elevator-dummy"}
@@ -780,6 +789,27 @@ if mods["planet-rabbasca"] then
     collision_box = {{-0.9, -0.9}, {0.9, 0.9}},
     selection_box = {{-1.2, -1.2}, {1.2, 1.2}},
   }})
+
+  -- vault-laser-turret: Design B/D entity. Void energy source so it fires without a power grid.
+  local laser_src = data.raw["electric-turret"]["laser-turret"]
+  if laser_src then
+    local vlt         = table.deepcopy(laser_src)
+    vlt.name          = "vault-laser-turret"
+    vlt.next_upgrade  = nil
+    vlt.minable       = nil
+    vlt.energy_source = {type = "void"}
+    data:extend({vlt})
+  end
+
+  -- vault-artillery-turret: Design D entity. Long-range area bombardment from the back wall.
+  local art_src = data.raw["artillery-turret"]["artillery-turret"]
+  if art_src then
+    local vat        = table.deepcopy(art_src)
+    vat.name         = "vault-artillery-turret"
+    vat.next_upgrade = nil
+    vat.minable      = nil
+    data:extend({vat})
+  end
 end
 
 if mods["panglia_planet"] and mods["Moshine"] then

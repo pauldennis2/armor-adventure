@@ -141,10 +141,15 @@ end
 -- Must be a crafting machine so Rabbasca's warp dispatch cycle (awake → trigger item → attempt_build_ghost) works.
 -- Graphics stripped via empty graphics_set so nothing is rendered.
 if mods["planet-rabbasca"] then
+  -- vault-entry-portal: restrict placement to Rabbasca using its own surface-condition API.
+  local portal = data.raw["container"]["vault-entry-portal"]
+  if portal then Rabbasca.only_on_harenic_surface(portal) end
+
   local src = data.raw["assembling-machine"]["rabbasca-warp-pylon"]
   if src then
     local personal_pylon                    = table.deepcopy(src)
     personal_pylon.name                     = "armor-adventure-personal-warp-pylon"
+    personal_pylon.next_upgrade             = nil
     personal_pylon.minable                  = nil
     personal_pylon.allow_copy_paste         = false
     personal_pylon.collision_box            = {{-0.01, -0.01}, {0.01, 0.01}}

@@ -105,9 +105,17 @@ local function on_entity_built(event)
     elseif name == "aquilo-elevator-shaft" then aquilo.register_elevator(event.entity); refresh()
     elseif name == "vault-entry-portal" and rabbasca then
         local player = event.player_index and game.players[event.player_index]
-        if player then
-            local quality_name = event.entity.quality and event.entity.quality.name or "normal"
-            rabbasca.enter_tunnel(player, quality_name)
+        if event.entity.surface.name ~= "rabbasca" then
+            -- Wrong surface: refund the item and bail out
+            if player then
+                player.insert({name = "vault-entry-pass", count = 1, quality = event.entity.quality})
+                player.print("[color=#FF6666]The vault portal only functions on Rabbasca.[/color]")
+            end
+        else
+            if player then
+                local quality_name = event.entity.quality and event.entity.quality.name or "normal"
+                rabbasca.enter_tunnel(player, quality_name, event.entity.surface, event.entity.position)
+            end
         end
         if event.entity.valid then event.entity.destroy() end
     end
@@ -138,7 +146,7 @@ local function on_entity_mined(event)
             if inserted == 0 then
                 player.surface.spill_item_stack(player.position, {name = "rabbit-mcguffin", count = 1, quality = quality_name}, true)
             end
-            player.print("[color=gold]You've claimed the vault's prize. The path to the Warp Pylon is now open.[/color]")
+            player.print("[color=#FFD700]You've claimed the vault's prize. The path to the Warp Pylon is now open.[/color]")
         end
     end
 end
@@ -160,6 +168,10 @@ if HAS_CASTRA then
     table.insert(entity_died_filter, {filter = "name", name = "simulac-commander"})
     table.insert(entity_died_filter, {filter = "name", name = "simulac-mobile-fortress"})
 end
+if HAS_RABBASCA then
+    table.insert(entity_died_filter, {filter = "name", name = "gun-turret"})
+    table.insert(entity_died_filter, {filter = "name", name = "vault-laser-turret"})
+end
 
 script.on_event(defines.events.on_entity_died, function(event)
     local name = event.entity.name
@@ -176,6 +188,8 @@ script.on_event(defines.events.on_entity_died, function(event)
         nauvis.on_big_worm_died(event.entity)
     elseif castra and (name == "data-collector" or name == "simulac-commander" or name == "simulac-mobile-fortress") then
         castra.on_entity_died(event)
+    elseif (name == "gun-turret" or name == "vault-laser-turret") and rabbasca then
+        rabbasca.on_turret_died(event.entity)
     end
 end, entity_died_filter)
 

@@ -1478,6 +1478,11 @@ script.on_nth_tick(60, function()
       end
     end
   end
+
+  -- Vault shield drain for players inside the rabbasca tunnel surface.
+  if HAS_RABBASCA and rabbasca_quest then
+    rabbasca_quest.on_tick_60()
+  end
 end)
 
 if HAS_RABBASCA and rabbasca_quest then

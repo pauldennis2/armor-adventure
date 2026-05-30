@@ -461,8 +461,9 @@ if mods["planet-rabbasca"] then
       category        = "armor-forging",
       ingredients = {
         {type = "item", name = "rabbasca-warp-pylon",  amount = 2},
-        {type = "item", name = "speed-module-3",       amount = 2},
-        {type = "item", name = "efficiency-module-3",  amount = 2},
+        {type = "item", name = "rabbasca-energetic-concrete", amount = 100},
+        {type = "item", name = "haronite-plate",       amount = 10},
+        {type = "item", name = "rabbit-mcguffin",      amount = 1},
       },
       results = {{type = "item", name = "personal-warp-pylon-equipment", amount = 1}},
     },
