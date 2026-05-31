@@ -14,7 +14,6 @@ data:extend({
     category        = "armor-forging",
     ingredients = {
       {type = "item", name = "mech-armor",                   amount = 1},
-      {type = "item", name = "steel-plate",                  amount = 5},
       {type = "item", name = "bio-interface",                amount = 1},
       {type = "item", name = "thermodynamic-regulator",       amount = 1},
       {type = "item", name = "promethium-armor-chassis",     amount = 1},
@@ -46,6 +45,7 @@ data:extend({
     name               = "demolisher-heart-split",
     icon               = "__base__/graphics/icons/heavy-armor.png",
     icon_size          = 64,
+    subgroup           = "armor-adventure-materials",
     enabled            = false,
     energy_required    = 30,
     allow_productivity = true,
@@ -535,6 +535,7 @@ data:extend({{
   enabled            = false,
   energy_required    = 300,
   category           = "advanced-crafting",
+  subgroup           = "armor-adventure-materials",
   allow_productivity = true,
   icon               = "__base__/graphics/icons/electronic-circuit.png",
   icon_size          = 64,
@@ -571,6 +572,7 @@ data:extend({{
   name            = "aquilo-elevator-shaft",
   enabled         = false,
   energy_required = 10,
+  subgroup        = "armor-adventure-machines",
   ingredients = {
     {type = "item", name = "concrete",          amount = 100},
     {type = "item", name = "steel-plate",       amount = 100},
@@ -593,12 +595,13 @@ data:extend({{
   enabled         = true,
   energy_required = 60,
   ingredients = {
-    {type = "item", name = "concrete",    amount = 50},
+    {type = "item", name = "concrete",    amount = 75},
     {type = "item", name = "steel-plate", amount = 25},
   },
   results = {
-    {type = "item", name = "stone",    amount = 100, ignored_by_productivity = 100},
-    {type = "item", name = "iron-ore", amount = 5,   ignored_by_productivity = 5},
+    {type = "item", name = "stone",    amount = 50,  ignored_by_productivity = 50},
+    {type = "item", name = "iron-ore", amount = 2,   ignored_by_productivity = 2},
+    {type = "item", name = "ice",      amount = 75,  ignored_by_productivity = 75},
   },
   allow_productivity = true,
 }})

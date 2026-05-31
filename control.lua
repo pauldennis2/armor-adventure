@@ -225,7 +225,7 @@ script.on_configuration_changed(function(data)
   storage.time_stopper_render = {}
   for _, player in pairs(game.players) do
     if storage.time_stopper_active[player.index] then
-      storage.time_stopper_render[player.index] = draw_time_stopper_aura(player)
+      storage.time_stopper_render[player.index] = draw_time_stopper_aura(player, storage.time_stopper_active[player.index].radius)
     end
   end
   -- Migrate puzzle state and initial signals for existing depot surfaces.
@@ -1222,7 +1222,7 @@ script.on_event(defines.events.on_player_changed_surface, function(event)
   end
   local render = storage.time_stopper_render and storage.time_stopper_render[player.index]
   if render and render.valid then render.destroy() end
-  storage.time_stopper_render[player.index] = draw_time_stopper_aura(player)
+  storage.time_stopper_render[player.index] = draw_time_stopper_aura(player, storage.time_stopper_active[player.index].radius)
   quests.refresh()
 end)
 
@@ -1283,7 +1283,7 @@ end -- HAS_RABBASCA
 local PTS_EQUIP       = "personal-time-stopper"
 local PTS_SPEED_BONUS = 1.5   -- added to character_running_speed_modifier
 local PTS_CRAFT_BONUS = 2.0   -- added to character_crafting_speed_modifier
-local PTS_SLOW_RADIUS = 15    -- tile radius for enemy slow
+local PTS_SLOW_RADIUS = {normal=3, uncommon=7, rare=11, epic=15, legendary=19}
 local PTS_COOLDOWN    = 60 * 60  -- 60s cooldown after effect ends
 
 local PTS_DURATION_BY_QUALITY = {
@@ -1307,10 +1307,10 @@ local function get_time_stopper_equip(player)
   return nil
 end
 
-local function apply_time_stopper_slow(player)
+local function apply_time_stopper_slow(player, radius)
   local enemies = player.surface.find_entities_filtered({
     position = player.position,
-    radius   = PTS_SLOW_RADIUS,
+    radius   = radius,
     force    = "enemy",
     type     = "unit",
   })
@@ -1325,11 +1325,11 @@ local function apply_time_stopper_slow(player)
   end
 end
 
-draw_time_stopper_aura = function(player)
+draw_time_stopper_aura = function(player, radius)
   if not (player.character and player.character.valid) then return nil end
   return rendering.draw_circle({
     color   = {r = 0.1, g = 0.7, b = 1.0, a = 0.6},
-    radius  = PTS_SLOW_RADIUS,
+    radius  = radius,
     width   = 3,
     filled  = false,
     target  = player.character,
@@ -1375,7 +1375,8 @@ activate_time_stopper = function(player)
 
   local quality  = eq.quality.name
   local duration = PTS_DURATION_BY_QUALITY[quality] or PTS_DURATION_BY_QUALITY.normal
-  storage.time_stopper_active[player.index]   = tick + duration
+  local radius   = PTS_SLOW_RADIUS[quality] or PTS_SLOW_RADIUS.normal
+  storage.time_stopper_active[player.index]   = {expires = tick + duration, radius = radius}
   storage.time_stopper_cooldown[player.index] = tick + duration + PTS_COOLDOWN
 
   player.character.character_running_speed_modifier =
@@ -1394,9 +1395,9 @@ activate_time_stopper = function(player)
       },
     })
   end
-  storage.time_stopper_render[player.index] = draw_time_stopper_aura(player)
+  storage.time_stopper_render[player.index] = draw_time_stopper_aura(player, radius)
 
-  apply_time_stopper_slow(player)
+  apply_time_stopper_slow(player, radius)
   player.set_shortcut_toggled("time-stopper-activate", true)
 end
 
@@ -1409,11 +1410,12 @@ end)
 script.on_nth_tick(60, function()
   local tick = game.tick
   for _, player in pairs(game.players) do
-    if not storage.time_stopper_active[player.index] then goto continue end
-    if tick >= storage.time_stopper_active[player.index] then
+    local pts = storage.time_stopper_active[player.index]
+    if not pts then goto continue end
+    if tick >= pts.expires then
       deactivate_time_stopper(player)
     elseif player.character and player.character.valid then
-      apply_time_stopper_slow(player)
+      apply_time_stopper_slow(player, pts.radius)
     end
     ::continue::
   end

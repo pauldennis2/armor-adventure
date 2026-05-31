@@ -166,11 +166,11 @@ function gleba.on_tick_59()
                         if d < dist2 then dist2 = d; nearest = player end
                     end
                 end
-                if nearest and entity.commandable then
+                if nearest and dist2 > 16 and entity.commandable then
                     entity.commandable.set_command{
                         type        = defines.command.go_to_location,
                         destination = nearest.position,
-                        distraction = defines.distraction.by_enemy,
+                        distraction = defines.distraction.none,
                     }
                 end
             end

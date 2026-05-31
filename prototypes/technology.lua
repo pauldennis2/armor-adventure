@@ -418,6 +418,7 @@ data:extend({
       "armor-adventure-fulgora",
       "cryo-core-acquired",
       "nauvis-defense-complete",
+      "dissection-analysis-complete",
     },
     unit = {
       count = 100000,

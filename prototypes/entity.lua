@@ -442,7 +442,7 @@ data:extend({elevator_shaft})
 local elevator_complete = table.deepcopy(data.raw["assembling-machine"]["chemical-plant"])
 elevator_complete.name                = "aquilo-elevator-complete"
 elevator_complete.next_upgrade        = nil
-elevator_complete.minable             = nil
+elevator_complete.minable             = {mining_time = 5.0, result = "aquilo-elevator-shaft"}
 elevator_complete.flags               = {"placeable-neutral", "not-blueprintable", "not-deconstructable"}
 elevator_complete.crafting_categories = {"aquilo-elevator-dummy"}
 elevator_complete.destructible        = false
