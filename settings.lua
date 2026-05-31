@@ -20,4 +20,11 @@ data:extend({
     default_value = true,
     order         = "c",
   },
+  {
+    type          = "bool-setting",
+    name          = "armor-adventure-custom-textures",
+    setting_type  = "startup",
+    default_value = true,
+    order         = "d",
+  },
 })

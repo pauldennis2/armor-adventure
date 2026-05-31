@@ -49,9 +49,6 @@ Eventual Gleba questline
     Creating gleba parts unlocks 
 
 Balancing
-make packed AFS available earlier and fit in regular mech armor
-
-Remove personal robot stash - still visible
 
 Pocket dimension
     Make it more interesting looking
@@ -74,8 +71,6 @@ Create a spoiler version and no-spoilers version for each quest
 improve simulac commander
     Probably make it vehicle is better; equipment gives lots of possibilities
     Vehicle concept didn't work; fix range of commander
-
-time stopper - scale size, magnitude of effect with quality, maybe reduce duration
 
 armor forging station packed - wrong stats/tooltip
 
@@ -108,11 +103,6 @@ Panglia quest updates
 
 Notes from playthrough
 
-
-
-"You've detected a strange EM emission from somewhere deeper in the planet. 
-You could set up radar stations to try to pinpoint the source."
-
 On completion print or add to armor journal
 
 Armor Forging Station :
@@ -120,48 +110,22 @@ AFS research icon: use the AFS
 
 possible trigger tech: craft AFS
 
-tech description: "unlocks the Armor Forging Station, [add->] your mechanical companion on this journey."
-Armor Forging Station item description:
-"Used for forging all components for the Promethium Armor as well as the armor itself.
- Due to the nature of the materials involved, cannot accept quality modules."
-
-Nauvis Field Research -> Nauvis Biter Investigation
-"Dig deeper into the mysteries of Nauvis... who knows what monsters lurk in the depths?"
 pheremone emitter
     remove/hide distribution efficiency
     desperately needs icon
     unknown key surface-property-unit.nauvis-native
     Change description. More vague, but add the suggestion of quality matters
 
-Fulgora field research - Fulgora Climate Investigation
-"Dig deeper into the mysteries of Fulgora... could you find a way to harness the power of the skies even further?"
-
-Massive Lighting Collector -> Massive Lightning Funnel
-
-Reduce to maybe 3-5 charged lightning gems - too much upcylcing or maybe ONE
-
-Description: 
-"Draws in lightning strikes from a much wider area, but does not send any electricity to the grid.
-Where could all that power be going? Best placed far from your base."
-
-Packable forge description:
-"crafting speed doubled -> crafting speed increased 100%
 
 Promethium armor icon use icon for promethium armor (most desperately needed)
 
 Trigger tech for vulcanus
-
-Vulcanus field research -> "Vulcanus Demolisher Anatomy Investigation"
-Remove/hide quantum coil
-
-Important!!! Remove all non armor crafting recipes from AFS
 
 Allow machining assembler to craft massive lightning funnel?
 MLF -> Icon w big lightning? dunno
 only buildable on Fulgora
 Make charged gems easier to see or go into a chest (ideally require coal or something to start?)
     or mark automatically for deconstruction
-Damage effect if you're standing nearby? nah
 
 Charged lightning gem description
 
@@ -169,17 +133,11 @@ Gleba
 Mind control rocket needs description
 Quality should matter
 
-Gleba field research -> "Gleba Pentapod Investigation"
-needs desc
-
 biointerface needs a technology!
-mind control doesn't work at all!!!!!!
 pheremone emitter - does nothing
 Update: still nothing
 
 Aquilo elevator
-    It should dump out more junk but currently it's giving too much back - I don't want players to build these for resources
-    Prob reduce iron ore to 2, stone to 75, and also put out 50 ice or something useless
     Quality doesn't matter (except for crafting speed). Maybe require quality shaft components? too mean?
     More gracefully handle extra items on completion? Cerys is similar issue
 
@@ -191,23 +149,36 @@ Fulgoran depot
     Let user know to check inventory for the core?
     Hint at "bring back another card for another core?
 
-important!!! promethium armor tech has invisible prereq???
-
 what happens on peaceful/no enemies mode? No armor on the latter
 
+Try slightly deblueifying the AFS
 
 Fix:
 Thermodynamic regulator needs icon, and should be discovered on Cryo core acquired
-Remove movement speed bonus from AFS tooltip
-
-prevent castra prime forge from crafting our armor parts
 cryovault access card should be producable in EM PLant? with no prod...?
 access card should be in our armor adventure tab
 
-Turn the high level pieces into 1x1 equipment items
-
-Remove 5 steel plates from final armor
-
-Mind controlled units don't follow very well - 2 steps forward 1 back
-
 Idea of having a spidertron version (discoverable from some planet) that can use the new gear
+
+Metal and stars quest
+M&S high end mats
+    Dark matter crystal (nix)
+    **Antimatter (nix)
+    Neuman conduit
+    QUantum shards (miranda)
+    hi speed proc + hv water? (ring)
+
+Rabbasca quest
+    Kinda nowhere
+    Some kind of "dodge the fire" hallway?
+    Feed them carotene?
+    Darkness challenge?
+
+Supply chain tracer
+    mouse over a building, it points towards where the missing ingredient is crafted
+    or traces the whole chain and shows what is missing base
+
+
+Live playtest notes/fixes
+
+Fix Thermodynamic regulator recipe

@@ -137,6 +137,80 @@ if mods["panglia_planet"] then
     end
 end
 
+-- Lightweight textures: when custom textures are disabled, replace the AFS and Harvester
+-- graphics_set with sprites from already-loaded companion mods (zero extra VRAM cost).
+-- Falls back to vanilla assembling-machine-3 if neither companion mod is present.
+if not settings.startup["armor-adventure-custom-textures"].value then
+  local function am3_graphics()
+    local am3 = data.raw["assembling-machine"]["assembling-machine-3"]
+    return am3 and {icon = am3.icon, icon_size = am3.icon_size, graphics_set = am3.graphics_set}
+  end
+
+  local afs = data.raw["assembling-machine"]["armor-forging-station"]
+  if afs then
+    if mods["castra-prime-assets"] then
+      local CP = "__castra-prime-assets__/graphics/atom-forge/"
+      afs.icon      = CP .. "atom-forge-icon.png"
+      afs.icon_size = 64
+      afs.graphics_set = {
+        reset_animation_when_frozen = true,
+        animation = { layers = {
+          { filename = CP.."atom-forge-hr-shadow.png",
+            width = 900, height = 500, frame_count = 1, repeat_count = 64,
+            draw_as_shadow = true, animation_speed = 0.3, scale = 0.33, shift = {0,-1} },
+          { filename = CP.."atom-forge-hr-animation-1.png",
+            width = 400, height = 480, frame_count = 64, line_length = 8,
+            animation_speed = 0.3, scale = 0.33, shift = {0,-1} },
+          { filename = CP.."atom-forge-hr-emission-1.png",
+            width = 400, height = 480, frame_count = 64, line_length = 8,
+            animation_speed = 0.3, scale = 0.33, shift = {0,-1},
+            draw_as_glow = true, blend_mode = "additive" },
+        }},
+      }
+    else
+      local fb = am3_graphics()
+      if fb then afs.icon = fb.icon; afs.icon_size = fb.icon_size; afs.graphics_set = fb.graphics_set end
+    end
+  end
+
+  local harvester = data.raw["assembling-machine"]["harvester"]
+  if harvester then
+    if mods["apia"] then
+      local AP = "__apia__/graphics/entity/biosynthesizer/"
+      harvester.icon      = "__apia__/graphics/icons/biosynthesizer-apia.png"
+      harvester.icon_size = 64
+      harvester.graphics_set = {
+        animation = { layers = {
+          { filename = AP.."biosynthesizer-animation.png",
+            width = 500, height = 500, frame_count = 60, line_length = 8,
+            animation_speed = 0.3, scale = 0.32, shift = {0,-0.35} },
+          { filename = AP.."biosynthesizer-shadow.png",
+            width = 900, height = 700, frame_count = 1, repeat_count = 60,
+            draw_as_shadow = true, animation_speed = 0.3, scale = 0.32, shift = {0,-0.35} },
+        }},
+        frozen_patch = {
+          filename = AP.."biosynthesizer-frozen.png",
+          width = 500, height = 500, frame_count = 60, line_length = 8,
+          animation_speed = 0.3, scale = 0.32, shift = {0,-0.35},
+        },
+        working_visualisations = {{
+          fadeout = true, effect = "flicker",
+          animation = {
+            filename = AP.."biosynthesizer-emission.png",
+            width = 500, height = 500, frame_count = 60, line_length = 8,
+            animation_speed = 0.3, priority = "extra-high",
+            blend_mode = "additive", draw_as_glow = true,
+            scale = 0.32, shift = {0,-0.35},
+          },
+        }},
+      }
+    else
+      local fb = am3_graphics()
+      if fb then harvester.icon = fb.icon; harvester.icon_size = fb.icon_size; harvester.graphics_set = fb.graphics_set end
+    end
+  end
+end
+
 -- Personal Warp Pylon: invisible assembling-machine deepcopy of rabbasca-warp-pylon.
 -- Must be a crafting machine so Rabbasca's warp dispatch cycle (awake → trigger item → attempt_build_ghost) works.
 -- Graphics stripped via empty graphics_set so nothing is rendered.

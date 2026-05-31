@@ -11,6 +11,8 @@
     "base >= 2.0.0",
     "space-age >= 2.0.0",
     "? castra-prime",
+    "? castra-prime-assets",
+    "? apia",
     "? factorissimo-2-notnotmelon",
     "? Moshine",
     "? panglia_planet",
