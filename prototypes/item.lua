@@ -16,13 +16,11 @@ data:extend({
   },
   {
     type         = "item",
-    name         = "pentapod-tissue-samples",
-    icon         = "__base__/graphics/icons/behemoth-biter.png",
-    subgroup     = "armor-adventure-materials",
-    order        = "z[pentapod-tissue-samples]",
-    stack_size   = 50,
-    spoil_ticks  = 7200,
-    spoil_result = "spoilage",
+    name       = "pentapod-tissue-samples",
+    icon       = "__base__/graphics/icons/behemoth-biter.png",
+    subgroup   = "armor-adventure-materials",
+    order      = "z[pentapod-tissue-samples]",
+    stack_size = 50,
   },
   {
     type         = "item",
@@ -123,7 +121,7 @@ data:extend({
     icon       = "__base__/graphics/icons/heavy-armor.png",
     subgroup   = "armor-adventure-materials",
     order      = "z[demolisher-heart]",
-    stack_size = 1,
+    stack_size = 5,
   },
   {
     type       = "item",

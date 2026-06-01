@@ -4,7 +4,15 @@ local gleba = {}
 
 local HARVESTER_RANGE  = 10
 local HP_PER_PART      = 1000
-local HEART_DROP_RANGE = 50
+local HEART_DROP_RANGE = 75
+
+local DART_QUALITY_MULTIPLIER = {
+    normal    = 1,
+    uncommon  = 2,
+    rare      = 3,
+    epic      = 4,
+    legendary = 5,
+}
 
 local TESLA_PRIMARY_DAMAGE = {
     normal    = 25,
@@ -62,6 +70,11 @@ function gleba.on_script_trigger_effect(event)
         end
         storage.mind_controlled = storage.mind_controlled or {}
         storage.mind_controlled[target.unit_number] = target
+        local q_name = event.source_entity and event.source_entity.valid
+                       and event.source_entity.quality and event.source_entity.quality.name
+                       or "normal"
+        storage.mc_quality = storage.mc_quality or {}
+        storage.mc_quality[target.unit_number] = DART_QUALITY_MULTIPLIER[q_name] or 1
         rendering.draw_text{
             text          = "★ Mind Controlled",
             surface       = target.surface,
@@ -134,10 +147,12 @@ function gleba.on_tick_59()
                         local dx = mc_entity.position.x - hx
                         local dy = mc_entity.position.y - hy
                         if dx*dx + dy*dy <= r2 then
-                            local hp = mc_entity.health
+                            local hp  = mc_entity.health
+                            local mul = storage.mc_quality and storage.mc_quality[m_uid] or 1
                             mc_entity.die()
                             mc[m_uid] = nil
-                            storage.harvester_hp[h_uid] = (storage.harvester_hp[h_uid] or 0) + hp
+                            if storage.mc_quality then storage.mc_quality[m_uid] = nil end
+                            storage.harvester_hp[h_uid] = (storage.harvester_hp[h_uid] or 0) + hp * mul
                             local biomass = math.floor(storage.harvester_hp[h_uid] / HP_PER_PART)
                             if biomass > 0 then
                                 storage.harvester_hp[h_uid] = storage.harvester_hp[h_uid] % HP_PER_PART
@@ -156,6 +171,7 @@ function gleba.on_tick_59()
         for uid, entity in pairs(mc) do
             if not entity.valid then
                 mc[uid] = nil
+                if storage.mc_quality then storage.mc_quality[uid] = nil end
             else
                 local nearest, dist2 = nil, math.huge
                 for _, player in pairs(game.players) do

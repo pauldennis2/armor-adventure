@@ -85,6 +85,12 @@ for _, proto in pairs(data.raw["roboport"] or {}) do
   proto.surface_conditions[#proto.surface_conditions + 1] = roboport_condition
 end
 
+-- Pentapod tissue samples: recycle into themselves instead of enemy-biomass.
+local pts_r = data.raw["recipe"]["pentapod-tissue-samples-recycling"]
+if pts_r then
+  pts_r.results = {{type = "item", name = "pentapod-tissue-samples", amount = 1, probability = 0.25}}
+end
+
 -- Flag each planet as its native surface so surface_conditions can gate entity placement.
 local nauvis_planet = data.raw["planet"]["nauvis"]
 if nauvis_planet then

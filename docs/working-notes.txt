@@ -179,6 +179,20 @@ Supply chain tracer
     or traces the whole chain and shows what is missing base
 
 
-Live playtest notes/fixes
+Live playtest notes/fixes (0.1.5 — first successful legendary craft)
 
-Fix Thermodynamic regulator recipe
+DONE: Thermodynamic regulator moved to cryo-core-acquired tech (was armor-adventure-aquilo)
+DONE: Thermodynamic regulator recipe: 20 lithium plates, 1 cryo core, 50 processing units, 250 cold fluoro, 25 quantum processors
+DONE: Thermodynamic regulator now AFS-only (armor-forging category + AFS has cold fluoro fluid input on north face)
+DONE: Demo heart stack size 1→5; HEART_DROP_RANGE 50→75
+DONE: Pentapod tissue samples no longer spoil
+DONE: Bio interface: 5 tissue samples, 55 green chips, 55 red chips, 5 blue chips
+DONE: Harvester: deepcopy base changed AM1→AM3; 4 module slots; quality + productivity allowed (direct modules confirmed working; beacon qual/prod still under investigation)
+DONE: Pentapod tissue samples recycle into themselves (was: enemy-biomass)
+DONE: allow_productivity + allow_quality on harvesting recipe
+
+Demo heart processing recipes on the trigger tech? → user confusion; deferred (tech rename needed)
+
+100 prom chunks is onerous logistically.
+
+Harvester beacon effects (quality/prod from special beacon mods) not yet resolved — direct modules work, beacon effects don't apply despite allowed_effects being set correctly. Needs further investigation with specific mod names.

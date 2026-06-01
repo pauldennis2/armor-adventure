@@ -75,11 +75,16 @@ end
 
 -- Harvester: assembling-machine deepcopy restricted to the "harvesting" crafting category.
 -- Script auto-sets the recipe and feeds enemy-biomass into the input inventory.
-local harvester = table.deepcopy(data.raw["assembling-machine"]["assembling-machine-1"])
-harvester.name                     = "harvester"
-harvester.minable                  = {mining_time = 0.5, result = "harvester"}
-harvester.crafting_categories      = {"harvesting"}
-harvester.crafting_speed           = 1.0
+local harvester = table.deepcopy(data.raw["assembling-machine"]["assembling-machine-3"])
+harvester.name                      = "harvester"
+harvester.minable                   = {mining_time = 0.5, result = "harvester"}
+harvester.crafting_categories       = {"harvesting"}
+harvester.crafting_speed            = 1.0
+harvester.module_slots              = 4
+harvester.allowed_effects           = {"speed", "consumption", "pollution", "quality", "productivity"}
+harvester.allowed_module_categories = {"speed", "efficiency", "quality", "productivity"}
+harvester.fluid_boxes               = nil
+harvester.fluid_boxes_off_when_no_fluid_recipe = nil
 harvester.factoriopedia_simulation = nil
 harvester.collision_box            = {{-2.4, -2.4}, {2.4, 2.4}}
 harvester.selection_box            = {{-2.5, -2.5}, {2.5, 2.5}}
@@ -186,8 +191,17 @@ forging_station.allowed_module_categories = {"speed", "efficiency"}
 forging_station.factoriopedia_simulation  = nil
 forging_station.collision_box             = {{-1.9, -1.9}, {1.9, 1.9}}
 forging_station.selection_box             = {{-2.0, -2.0}, {2.0, 2.0}}
-forging_station.fluid_boxes               = nil
-forging_station.fluid_boxes_off_when_no_fluid_recipe = nil
+forging_station.fluid_boxes = {
+  {
+    production_type = "input",
+    filter          = "fluoroketone-cold",
+    volume          = 1000,
+    pipe_connections = {
+      {flow_direction = "input", direction = defines.direction.north, position = {0, -1}},
+    },
+  },
+}
+forging_station.fluid_boxes_off_when_no_fluid_recipe = true
 forging_station.icon                      = "__armor-adventure__/graphics/entity/armor-crafting-station/base/armor-crafting-station-icon.png"
 forging_station.icon_size                 = 640
 -- frame_count=64 estimated from the 4000×3840 sheet (8 cols × 500px, 8 rows × 480px).

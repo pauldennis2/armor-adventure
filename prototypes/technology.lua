@@ -346,9 +346,7 @@ data:extend({
       },
       time = 60,
     },
-    effects = {
-      {type = "unlock-recipe", recipe = "thermodynamic-regulator"},
-    },
+    effects = {},
   },
   {
     type             = "technology",
@@ -405,6 +403,7 @@ data:extend({
     research_trigger = {type = "mine-entity", entity = "vault-card-reader"},
     effects          = {
       {type = "unlock-recipe", recipe = "cryovault-access-card"},
+      {type = "unlock-recipe", recipe = "thermodynamic-regulator"},
     },
   },
   {
