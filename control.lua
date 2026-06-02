@@ -46,6 +46,7 @@ if EXPLORATION_MODE then
     ["regenerative-armor-covered"]             = "regenerative-armor",
     ["dissection-analysis-complete-covered"]   = "dissection-analysis-complete",
   }
+  if HAS_MOSHINE     then COVERED_TECHS["magnetic-data-agitation-covered"]        = "magnetic-data-agitation" end
   if HAS_MOSHINE     then COVERED_TECHS["personal-tesla-turret-covered"]          = "personal-tesla-turret" end
   if HAS_PANGLIA     then COVERED_TECHS["time-fracking-covered"]                  = "time-fracking" end
   if HAS_PANGLIA     then COVERED_TECHS["personal-time-stopper-covered"]          = "personal-time-stopper" end
@@ -54,8 +55,8 @@ if EXPLORATION_MODE then
     COVERED_TECHS["armor-adventure-rabbasca-covered"]     = "armor-adventure-rabbasca"
     COVERED_TECHS["conquer-the-vault-covered"]            = "conquer-the-vault"
   end
-  if HAS_CASTRA      then COVERED_TECHS["core-hunt-covered"]                      = "core-hunt" end
-  if HAS_CASTRA      then COVERED_TECHS["personal-combat-roboport-covered"]       = "personal-combat-roboport" end
+  if HAS_CASTRA      then COVERED_TECHS["castra-simulac-investigation-covered"]    = "castra-simulac-investigation" end
+  if HAS_CASTRA      then COVERED_TECHS["operation-data-tap-covered"]             = "operation-data-tap" end
   if HAS_METAL_STARS then COVERED_TECHS["armor-adventure-metal-and-stars-covered"] = "armor-adventure-metal-and-stars" end
   if HAS_METAL_STARS then COVERED_TECHS["pocket-dimension-covered"]               = "pocket-dimension" end
   if HAS_METAL_STARS then COVERED_TECHS["pocket-dimension-roboport-covered"]      = "pocket-dimension-roboport" end

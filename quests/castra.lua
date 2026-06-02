@@ -1,19 +1,32 @@
 -- Quest: SIMULAC Commander (Castra)
--- Killing enemy data-collector bases earns quality-scaled points (1-5).
--- Warning fires at WARN_THRESHOLD; commander spawns at KILL_THRESHOLD.
+-- Killing enemy data-collector bases earns quality-scaled points (2-7).
+-- Warnings fire at LOW_WARN_THRESHOLD and WARN_THRESHOLD; commander spawns at KILL_THRESHOLD.
 -- Meter drains DRAIN_PER_MIN points per minute while no commander is active.
 
 local castra = {}
 
-local KILL_THRESHOLD  = 50
-local WARN_THRESHOLD  = 30
-local DRAIN_PER_MIN   = 2
-local QUALITY_POINTS  = {normal=1, uncommon=2, rare=3, epic=4, legendary=5}
+local KILL_THRESHOLD      = 30
+local WARN_THRESHOLD      = 20
+local LOW_WARN_THRESHOLD  = 10
+local DRAIN_PER_MIN       = 2
+local QUALITY_POINTS      = {normal=2, uncommon=3, rare=4, epic=5, legendary=7}
+local QUALITY_ORDER   = {"legendary", "epic", "rare", "uncommon", "normal"}
 local COMMANDER_NAME  = "simulac-commander"
 local SMF_NAME        = "simulac-mobile-fortress"
 local SMF_MIN_RANGE   = 20   -- tiles; SMF stops closing when this close to the player
 local SMF_SPEED       = 0.104 -- tiles per tick (~tank speed with rocket fuel, +30%)
 local SPAWN_DIST      = 90  -- tiles; off-screen at normal zoom
+
+local function best_tap_quality(player)
+    local inv = player.get_main_inventory()
+    if not inv then return nil end
+    for _, q in ipairs(QUALITY_ORDER) do
+        if inv.find_item_stack({name = "simulac-data-tap", quality = q}) then
+            return q
+        end
+    end
+    return nil
+end
 
 local function find_player_on_castra(near_position)
     local best, best_d2 = nil, math.huge
@@ -39,10 +52,17 @@ local function spawn_commander(near_player)
     local pos = surface.find_non_colliding_position(COMMANDER_NAME, base, 20, 1)
     if not pos then pos = base end
 
+    local tap_quality = best_tap_quality(near_player)
+    if tap_quality then
+        near_player.remove_item({name = "simulac-data-tap", quality = tap_quality, count = 1})
+        storage.simulac_commander_quality = tap_quality
+    end
+
     local commander = surface.create_entity({
         name     = COMMANDER_NAME,
         position = pos,
         force    = "enemy",
+        quality  = tap_quality or "normal",
     })
     if commander and commander.valid then
         storage.simulac_commander = commander
@@ -219,6 +239,18 @@ function castra.on_entity_died(event)
         if not (cause and cause.valid and cause.type == "character") then return end
         if cause.surface.name ~= "castra" then return end
 
+        local inv = cause.player and cause.player.get_main_inventory()
+        local has_tap = false
+        if inv then
+            for i = 1, #inv do
+                local stack = inv[i]
+                if stack.valid_for_read and stack.name == "simulac-data-tap" then
+                    has_tap = true; break
+                end
+            end
+        end
+        if not has_tap then return end
+
         local quality   = ent.quality and ent.quality.name or "normal"
         local pts       = QUALITY_POINTS[quality] or 1
         local old_meter = storage.simulac_awaken_meter or 0
@@ -227,6 +259,9 @@ function castra.on_entity_died(event)
         game.forces["player"].print(
             "Killed a " .. quality .. " base, +" .. pts .. " castra points, you now have " .. new_meter)
 
+        if old_meter < LOW_WARN_THRESHOLD and new_meter >= LOW_WARN_THRESHOLD then
+            game.forces["player"].print({"armor-adventure.simulac-warning-low"})
+        end
         if old_meter < WARN_THRESHOLD and new_meter >= WARN_THRESHOLD then
             game.forces["player"].print({"armor-adventure.simulac-warning"})
         end
@@ -248,10 +283,20 @@ function castra.on_entity_died(event)
 
     elseif name == COMMANDER_NAME then
         storage.simulac_commander = nil
-        local surf      = ent.surface
-        local pos       = ent.position
+        local surf         = ent.surface
+        local pos          = ent.position
+        local tap_quality  = storage.simulac_commander_quality
+        storage.simulac_commander_quality = nil
+        if tap_quality then
+            storage.simulac_pending_core_quality = tap_quality
+        end
         local place_pos = surf.find_non_colliding_position("simulac-core-remains", pos, 10, 0.5) or pos
-        surf.create_entity({name = "simulac-core-remains", position = place_pos, force = "neutral"})
+        surf.create_entity({
+            name    = "simulac-core-remains",
+            position = place_pos,
+            force   = "neutral",
+            quality = tap_quality or "normal",
+        })
         rendering.draw_text{
             text          = "★ Mine the SIMULAC Remains",
             surface       = surf,

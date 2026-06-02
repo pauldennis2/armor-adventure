@@ -123,12 +123,10 @@ This quest has three sub-phases.
    - **Northeast puzzle** — The Answer to Life, the Universe, and Everything. Set signal [A] = **42**.
    - **Northwest puzzle** — "The kind of thing an idiot would have on his luggage" (5 digits). Set signals [1] through [5] each to a positive value (any positive number works — the answer is **1-2-3-4-5**, from *Spaceballs*).
 3. When all four puzzles are solved (indicators turn green), the **Cryovault** chest in the north wall unlocks.
-4. The cryovault contains a **Cryovault Access Card**. Pick it up, then insert it into the **Vault Card Reader** (the entity to the right of the cryovault). This triggers the **Cryo-core Acquired** technology.
+4. The cryovault contains a **Cryovault Access Card**. Pick it up, then insert it into the **Vault Card Reader** (the chest to the right of the cryovault). This triggers the **Cryo-core Acquired** technology.
 5. The Cryo-core Acquired tech unlocks the **Cryovault Access Card** crafting recipe (so you can make quality cards) — but for now, the one from the chest is all you need.
 6. Use the depot elevator to ascend back to Aquilo.
 7. Craft a **Thermodynamic Regulator** at the Armor Forging Station using the Cryo Core and other components.
-
-The Thermodynamic Regulator is one of the five armor components and also equippable as a passive 1×1 module in any modular armor.
 
 ---
 
@@ -143,13 +141,13 @@ Craft the **Promethium Armor** at the Armor Forging Station. You will need all f
 - Superconducting Telemetry Core (Fulgora)
 - Thermodynamic Regulator (Aquilo)
 
-Wear it. It has a 12×14 equipment grid.
-
 ---
 
-## Post-Game: Castra Prime (requires castra-prime mod)
+## Planetary Mods
 
-**Goal:** Research Personal Combat Roboport
+Some planet mods will offer additional content if they are installed. These quests will enable you to craft special equipment that can only be used in your new armor. Unless otherwise specified, these items are "unique-equipped" meaning you can only use one at a time. This additional content will only be available if the planet mods are enabled.
+
+### Castra Prime - Personal Combat Roboport
 
 Castra is a battlefield world. Enemy **data-collector bases** (destroyable buildings on Castra) fill a hidden meter when destroyed. Higher quality buildings contribute more points (1–5 per building). A warning fires at 30 points. At 50 points, a **SIMULAC Commander** spawns near you.
 
@@ -161,31 +159,29 @@ Castra is a battlefield world. Enemy **data-collector bases** (destroyable build
 
 ---
 
-## Post-Game: Moshine (requires Moshine mod)
+### Moshine - Personal Tesla Turret
 
-**Goal:** Research Personal Tesla Turret and collect Vortex Data Cards
+To craft the "Vortex Data Card", you will need a specialized train setup. You will need to craft "Deosil Motion Data" (clockwise) and "Widdershins Motion Data" (counter-clockwise) simultaneously, as both items have a short spoil time and must be combined.
 
-Moshine involves **train-direction data collection**. The planet has trains running circular loops, and some loops run clockwise (deosil) while others run counterclockwise (widdershins).
+There are a number of ways you can achieve this; we'll describe the simplest. You should read all steps before getting started.
 
-1. On Moshine, build a circular train loop. Place a locomotive and cargo wagon on it, load the cargo wagon with a **Magnet**, and start the train running. The train must reach a minimum speed to be tracked.
-2. Place a **Data Processor** building inside the loop (within the circle the train traces). Set the processor to either the **Deosil Motion Data Capture** or **Widdershins Motion Data Capture** recipe, depending on which direction you want to detect.
-3. The mod tracks the train's position history. When it confirms the loop direction matches the recipe, it inserts a **Scan Token** into the data processor's input inventory automatically. The processor then runs the recipe and produces the motion data item.
-4. Collect **Deosil Motion Data** and **Widdershins Motion Data** from the processors.
-5. Use these at the Moshine data-processing infrastructure to produce **Vortex Data Cards**.
-6. Research **Personal Tesla Turret** using Training Data datacells and AI Model Data datacells (×30, 400,000 second research time). The tech also unlocks the Vortex Data Card recipe. Craft the turret using the recipe and slot it into your Promethium Armor.
+1. Research the **Personal Tesla Turret**.
+2. Build a circular train loop. Place a locomotive and cargo wagon on it, load the cargo wagon with a **Magnet**, and start the train running. The train must reach a minimum speed to be tracked. In order to automate this, you will need to have two "flat" sections of the circle that can support train stops.
+3. You will need to either construct your loops around one of the Moshine training data sources or add an elevated rail segment to allow data to be "piped in". 
+4. Place a **Data Processor** inside the loop. Set the processor to either the **Deosil Motion Data Capture** and set the train to go in a clockwise loop.
+5. If you have correctly set everything up, you will see "Scan tokens" appearing in the data processor.
+6. Construct a larger loop around the first one with the same setup, but this time going counter-clockwise. Add a Data Processor for "Widdershins Data Capture". 
+7. Add a third data processor to produce **Vortex Data Cards**.
+8. Craft the equipment using the Vortex card and other items.
 
 ---
 
-## Post-Game: Panglia (requires Panglia Planet mod)
+### Panglia - Personal Time Stopper
 
-**Goal:** Research Personal Time Stopper
+Panglia's surface has large **speed zones**  that grant movement speed while inside. These zones can be destroyed with atomic weapons.
 
-Panglia's surface has large **speed zones** — fields of hidden beacons that grant movement speed while inside. These zones can be destroyed with atomic weapons.
-
-1. Go to Panglia and locate a speed zone.
-2. Fire an **atomic rocket** into the zone. The explosion triggers a script that detects the entire contiguous zone you hit and destroys all the hidden beacons in it after the blast.
-3. After the blast settles (about 5 seconds), **Speed Zone Residue** nodes (panglia-essence-node) appear at intervals across the former zone. These are harmless entities that stay in place.
-4. **Mine** the Speed Zone Residue nodes. The first time you mine one, the **Time Fracking** technology researches automatically (no cost — triggered by the mining act).
-5. Time Fracking unlocks the **Essence of Speed** recipe in Moshine's data-processing machines. Run this recipe to convert Essence of Speed into **Refined Speed** (1000-second process, data-processing category).
-6. Research **Personal Time Stopper** using Training Data, AI Model Data, Solved Equation, and Sequenced DNA datacells (×30, 400,000 seconds). Craft and slot the module into your Promethium Armor.
-7. Press **Alt+T** to activate the time distortion. Your movement and crafting speed surge while nearby enemies are slowed to a crawl. Cooldown is 60 seconds after the effect ends.
+1. Go to Panglia and locate a speed zone. The entire zone will be destroyed, so pick one you don't need.
+2. Fire an **atomic rocket** into the zone. After the blast settles (about 5 seconds), **Speed Zone Residue** nodes appear. Mine them, which will trigger the **Time Fracking** technology. Note: Armor Adventure, Inc. cannot be held liable for death or injury from engineers standing too close to their own nuclear blasts.
+3. "Plant" the essence of speed in a compute data farm. It will be processed into **Refined Speed**.
+4. Research **Personal Time Stopper** and craft the item using Refined Speed and other components.
+7. Press **Alt+T** to activate the time distortion. Your movement and crafting speed surge while nearby enemies are slowed to a crawl.

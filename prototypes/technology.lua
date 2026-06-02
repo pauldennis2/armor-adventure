@@ -152,25 +152,38 @@ if mods["metal-and-stars"] then
 end
 
 if mods["Moshine"] then
-  data:extend({{
-    type = "technology",
-    name = "personal-tesla-turret",
-    icon = "__space-age__/graphics/icons/teslagun.png",
-    icon_size = 64,
-    prerequisites = {"forge-promethium-armor"},
-    unit = {
-      count = 30,
-      ingredients = {
-        {"datacell-raw-data",      1},
-        {"datacell-ai-model-data", 1},
+  data:extend({
+    {
+      type = "technology",
+      name = "magnetic-data-agitation",
+      icon = "__space-age__/graphics/icons/teslagun.png",
+      icon_size = 64,
+      prerequisites = {"forge-promethium-armor"},
+      unit = {
+        count = 30,
+        ingredients = {
+          {"datacell-raw-data",      1},
+          {"datacell-ai-model-data", 1},
+        },
+        time = 400000,
       },
-      time = 400000,
+      effects = {
+        {type = "unlock-recipe", recipe = "unstable-magnetized-data-core"},
+        {type = "unlock-recipe", recipe = "vortex-data-card"},
+      },
     },
-    effects = {
-      {type = "unlock-recipe", recipe = "personal-tesla-turret"},
-      {type = "unlock-recipe", recipe = "vortex-data-card"},
+    {
+      type             = "technology",
+      name             = "personal-tesla-turret",
+      icon             = "__space-age__/graphics/icons/teslagun.png",
+      icon_size        = 64,
+      prerequisites    = {"magnetic-data-agitation"},
+      research_trigger = {type = "craft-item", item = "vortex-data-card", count = 1},
+      effects = {
+        {type = "unlock-recipe", recipe = "personal-tesla-turret"},
+      },
     },
-  }})
+  })
 end
 
 if mods["panglia_planet"] then
@@ -511,22 +524,11 @@ end
 if mods["castra-prime"] then
   data:extend({
     {
-      type             = "technology",
-      name             = "core-hunt",
-      icon             = "__base__/graphics/technology/uranium-ammo.png",
-      icon_size        = 256,
-      prerequisites    = {"forge-promethium-armor"},
-      research_trigger = {type = "mine-entity", entity = "simulac-core-remains"},
-      effects = {
-        {type = "unlock-recipe", recipe = "simulac-core"},
-      },
-    },
-    {
       type = "technology",
-      name = "personal-combat-roboport",
+      name = "castra-simulac-investigation",
       icon = "__armor-adventure__/graphics/icons/pcr-destroyer.png",
       icon_size = 64,
-      prerequisites = {"forge-promethium-armor", "core-hunt"},
+      prerequisites = {"forge-promethium-armor"},
       unit = {
         count = 10000,
         ingredients = {
@@ -542,6 +544,17 @@ if mods["castra-prime"] then
         },
         time = 60,
       },
+      effects = {
+        {type = "unlock-recipe", recipe = "simulac-data-tap"},
+      },
+    },
+    {
+      type             = "technology",
+      name             = "operation-data-tap",
+      icon             = "__base__/graphics/technology/uranium-ammo.png",
+      icon_size        = 256,
+      prerequisites    = {"castra-simulac-investigation"},
+      research_trigger = {type = "mine-entity", entity = "simulac-core-remains"},
       effects = {
         {type = "unlock-recipe", recipe = "personal-combat-roboport"},
         {type = "unlock-recipe", recipe = "personal-combat-roboport-distractor"},
@@ -594,6 +607,7 @@ if settings.startup["armor-adventure-exploration-mode"].value then
     "regenerative-armor",
     "dissection-analysis-complete",
   }
+  if mods["Moshine"]         then table.insert(to_cover, "magnetic-data-agitation") end
   if mods["Moshine"]         then table.insert(to_cover, "personal-tesla-turret") end
   if mods["panglia_planet"]  then table.insert(to_cover, "time-fracking") end
   if mods["panglia_planet"]  then table.insert(to_cover, "personal-time-stopper") end
@@ -602,8 +616,8 @@ if settings.startup["armor-adventure-exploration-mode"].value then
     table.insert(to_cover, "conquer-the-vault")
     table.insert(to_cover, "personal-warp-pylon")
   end
-  if mods["castra-prime"]    then table.insert(to_cover, "core-hunt") end
-  if mods["castra-prime"]    then table.insert(to_cover, "personal-combat-roboport") end
+  if mods["castra-prime"]    then table.insert(to_cover, "castra-simulac-investigation") end
+  if mods["castra-prime"]    then table.insert(to_cover, "operation-data-tap") end
   if mods["metal-and-stars"] then table.insert(to_cover, "armor-adventure-metal-and-stars") end
   if mods["metal-and-stars"] then table.insert(to_cover, "pocket-dimension") end
   if mods["metal-and-stars"] then table.insert(to_cover, "pocket-dimension-roboport") end

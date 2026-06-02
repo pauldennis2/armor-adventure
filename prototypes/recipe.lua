@@ -265,9 +265,10 @@ if mods["Moshine"] then
     ingredients = {
       {type = "item", name = "personal-laser-defense-equipment", amount =  1},
       {type = "item", name = "tesla-turret",                     amount =  1},
-      {type = "item", name = "vortex-data-card",                 amount = 10},
-      {type = "item", name = "rail-minimal",                      amount = 10},
+      {type = "item", name = "vortex-data-card",                 amount = 50},
+      {type = "item", name = "rail-minimal",                     amount = 10},
       {type = "item", name = "processing-unit",                  amount = 50},
+      {type = "item", name = "ai-tier-10",                       amount =  1},
     },
     results = {{type = "item", name = "personal-tesla-turret", amount = 1}},
   }})
@@ -312,13 +313,13 @@ if mods["Moshine"] then
   data:extend({{
     type            = "recipe",
     name            = "unstable-magnetized-data-core",
-    enabled         = true,  -- TODO: lock behind armor-adventure-moshine tech
+    enabled         = false,
     energy_required = 120,
     category        = "metallurgy",
     ingredients = {
-      {type = "fluid", name = "raw-data",    amount = 5000},
-      {type = "fluid", name = "molten-iron", amount = 500},
-      {type = "item",  name = "magnet",      amount = 50},
+      {type = "item",  name = "datacell-raw-data", amount = 25},
+      {type = "fluid", name = "molten-iron",       amount = 500},
+      {type = "item",  name = "magnet",            amount = 50},
     },
     results = {{type = "item", name = "unstable-magnetized-data-core", amount = 1}},
   }})
@@ -334,7 +335,7 @@ if mods["Moshine"] then
       category                  = "data-processing",
       hide_from_player_crafting = true,
       enabled                   = true,
-      energy_required           = 1,
+      energy_required           = 30,
       allow_productivity        = false,
       auto_recycle              = false,
       reset_freshness_on_craft  = true,
@@ -350,7 +351,7 @@ if mods["Moshine"] then
       category                  = "data-processing",
       hide_from_player_crafting = true,
       enabled                   = true,
-      energy_required           = 1,
+      energy_required           = 30,
       allow_productivity        = false,
       auto_recycle              = false,
       reset_freshness_on_craft  = true,
@@ -369,7 +370,7 @@ if mods["Moshine"] then
       category                  = "data-processing",
       hide_from_player_crafting = true,
       enabled                   = true,
-      energy_required           = 1,
+      energy_required           = 90,
       allow_productivity        = false,
       auto_recycle              = false,
       ingredients = {
@@ -397,7 +398,7 @@ if mods["castra-prime"] then
         {type = "item", name = "speed-module-3",                 amount = 2},
         {type = "item", name = "efficiency-module-3",            amount = 2},
         {type = "item", name = "gun-turret",                     amount = 5},
-        {type = "item", name = "simulac-core",                   amount = 1},
+        {type = "item", name = "simulac-data-tap-filled",        amount = 1},
       },
       results = {{type = "item", name = "personal-combat-roboport", amount = 1}},
     },
@@ -414,7 +415,7 @@ if mods["castra-prime"] then
         {type = "item", name = "speed-module-3",                 amount = 2},
         {type = "item", name = "efficiency-module-3",            amount = 2},
         {type = "item", name = "laser-turret",                   amount = 5},
-        {type = "item", name = "simulac-core",                   amount = 1},
+        {type = "item", name = "simulac-data-tap-filled",        amount = 1},
       },
       results = {{type = "item", name = "personal-combat-roboport-distractor", amount = 1}},
     },
@@ -431,7 +432,7 @@ if mods["castra-prime"] then
         {type = "item", name = "speed-module-3",                 amount = 2},
         {type = "item", name = "efficiency-module-3",            amount = 2},
         {type = "item", name = "tesla-turret",                   amount = 2},
-        {type = "item", name = "simulac-core",                   amount = 1},
+        {type = "item", name = "simulac-data-tap-filled",        amount = 1},
       },
       results = {{type = "item", name = "personal-combat-roboport-destroyer", amount = 1}},
     },
@@ -439,17 +440,16 @@ if mods["castra-prime"] then
 
   data:extend({{
     type            = "recipe",
-    name            = "simulac-core",
+    name            = "simulac-data-tap",
     enabled         = false,
-    energy_required = 30,
-    category        = "armor-forging",
+    allow_quality   = true,
+    energy_required = 10,
     ingredients = {
-      {type = "item", name = "unrefined-simulac-core", amount = 1},
-      {type = "item", name = "nickel-plate",           amount = 100},
-      {type = "item", name = "gunpowder",              amount = 50},
-      {type = "item", name = "uranium-235",            amount = 10},
+      {type = "item", name = "nickel-plate",        amount = 5},
+      {type = "item", name = "lithium-battery",     amount = 25},
+      {type = "item", name = "jammed-data-collector", amount = 1},
     },
-    results = {{type = "item", name = "simulac-core", amount = 1}},
+    results = {{type = "item", name = "simulac-data-tap", amount = 1}},
   }})
 end
 
@@ -630,7 +630,7 @@ do
     "deosil-motion-data", "widdershins-motion-data", "vortex-data-card",
     "personal-time-stopper", "panglia-essence-of-speed",
     "personal-combat-roboport", "personal-combat-roboport-distractor",
-    "personal-combat-roboport-destroyer", "simulac-core",
+    "personal-combat-roboport-destroyer", "simulac-data-tap",
     "personal-warp-pylon-equipment",
     "vault-excavation-key",
     "vault-entry-extraction",

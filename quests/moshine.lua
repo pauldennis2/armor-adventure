@@ -36,19 +36,29 @@ local MIN_RADIUS          = 8      -- fitted circle must be at least this many t
 local INSIDE_FACTOR       = 0.6    -- data-proc must be within this fraction of radius from center
 local DEOSIL_TOKEN        = "deosil-scan-token"
 local WIDDERSHINS_TOKEN   = "widdershins-scan-token"
+local CORE_ITEM           = "unstable-magnetized-data-core"
 
--- Iterate slots rather than get_item_count so any quality of magnet qualifies.
-local function train_has_magnet(train)
+-- Returns the quality name of the highest-quality agitated core on the train,
+-- or nil if none is present. Quality level is 0-indexed (normal=0 … legendary=4).
+local function train_core_quality(train)
+    local best_level = -1
+    local best_name  = nil
     for _, wagon in ipairs(train.cargo_wagons) do
         local inv = wagon.get_inventory(defines.inventory.cargo_wagon)
         if inv then
             for i = 1, #inv do
                 local stack = inv[i]
-                if stack.valid_for_read and stack.name == "magnet" then return true end
+                if stack.valid_for_read and stack.name == CORE_ITEM then
+                    local level = stack.quality and stack.quality.level or 0
+                    if level > best_level then
+                        best_level = level
+                        best_name  = stack.quality and stack.quality.name or "normal"
+                    end
+                end
             end
         end
     end
-    return false
+    return best_name
 end
 
 -- Sum cross-products across all consecutive triplets in the position history.
@@ -83,10 +93,9 @@ local function fit_circle(p1, p2, p3)
     return ux, uy, r
 end
 
--- Insert token into any data-processor inside the fitted loop that has the
--- matching recipe active and does not already hold a token.
--- Returns number of processors found inside the loop.
-local function grant_token(surface, cx, cy, radius, token_name, recipe_name)
+-- Insert a quality-matched token into any data-processor inside the fitted loop
+-- that has the matching recipe active and does not already hold a token of any quality.
+local function grant_token(surface, cx, cy, radius, token_name, recipe_name, quality_name)
     local procs = surface.find_entities_filtered{
         name     = PROCESSOR_NAME,
         position = {x = cx, y = cy},
@@ -96,12 +105,20 @@ local function grant_token(surface, cx, cy, radius, token_name, recipe_name)
         local recipe = proc.get_recipe()
         if recipe and recipe.name == recipe_name then
             local inv = proc.get_inventory(defines.inventory.assembling_machine_input)
-            if inv and not inv.find_item_stack(token_name) then
-                inv.insert{name = token_name, count = 1}
+            if inv then
+                local has_token = false
+                for i = 1, #inv do
+                    local s = inv[i]
+                    if s.valid_for_read and s.name == token_name then
+                        has_token = true; break
+                    end
+                end
+                if not has_token then
+                    inv.insert{name = token_name, count = 1, quality = quality_name}
+                end
             end
         end
     end
-    return #procs
 end
 
 function M.on_tick_3()
@@ -140,8 +157,10 @@ function M.on_tick_3()
         if #h > HISTORY_SIZE then table.remove(h, 1) end
         history[train.id] = h
 
-        if #h < HISTORY_SIZE          then goto continue end
-        if not train_has_magnet(train) then goto continue end
+        if #h < HISTORY_SIZE then goto continue end
+
+        local core_quality = train_core_quality(train)
+        if not core_quality then goto continue end
 
         local cross = cross_sum(h)
 
@@ -157,7 +176,7 @@ function M.on_tick_3()
             token, recipe = WIDDERSHINS_TOKEN, "widdershins-motion-data"
         end
 
-        grant_token(surface, cx, cy, radius, token, recipe)
+        grant_token(surface, cx, cy, radius, token, recipe, core_quality)
 
         ::continue::
     end

@@ -416,7 +416,8 @@ if mods["castra-prime"] then
   data:extend({commander})
 
   -- Mineable remains left by a dead SIMULAC Commander.
-  -- The mine-entity research trigger on "core-hunt" fires when a player mines this.
+  -- The mine-entity research trigger on "operation-data-tap" fires when a player mines this.
+  -- The filled data tap is given by script (quests/quests.lua); no native item drop needed.
   data:extend({{
     type          = "simple-entity",
     name          = "simulac-core-remains",
@@ -427,7 +428,7 @@ if mods["castra-prime"] then
     destructible  = false,
     minable = {
       mining_time = 2,
-      results     = {{type = "item", name = "unrefined-simulac-core", amount = 1}},
+      results     = {},
     },
     picture = {
       filename = "__base__/graphics/icons/uranium-235.png",

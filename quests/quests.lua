@@ -129,6 +129,9 @@ local MINED_FILTER = {
     {filter = "name", name = "pheromone-emitter"},
     {filter = "name", name = "aquilo-elevator-shaft"},
 }
+if HAS_CASTRA then
+    table.insert(MINED_FILTER, {filter = "name", name = "simulac-core-remains"})
+end
 if HAS_RABBASCA then
     table.insert(MINED_FILTER, {filter = "name", name = "rabbit-mcguffin"})
 end
@@ -137,6 +140,18 @@ local function on_entity_mined(event)
     if     name == "harvester"             then gleba.unregister_harvester(event.entity)
     elseif name == "pheromone-emitter"     then nauvis.unregister_emitter(event.entity)
     elseif name == "aquilo-elevator-shaft" then aquilo.unregister_elevator(event.entity); refresh()
+    elseif name == "simulac-core-remains" and castra then
+        local player      = event.player_index and game.players[event.player_index]
+        local core_quality = storage.simulac_pending_core_quality
+        storage.simulac_pending_core_quality = nil
+        if player and core_quality then
+            local inserted = player.insert({name = "simulac-data-tap-filled", quality = core_quality, count = 1})
+            if inserted == 0 then
+                player.surface.spill_item_stack(player.position,
+                    {name = "simulac-data-tap-filled", quality = core_quality, count = 1}, true)
+            end
+            player.print({"armor-adventure.simulac-tap-filled"})
+        end
     elseif name == "rabbit-mcguffin" then
         local player = event.player_index and game.players[event.player_index]
         if player then

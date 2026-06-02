@@ -107,15 +107,7 @@ data:extend({
     stack_size                = 50,
     place_as_equipment_result = "bio-interface-equipment",
   },
-  {
-    type       = "item",
-    name       = "aquilo-prom-suit-component",
-    icon       = "__base__/graphics/icons/heavy-armor.png",
-    subgroup   = "armor-adventure-materials",
-    order      = "z[aquilo-prom-suit-component]",
-    stack_size = 50,
-  },
-  {
+{
     type       = "item",
     name       = "demolisher-heart",
     icon       = "__base__/graphics/icons/heavy-armor.png",
@@ -459,18 +451,18 @@ if mods["castra-prime"] then
   data:extend({
     {
       type       = "item",
-      name       = "unrefined-simulac-core",
-      icon       = "__base__/graphics/icons/tank.png",
+      name       = "simulac-data-tap",
+      icon       = "__base__/graphics/icons/battery-mk2-equipment.png",
       subgroup   = "armor-adventure-materials",
-      order      = "z[simulac-core-a]",
-      stack_size = 1,
+      order      = "z[simulac-data-tap-a]",
+      stack_size = 5,
     },
     {
       type       = "item",
-      name       = "simulac-core",
-      icon       = "__base__/graphics/icons/uranium-235.png",
+      name       = "simulac-data-tap-filled",
+      icon       = "__base__/graphics/icons/uranium-fuel-cell.png",
       subgroup   = "armor-adventure-materials",
-      order      = "z[simulac-core-b]",
+      order      = "z[simulac-data-tap-b]",
       stack_size = 1,
     },
   })
