@@ -114,24 +114,6 @@ if aquilo_planet then
   aquilo_planet.surface_properties["aquilo-native"] = 1
 end
 
--- Moshine: add raw-data (optical cable) fluid input on the east face of the foundry.
--- The foundry's existing fluid boxes use the default connection category; this one uses
--- "data" so optical cable can connect without conflicting with normal pipes.
--- fluid_boxes_off_when_no_fluid_recipe means this port is invisible until a matching
--- recipe is selected — no pollution to normal foundry use.
-if mods["Moshine"] then
-  local foundry = data.raw["assembling-machine"]["foundry"]
-  if foundry and data.raw["fluid"]["raw-data"] then
-    table.insert(foundry.fluid_boxes, {
-      production_type  = "input",
-      filter           = "raw-data",
-      volume           = 10000,
-      pipe_connections = {
-        {flow_direction = "input", direction = defines.direction.east, position = {2, 0}, connection_category = "data"}
-      },
-    })
-  end
-end
 
 -- Panglia: allow essence-of-speed to be planted in Moshine's compute farm.
 if mods["panglia_planet"] and mods["Moshine"] then
