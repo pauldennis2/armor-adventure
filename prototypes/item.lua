@@ -387,14 +387,24 @@ if mods["panglia_planet"] then
       stack_size = 50,
     }})
   end
-  data:extend({{
-    type       = "item",
-    name       = "panglia-refined-speed",
-    icon       = "__panglia_planet__/graphics/icons/panglia_hidden_beacon.png",
-    subgroup   = "armor-adventure-materials",
-    order      = "z[panglia-refined-speed]",
-    stack_size = 50,
-  }})
+  data:extend({
+    {
+      type       = "item",
+      name       = "panglia-refined-speed",
+      icon       = "__panglia_planet__/graphics/icons/panglia_hidden_beacon.png",
+      subgroup   = "armor-adventure-materials",
+      order      = "z[panglia-refined-speed]",
+      stack_size = 50,
+    },
+    {
+      type       = "item",
+      name       = "panglia-seed-of-speedy-universe",
+      icon       = "__base__/graphics/icons/rocket-fuel.png",
+      subgroup   = "armor-adventure-materials",
+      order      = "z[panglia-seed-of-speedy-universe]",
+      stack_size = 10,
+    },
+  })
 end
 
 if mods["planet-rabbasca"] then
@@ -437,11 +447,11 @@ if mods["planet-rabbasca"] then
     },
     {
       type       = "item",
-      name       = "rabbit-mcguffin",
+      name       = "ancient-rabbits-foote",
       icon       = "__base__/graphics/icons/copper-ore.png",
       icon_size  = 64,
       subgroup   = "armor-adventure-materials",
-      order      = "z[rabbit-mcguffin]",
+      order      = "z[ancient-rabbits-foote]",
       stack_size = 1,
     },
   })

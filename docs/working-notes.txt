@@ -3,7 +3,7 @@ Goals for 0.2.0:
 2. Add icons, particularly on worst placeholders
 3. Build out spoiler free tech tree
 4. Build out tips and tricks
-5. Further content additions: quests for Metal and Stars, Rabbasca, Maraxsis hopefully
+5. Further content additions: quests for Rabbasca, Maraxsis hopefully
 6. Review and rewrite Claude's docs
 
 + increase radius? no, not necessarily good
@@ -160,13 +160,6 @@ access card should be in our armor adventure tab
 
 Idea of having a spidertron version (discoverable from some planet) that can use the new gear
 
-Metal and stars quest
-M&S high end mats
-    Dark matter crystal (nix)
-    **Antimatter (nix)
-    Neuman conduit
-    QUantum shards (miranda)
-    hi speed proc + hv water? (ring)
 
 Rabbasca quest
     Kinda nowhere
@@ -178,6 +171,8 @@ Supply chain tracer
     mouse over a building, it points towards where the missing ingredient is crafted
     or traces the whole chain and shows what is missing base
 
+Desired feature/research
+    paint your armor
 
 Live playtest notes/fixes (0.1.5 — first successful legendary craft)
 

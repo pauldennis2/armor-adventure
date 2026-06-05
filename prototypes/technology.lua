@@ -107,6 +107,9 @@ data:extend({
     name = "regenerative-armor",
     icon = "__base__/graphics/technology/energy-shield-equipment.png",
     icon_size = 256,
+    hidden = true,
+    enabled = false,
+    visible_when_disabled = false,
     prerequisites = {"forge-promethium-armor"},
     unit = {
       count = 10,
@@ -119,37 +122,41 @@ data:extend({
   },
 })
 
-if mods["metal-and-stars"] then
-  data:extend({
-    {
-      type = "technology",
-      name = "pocket-dimension",
-      icon = "__base__/graphics/technology/personal-roboport-equipment.png",
-      icon_size = 256,
-      prerequisites = {"armor-adventure-metal-and-stars"},
-      unit = {
-        count = 10,
-        ingredients = {{"automation-science-pack", 1}},
-        time = 60,
-      },
-      effects = {
-        {type = "unlock-recipe", recipe = "pocket-dimension-generator"},
-      },
+data:extend({
+  {
+    type = "technology",
+    name = "pocket-dimension",
+    icon = "__base__/graphics/technology/personal-roboport-equipment.png",
+    icon_size = 256,
+    hidden = true,
+    enabled = false,
+    visible_when_disabled = false,
+    prerequisites = {"forge-promethium-armor"},
+    unit = {
+      count = 10,
+      ingredients = {{"automation-science-pack", 1}},
+      time = 60,
     },
-    {
-      type = "technology",
-      name = "pocket-dimension-roboport",
-      icon = "__base__/graphics/technology/construction-robotics.png",
-      icon_size = 256,
-      prerequisites = {"pocket-dimension"},
-      unit = {
-        count = 10,
-        ingredients = {{"logistic-science-pack", 1}},
-        time = 60,
-      },
+    effects = {
+      {type = "unlock-recipe", recipe = "pocket-dimension-generator"},
     },
-  })
-end
+  },
+  {
+    type = "technology",
+    name = "pocket-dimension-roboport",
+    icon = "__base__/graphics/technology/construction-robotics.png",
+    icon_size = 256,
+    hidden = true,
+    enabled = false,
+    visible_when_disabled = false,
+    prerequisites = {"pocket-dimension"},
+    unit = {
+      count = 10,
+      ingredients = {{"logistic-science-pack", 1}},
+      time = 60,
+    },
+  },
+})
 
 if mods["Moshine"] then
   data:extend({
@@ -196,7 +203,8 @@ if mods["panglia_planet"] then
       prerequisites    = {"forge-promethium-armor"},
       research_trigger = {type = "mine-entity", entity = "panglia-essence-node"},
       effects = {
-        {type = "unlock-recipe", recipe = "panglia-essence-of-speed"},
+        {type = "unlock-recipe", recipe = "panglia-seed-of-speedy-universe"},
+        {type = "unlock-recipe", recipe = "panglia-speed-incubation"},
       },
     },
     {
@@ -490,7 +498,7 @@ if mods["planet-rabbasca"] then
       icon             = "__base__/graphics/technology/military.png",
       icon_size        = 256,
       prerequisites    = {"armor-adventure-rabbasca"},
-      research_trigger = {type = "mine-entity", entity = "rabbit-mcguffin"},
+      research_trigger = {type = "mine-entity", entity = "ancient-rabbits-foote"},
       effects          = {},
     },
     {
@@ -564,29 +572,6 @@ if mods["castra-prime"] then
   })
 end
 
-if mods["metal-and-stars"] then
-  data:extend({{
-    type          = "technology",
-    name          = "armor-adventure-metal-and-stars",
-    icon          = "__metal-and-stars-graphics__/graphics/technology/prototype-mech-armor.png",
-    icon_size     = 256,
-    prerequisites = {"forge-promethium-armor"},
-    unit = {
-      count = 5000,
-      ingredients = {
-        {"promethium-science-pack", 1},
-        {"space-science-pack",      1},
-        {"nanite-science-pack",     1},
-        {"anomaly-science-pack",    1},
-        {"quantum-science-pack",    1},
-        {"ring-science-pack",       1},
-      },
-      time = 60,
-    },
-    effects = {},
-  }})
-end
-
 -- Exploration mode: cover all quest techs (except mech-armor-mk2) with ??? shadow
 -- techs until their prerequisites are researched. The shadow has the same position
 -- in the tree but an impossibly large cost so it can never be researched normally.
@@ -604,7 +589,6 @@ if settings.startup["armor-adventure-exploration-mode"].value then
     "aquilo-scanning-complete",
     "cryo-core-acquired",
     "forge-promethium-armor",
-    "regenerative-armor",
     "dissection-analysis-complete",
   }
   if mods["Moshine"]         then table.insert(to_cover, "magnetic-data-agitation") end
@@ -618,9 +602,6 @@ if settings.startup["armor-adventure-exploration-mode"].value then
   end
   if mods["castra-prime"]    then table.insert(to_cover, "castra-simulac-investigation") end
   if mods["castra-prime"]    then table.insert(to_cover, "operation-data-tap") end
-  if mods["metal-and-stars"] then table.insert(to_cover, "armor-adventure-metal-and-stars") end
-  if mods["metal-and-stars"] then table.insert(to_cover, "pocket-dimension") end
-  if mods["metal-and-stars"] then table.insert(to_cover, "pocket-dimension-roboport") end
 
   local shadows = {}
   for _, tech_name in ipairs(to_cover) do

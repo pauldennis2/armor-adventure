@@ -63,7 +63,7 @@ local DESIGNS = {
   },
   D = {
     drain_mult = 2,
-    entry_msg  = "[color=cyan]You enter Design D: The Phase Lock. Three laser clusters share a rotating invulnerability shield — only one cluster is exposed at a time. An artillery piece guards the back wall. Shields moderately disrupted.[/color]",
+    entry_msg  = "[color=cyan]Three laser clusters sweep the chamber. Their invulnerability fields cycle — only one cluster can be harmed at a time. Artillery covers the far wall. Shields moderately disrupted.[/color]",
   },
 }
 local DESIGN_KEYS = {"A", "B", "C", "D"}
@@ -133,8 +133,8 @@ local function clear_room_entities(surface)
   for _, e in ipairs(surface.find_entities_filtered({name = "land-mine", area = CLEAR_AREA})) do
     if e.valid then e.destroy() end
   end
-  -- McGuffin
-  for _, e in ipairs(surface.find_entities_filtered({name = "rabbit-mcguffin"})) do
+  -- Ancient Rabbit's Foote
+  for _, e in ipairs(surface.find_entities_filtered({name = "ancient-rabbits-foote"})) do
     if e.valid then e.destroy() end
   end
   -- All stone walls in the clear area (gate + any bunker walls); re-placed per design
@@ -328,7 +328,7 @@ local function setup_challenge_room(surface, quality_name, design)
   else                       setup_design_C(surface, quality_name)
   end
 
-  surface.create_entity({name = "rabbit-mcguffin", position = MCGUFFIN_POS, force = "neutral"})
+  surface.create_entity({name = "ancient-rabbits-foote", position = MCGUFFIN_POS, force = "neutral"})
 end
 
 -- ── Surface management ────────────────────────────────────────────────────────
@@ -434,7 +434,7 @@ function rabbasca.enter_tunnel(player, quality_name, origin_surface, origin_posi
   if not (player and player.valid and player.character) then return end
   local surface = get_or_create_tunnel_surface()
 
-  local design = DESIGN_KEYS[math.random(#DESIGN_KEYS)]
+  local design = "D"
   storage.vault_tunnel_return[player.index] = {
     position = origin_position or {x = player.position.x, y = player.position.y},
     surface  = origin_surface  or player.surface,
@@ -539,9 +539,9 @@ function rabbasca.on_tick_60()
 
       -- Announce phase to any player in the vault
       local phase_labels = {
-        "[color=#FF6666]Phase shift: Left cluster exposed.[/color]",
-        "[color=#FF6666]Phase shift: Center cluster exposed.[/color]",
-        "[color=#FF6666]Phase shift: Right cluster exposed.[/color]",
+        "[color=#FF6666]Left cluster vulnerable.[/color]",
+        "[color=#FF6666]Center cluster vulnerable.[/color]",
+        "[color=#FF6666]Right cluster vulnerable.[/color]",
       }
       local msg = phase_labels[storage.vault_phase] or "[color=#FF6666]Phase shift.[/color]"
       for _, p in pairs(game.connected_players) do

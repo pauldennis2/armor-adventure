@@ -133,7 +133,7 @@ if HAS_CASTRA then
     table.insert(MINED_FILTER, {filter = "name", name = "simulac-core-remains"})
 end
 if HAS_RABBASCA then
-    table.insert(MINED_FILTER, {filter = "name", name = "rabbit-mcguffin"})
+    table.insert(MINED_FILTER, {filter = "name", name = "ancient-rabbits-foote"})
 end
 local function on_entity_mined(event)
     local name = event.entity.name
@@ -152,14 +152,14 @@ local function on_entity_mined(event)
             end
             player.print({"armor-adventure.simulac-tap-filled"})
         end
-    elseif name == "rabbit-mcguffin" then
+    elseif name == "ancient-rabbits-foote" then
         local player = event.player_index and game.players[event.player_index]
         if player then
             local ret = storage.vault_tunnel_return and storage.vault_tunnel_return[player.index]
             local quality_name = ret and ret.quality or "normal"
-            local inserted = player.insert({name = "rabbit-mcguffin", count = 1, quality = quality_name})
+            local inserted = player.insert({name = "ancient-rabbits-foote", count = 1, quality = quality_name})
             if inserted == 0 then
-                player.surface.spill_item_stack(player.position, {name = "rabbit-mcguffin", count = 1, quality = quality_name}, true)
+                player.surface.spill_item_stack(player.position, {name = "ancient-rabbits-foote", count = 1, quality = quality_name}, true)
             end
             player.print("[color=#FFD700]You've claimed the vault's prize. The path to the Warp Pylon is now open.[/color]")
         end

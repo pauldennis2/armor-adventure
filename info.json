@@ -1,6 +1,6 @@
 {
   "name": "armor-adventure",
-  "version": "0.1.5",
+  "version": "0.2.0",
   "title": "Armor Adventure",
   "author": "erronius",
   "contact": "",
@@ -13,10 +13,8 @@
     "? castra-prime",
     "? castra-prime-assets",
     "? apia",
-    "? factorissimo-2-notnotmelon",
     "? Moshine",
     "? panglia_planet",
-    "? planet-rabbasca",
-    "? metal-and-stars"
+    "? planet-rabbasca"
   ]
 }

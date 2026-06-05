@@ -608,7 +608,6 @@ for _, entry in ipairs(char_anims) do
       if name == "mech-armor" then
         local mk2_anim = table.deepcopy(entry)
         mk2_anim.armors = {"mech-armor-mk2"}
-        apply_fixed_tint(mk2_anim, hot_rod_red)
         table.insert(char_anims, mk2_anim)
         break
       end
@@ -781,10 +780,10 @@ if mods["planet-rabbasca"] then
   tunnel_exit.energy_source       = {type = "void"}
   data:extend({tunnel_exit})
 
-  -- rabbit-mcguffin entity: placed in the tunnel; mining it triggers the conquer-the-vault research.
+  -- ancient-rabbits-foote entity: placed in the tunnel; mining it triggers the conquer-the-vault research.
   data:extend({{
     type           = "simple-entity",
-    name           = "rabbit-mcguffin",
+    name           = "ancient-rabbits-foote",
     icon           = "__base__/graphics/icons/copper-ore.png",
     icon_size      = 64,
     flags          = {"placeable-neutral", "not-blueprintable", "not-deconstructable"},

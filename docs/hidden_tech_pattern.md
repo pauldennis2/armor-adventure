@@ -120,6 +120,5 @@ That's it. The shadow tech is generated automatically from the `to_cover` list; 
 | `personal-warp-pylon` | `planet-rabbasca` |
 | `core-hunt` | `castra-prime` |
 | `personal-combat-roboport` | `castra-prime` |
-| `armor-adventure-metal-and-stars` | `metal-and-stars` |
-| `pocket-dimension` | `metal-and-stars` |
-| `pocket-dimension-roboport` | `metal-and-stars` |
+| `pocket-dimension` | _(unconditional)_ |
+| `pocket-dimension-roboport` | _(unconditional)_ |

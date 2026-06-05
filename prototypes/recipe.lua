@@ -274,22 +274,41 @@ if mods["Moshine"] then
   }})
 end
 
-if mods["panglia_planet"] and mods["Moshine"] then
-  data:extend({{
-    type               = "recipe",
-    name               = "panglia-essence-of-speed",
-    category           = "data-processing",
-    enabled            = false,
-    energy_required    = 1000,
-    allow_productivity = false,
-    auto_recycle       = false,
-    ingredients = {
-      {type = "item", name = "panglia-essence-of-speed", amount = 1},
+if mods["panglia_planet"] then
+  data:extend({
+    {
+      type               = "recipe",
+      name               = "panglia-seed-of-speedy-universe",
+      category           = "crafting-with-fluid",
+      enabled            = false,
+      energy_required    = 60,
+      allow_productivity = false,
+      auto_recycle       = false,
+      ingredients = {
+        {type = "item",  name = "rocket-fuel",               amount =   5},
+        {type = "item",  name = "panglia-refined-speed",     amount =   3},
+        {type = "fluid", name = "panglia_branbalite_slurry", amount = 100},
+      },
+      results = {
+        {type = "item", name = "panglia-seed-of-speedy-universe", amount = 1},
+      },
     },
-    results = {
-      {type = "item", name = "panglia-refined-speed", amount = 1},
+    {
+      type               = "recipe",
+      name               = "panglia-speed-incubation",
+      category           = "cosmic_incubator",
+      enabled            = false,
+      energy_required    = 300,
+      allow_productivity = false,
+      auto_recycle       = false,
+      ingredients = {
+        {type = "item", name = "panglia-seed-of-speedy-universe", amount = 1},
+      },
+      results = {
+        {type = "item", name = "panglia-refined-speed", amount_min = 7, amount_max = 10},
+      },
     },
-  }})
+  })
 end
 
 if mods["panglia_planet"] then
@@ -465,7 +484,7 @@ if mods["planet-rabbasca"] then
         {type = "item", name = "rabbasca-warp-pylon",  amount = 2},
         {type = "item", name = "rabbasca-energetic-concrete", amount = 100},
         {type = "item", name = "haronite-plate",       amount = 10},
-        {type = "item", name = "rabbit-mcguffin",      amount = 1},
+        {type = "item", name = "ancient-rabbits-foote",      amount = 1},
       },
       results = {{type = "item", name = "personal-warp-pylon-equipment", amount = 1}},
     },
@@ -628,7 +647,7 @@ do
     "thermodynamic-regulator", "aquilo-elevator-shaft", "aquilo-elevator-dig",
     "personal-tesla-turret", "unstable-magnetized-data-core",
     "deosil-motion-data", "widdershins-motion-data", "vortex-data-card",
-    "personal-time-stopper", "panglia-essence-of-speed",
+    "personal-time-stopper", "panglia-seed-of-speedy-universe", "panglia-speed-incubation",
     "personal-combat-roboport", "personal-combat-roboport-distractor",
     "personal-combat-roboport-destroyer", "simulac-data-tap",
     "personal-warp-pylon-equipment",

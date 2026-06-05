@@ -9,18 +9,27 @@ local function parse_energy(val)
   return num * (mult[prefix] or 1)
 end
 
--- Poll all energy-shield-equipment prototypes (excluding our own) for the best stats.
+-- Poll energy-shield-equipment prototypes for the best stats.
+-- Only consider shields whose name contains "energy-shield" and whose categories
+-- include one accepted by the mk2 grid — this excludes mod-added outlier shields.
+local mk2_grid_cats = {["armor"] = true, ["armor-adventure-mk2"] = true}
 local best_hp    = 0
 local best_regen = 0  -- HP/second
 
 for name, eq in pairs(data.raw["energy-shield-equipment"] or {}) do
-  if name ~= "regenerative-plating" then
-    best_hp = math.max(best_hp, eq.max_shield_value or 0)
+  if name ~= "regenerative-plating" and name:find("energy%-shield") then
+    local fits_grid = false
+    for _, cat in pairs(eq.categories or {}) do
+      if mk2_grid_cats[cat] then fits_grid = true; break end
+    end
+    if fits_grid then
+      best_hp = math.max(best_hp, eq.max_shield_value or 0)
 
-    local cost = parse_energy(eq.energy_per_shield or 0)
-    local flow = (eq.energy_source and parse_energy(eq.energy_source.input_flow_limit or 0)) or 0
-    if cost > 0 and flow > 0 and flow ~= math.huge then
-      best_regen = math.max(best_regen, flow / cost)
+      local cost = parse_energy(eq.energy_per_shield or 0)
+      local flow = (eq.energy_source and parse_energy(eq.energy_source.input_flow_limit or 0)) or 0
+      if cost > 0 and flow > 0 and flow ~= math.huge then
+        best_regen = math.max(best_regen, flow / cost)
+      end
     end
   end
 end
@@ -33,6 +42,7 @@ local REGEN_SECONDS = 900
 
 local our_hp    = math.floor(best_hp * 10)
 local our_regen = math.max(1, math.ceil(our_hp / REGEN_SECONDS))
+log("[armor-adventure] Regenerative Plating: best_hp=" .. best_hp .. "  our_hp=" .. our_hp .. "  our_regen=" .. our_regen .. " HP/s")
 
 -- Minimum-cost energy source: 1J per HP, buffer just large enough to fill the shield,
 -- flow limit set to exactly what the target regen rate requires.

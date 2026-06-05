@@ -13,7 +13,6 @@ local HAS_RABBASCA    = script.active_mods["planet-rabbasca"] ~= nil
 local HAS_CASTRA      = script.active_mods["castra-prime"]    ~= nil
 local HAS_MOSHINE     = script.active_mods["Moshine"]         ~= nil
 local HAS_PANGLIA     = script.active_mods["panglia_planet"]  ~= nil
-local HAS_METAL_STARS = script.active_mods["metal-and-stars"] ~= nil
 local PERSONAL_WARP_PYLON_EQUIP  = "personal-warp-pylon-equipment"
 local PERSONAL_WARP_PYLON_ENTITY = "armor-adventure-personal-warp-pylon"
 local create_personal_warp_pylon
@@ -43,7 +42,6 @@ if EXPLORATION_MODE then
     ["aquilo-scanning-complete-covered"] = "aquilo-scanning-complete",
     ["cryo-core-acquired-covered"]       = "cryo-core-acquired",
     ["forge-promethium-armor-covered"]         = "forge-promethium-armor",
-    ["regenerative-armor-covered"]             = "regenerative-armor",
     ["dissection-analysis-complete-covered"]   = "dissection-analysis-complete",
   }
   if HAS_MOSHINE     then COVERED_TECHS["magnetic-data-agitation-covered"]        = "magnetic-data-agitation" end
@@ -57,9 +55,6 @@ if EXPLORATION_MODE then
   end
   if HAS_CASTRA      then COVERED_TECHS["castra-simulac-investigation-covered"]    = "castra-simulac-investigation" end
   if HAS_CASTRA      then COVERED_TECHS["operation-data-tap-covered"]             = "operation-data-tap" end
-  if HAS_METAL_STARS then COVERED_TECHS["armor-adventure-metal-and-stars-covered"] = "armor-adventure-metal-and-stars" end
-  if HAS_METAL_STARS then COVERED_TECHS["pocket-dimension-covered"]               = "pocket-dimension" end
-  if HAS_METAL_STARS then COVERED_TECHS["pocket-dimension-roboport-covered"]      = "pocket-dimension-roboport" end
 end
 
 local function reveal_all_exploration_techs(force)
@@ -517,7 +512,7 @@ end, {{filter = "type", type = "character"}})
 
 -- Personal Combat Roboport --
 
-local COMBAT_ROBOPORT_TECH    = "personal-combat-roboport"
+local COMBAT_ROBOPORT_TECH    = "operation-data-tap"
 local ROBOPORT_COOLDOWN_TICKS = 1800  -- 30s after a spawn
 local ROBOPORT_RETRY_TICKS    = 300   -- 5s after a check that found nothing
 
@@ -1347,9 +1342,9 @@ deactivate_time_stopper = function(player)
   storage.time_stopper_render[player.index] = nil
   if player.character and player.character.valid then
     player.character.character_running_speed_modifier =
-      player.character.character_running_speed_modifier - PTS_SPEED_BONUS
+      math.max(-1, player.character.character_running_speed_modifier - PTS_SPEED_BONUS)
     player.character.character_crafting_speed_modifier =
-      player.character.character_crafting_speed_modifier - PTS_CRAFT_BONUS
+      math.max(-1, player.character.character_crafting_speed_modifier - PTS_CRAFT_BONUS)
   end
   player.set_shortcut_toggled("time-stopper-activate", false)
 end
